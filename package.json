@@ -24,7 +24,7 @@
             "type": "object",
             "title": "DMBinder configuration",
             "properties": {
-                "dmbinder.campaignPaths": {
+                "dmbinder.campaigns": {
                     "type": "array",
                     "items": {
                         "type": "object",
@@ -42,7 +42,13 @@
                     }
                 }
             }
-        }
+        },
+        "jsonValidation": [
+            {
+                "fileMatch": "campaign.json",
+                "url": "./campaign.schema.json"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -52,10 +58,14 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^3.1.4",
-        "vscode": "^1.1.25",
-        "tslint": "^5.8.0",
+        "@types/fs-extra": "^5.0.4",
+        "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42"
+        "tslint": "^5.8.0",
+        "typescript": "^3.1.4",
+        "vscode": "^1.1.25"
+    },
+    "dependencies": {
+        "fs-extra": "^7.0.1"
     }
 }
