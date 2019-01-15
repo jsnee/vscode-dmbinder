@@ -1,0 +1,61 @@
+{
+    "name": "vscode-dm-binder",
+    "displayName": "DMBinder",
+    "description": "",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.30.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:dmbinder.campaign.create"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "dmbinder.campaign.create",
+                "title": "DMBinder: Create New Campaign"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "DMBinder configuration",
+            "properties": {
+                "dmbinder.campaignPaths": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "title": "campaign setting",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "description": "The title of the campaign"
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "The path of the campaign files"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^3.1.4",
+        "vscode": "^1.1.25",
+        "tslint": "^5.8.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    }
+}
