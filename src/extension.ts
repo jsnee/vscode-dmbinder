@@ -1,7 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands, ExtensionContext, QuickPickOptions, Uri, window } from 'vscode';
-import { promptCreateCampaign, homebrewAddWrapper, homebrewReplacePages } from './common';
+import { commands, ExtensionContext, QuickPickOptions, window, workspace } from 'vscode';
+import { homebrewAddWrapper, homebrewReplacePages } from './HomebrewRenderer';
+import * as vscode from 'vscode';
 //import * as homebrew from './HomebrewRenderer';
 
 // this method is called when your extension is activated
@@ -13,20 +14,44 @@ export async function activate(context: ExtensionContext) {
     console.log('Congratulations, your extension "vscode-dm-binder" is now active!');
 
     let addCampaignDisposable = commands.registerCommand('dmbinder.campaign.create', async () => {
-        let campaign = await promptCreateCampaign();
-        if (campaign) {
+        const currFolder = workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined;
+        if (currFolder) {
             const qpOpts: QuickPickOptions = {
                 canPickMany: false,
                 ignoreFocusOut: true,
-                placeHolder: 'Open campaign in new window?'
+                placeHolder: 'Create a new DM Binder campaign in the current folder? (' + currFolder.uri.path + ')'
             };
-            const shouldOpen = await window.showQuickPick(['Yes', 'No'], qpOpts);
-            if (shouldOpen) {
-                await commands.executeCommand('vscode.openFolder', Uri.parse(campaign.path), shouldOpen === 'Yes');
+            const confirmInit = await window.showQuickPick(['Yes', 'No'], qpOpts);
+            if (confirmInit && confirmInit === 'Yes') {
+                // TODO: status bar tricks
+                const campaignName = await window.showInputBox({ placeHolder: 'Campaign Name', ignoreFocusOut: true });
+                if (campaignName) {
+                    await context.workspaceState.update('dmbinder.campaignName', campaignName);
+                }
             }
+        } else {
+            window.showErrorMessage('You need to open up a folder in VS Code before you can initialize a DMBinder campaign.');
+            const pathToOpen = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                openLabel: 'Open Folder'
+            });
+            if (pathToOpen) {
+                await commands.executeCommand('vscode.openFolder', pathToOpen[0].fsPath);
+            }
+            return;
         }
     });
     context.subscriptions.push(addCampaignDisposable);
+
+    let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
+        if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {
+            commands.executeCommand('markdown.preview.refresh', undefined);
+        }
+    });
+    context.subscriptions.push(onEnabledChangeListener);
+
     return {
         extendMarkdownIt(md: any) {
             //return md.use(require('./HomebrewRenderer'));
