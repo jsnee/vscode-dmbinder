@@ -10,7 +10,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:dmbinder.campaign.create"
+        "onCommand:dmbinder.campaign.create",
+        "onCommand:dmbinder.campaign.init"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -18,6 +19,10 @@
             {
                 "command": "dmbinder.campaign.create",
                 "title": "DMBinder: Create New Campaign"
+            },
+            {
+                "command": "dmbinder.campaign.init",
+                "title": "DMBinder: Initialize Campaign in Current Folder"
             }
         ],
         "configuration": {
@@ -32,7 +37,7 @@
         },
         "jsonValidation": [
             {
-                "fileMatch": "campaign.json",
+                "fileMatch": "/.dmbinder/campaign.json",
                 "url": "./campaign.schema.json"
             }
         ],

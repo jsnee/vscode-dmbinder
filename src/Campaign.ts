@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
-import { Uri, workspace } from 'vscode';
+import { Uri } from 'vscode';
 
 export class Campaign {
     path: string;
@@ -10,8 +10,7 @@ export class Campaign {
     }
 
     private getConfigPath(): string {
-        return path.resolve(this.path, '.vscode', 'campaign.json');
-        //return path.resolve(this.path, '.vscode', 'settings.json');
+        return path.resolve(this.path, '.dmbinder', 'campaign.json');
     }
 
     getConfigUri(): Uri {
@@ -24,8 +23,10 @@ export class Campaign {
         }
         await fse.ensureFile(this.getConfigPath());
         if (await this.exists()) {
-            await fse.writeJSON(this.getConfigPath(), config);
-            console.log(workspace.getConfiguration('campaign', this.getConfigUri()).get('campaignName'));
+            let opts: fse.WriteOptions = {
+                spaces: 4
+            };
+            await fse.writeJSON(this.getConfigPath(), config, opts);
             return true;
         }
         return false;
