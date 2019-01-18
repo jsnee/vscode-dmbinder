@@ -1,0 +1,15 @@
+.phb .narration {
+    color: #58180D;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    padding-top: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.phb hr+h3+ul {
+    margin-bottom: .5em;
+    padding-left: 1em;
+    text-indent: -1em;
+    list-style-type: none
+}

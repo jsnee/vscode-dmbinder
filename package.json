@@ -48,6 +48,11 @@
                 "fileMatch": "campaign.json",
                 "url": "./campaign.schema.json"
             }
+        ],
+        "markdown.markdownItPlugins": true,
+        "markdown.previewStyles": [
+            "./phb.standalone.css",
+            "./jsnee-homebrew.css"
         ]
     },
     "scripts": {
