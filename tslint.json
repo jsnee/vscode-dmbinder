@@ -3,6 +3,11 @@
         "no-string-throw": true,
         "no-unused-expression": true,
         "no-duplicate-variable": true,
+        "no-floating-promises": true,
+        "await-promise": [
+            true,
+            "Thenable"
+        ],
         "curly": true,
         "class-name": true,
         "semicolon": [

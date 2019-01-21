@@ -27,7 +27,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "DMBinder configuration",
+            "title": "DMBinder",
             "properties": {
                 "dmbinder.homebrewPreviewEnabled": {
                     "type": "boolean",

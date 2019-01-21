@@ -16,6 +16,7 @@
         }
     },
     "required": [
-        "campaignName"
+        "campaignName",
+        "sourcePaths"
     ]
 }

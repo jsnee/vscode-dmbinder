@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fse from 'fs-extra';
 import { Uri } from 'vscode';
 
-export class Campaign {
+export class CampaignProvider {
     path: string;
 
     constructor(campaignPath: string) {
@@ -17,7 +17,7 @@ export class Campaign {
         return Uri.file(this.getConfigPath());
     }
 
-    async init(config: CampaignConfig): Promise<boolean> {
+    async init(config: any): Promise<boolean> {
         if (await this.exists()) {
             return false;
         }
@@ -35,8 +35,4 @@ export class Campaign {
     async exists(): Promise<boolean> {
         return await fse.pathExists(this.getConfigPath());
     }
-}
-
-export interface CampaignConfig {
-    campaignName: string;
 }
