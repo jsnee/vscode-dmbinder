@@ -1,22 +1,6 @@
 import { Uri, window } from 'vscode';
 import { CampaignProvider } from './CampaignProvider';
 
-export async function promptCreateCampaign(): Promise<CampaignProvider | undefined> {
-    const path: Uri[] | undefined = await window.showOpenDialog({
-        canSelectFiles: false,
-        canSelectFolders: true,
-        canSelectMany: false,
-        openLabel: 'Select Campaign Folder'
-    });
-    if (path) {
-        if (path.length === 1) {
-            return await promptInitCampaign(path[0]);
-        }
-        window.showErrorMessage('Something happened while retrieving your selected folder...');
-    }
-    return;
-}
-
 export async function promptInitCampaign(path: Uri): Promise<CampaignProvider | undefined> {
     if (path) {
         window.showInformationMessage('Creating new campaign in: ' + path.fsPath);

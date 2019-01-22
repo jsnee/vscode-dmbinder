@@ -1,6 +1,7 @@
-import { Event, EventEmitter, TreeDataProvider, TreeItem, workspace } from 'vscode';
-import { ITreeItem } from './models/ITreeItem';
-import { CampaignFolder } from './models/CampaignFolder';
+import { Event, EventEmitter, TreeDataProvider, TreeItem, workspace, WorkspaceFolder } from "vscode";
+import { Campaign } from "./models/Campaign";
+import { ITreeItem } from "./models/ITreeItem";
+import { CampaignTreeItem } from "./models/CampaignTreeItem";
 
 class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: Event<ITreeItem>;
@@ -25,10 +26,8 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
             if (!workspace.workspaceFolders) {
                 return undefined;
             }
-            if (workspace.workspaceFolders.length === 1) {
-                return await new CampaignFolder(workspace.workspaceFolders[0]).getChildren();
-            }
-            return workspace.workspaceFolders.map(workspaceFolder => new CampaignFolder(workspaceFolder));
+            // TODO: What if workspace folder has no Campa
+            return Promise.resolve(mapCampaigns(workspace.workspaceFolders));
         } else {
             return element.getChildren && element.getChildren();
         }
@@ -37,6 +36,16 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public refresh(item?: ITreeItem): void {
         return this._onDidChangeTreeData.fire(item);
     }
+}
+
+function mapCampaigns(workspaceFolders: WorkspaceFolder[]): CampaignTreeItem[] {
+    let result: CampaignTreeItem[] = [];
+    workspaceFolders.forEach(workspaceFolder => {
+        if (Campaign.hasCampaignConfig(workspaceFolder.uri.path)) {
+            result.push(new CampaignTreeItem(new Campaign(workspaceFolder.uri.path)));
+        }
+    });
+    return result;
 }
 
 export const campaignExplorerProvider: CampaignExplorerProvider = new CampaignExplorerProvider();
