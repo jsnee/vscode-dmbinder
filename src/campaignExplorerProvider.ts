@@ -26,7 +26,11 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
             if (!workspace.workspaceFolders) {
                 return undefined;
             }
-            // TODO: What if workspace folder has no Campa
+            if (workspace.workspaceFolders.length === 1) {
+                if (Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.path)) {
+                    return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.path)).getChildren();
+                }
+            }
             return Promise.resolve(mapCampaigns(workspace.workspaceFolders));
         } else {
             return element.getChildren && element.getChildren();

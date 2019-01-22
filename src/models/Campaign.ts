@@ -53,6 +53,10 @@ export class Campaign {
         return this._config.campaignName;
     }
 
+    public get campaignPath(): string {
+        return this._path;
+    }
+
     public get sourcePaths(): string[] {
         return this._config.sourcePaths;
     }

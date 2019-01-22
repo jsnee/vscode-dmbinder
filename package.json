@@ -10,7 +10,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:dmbinder.campaign.create",
+        "workspaceContains:.dmbinder/campaign.json",
         "onCommand:dmbinder.campaign.init",
         "onView:dmbinder"
     ],
@@ -52,6 +52,10 @@
                 {
                     "id": "dmbinder",
                     "name": "DM Binder"
+                },
+                {
+                    "id": "dmbinder.sources",
+                    "name": "Binder Sources"
                 }
             ]
         },
