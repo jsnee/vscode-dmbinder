@@ -1,9 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { commands, ExtensionContext, QuickPickOptions, window, workspace } from 'vscode';
-import { homebrewAddWrapper, homebrewReplacePages } from './HomebrewRenderer';
+import { registerHomebrewRenderer } from './renderers/HomebrewRenderer';
 import { promptInitCampaign } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
+import { registerDMBinderRenderer } from './renderers/DMBinderRenderer';
 //import * as homebrew from './HomebrewRenderer';
 
 // this method is called when your extension is activated
@@ -44,10 +45,8 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(onEnabledChangeListener);
 
     return {
-        extendMarkdownIt(md: any) {
-            md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
-            md.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
-            return md;
+        extendMarkdownIt(md: markdownit) {
+            return registerHomebrewRenderer(registerDMBinderRenderer(md));
         }
     };
 }

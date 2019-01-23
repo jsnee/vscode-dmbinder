@@ -1,11 +1,13 @@
-import { workspace } from 'vscode';
+import * as Settings from '../Settings';
 
-export function homebreweryEnabled(): boolean | undefined {
-    return workspace.getConfiguration('dmbinder').get('homebrewPreviewEnabled');
+export function registerHomebrewRenderer(md: markdownit): markdownit {
+    md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
+    md.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
+    return md;
 }
 
-export function homebrewAddWrapper(state: any) {
-    if (state.tokens.length === 0 || !homebreweryEnabled()) {
+function homebrewAddWrapper(state: any) {
+    if (state.tokens.length === 0 || !Settings.homebreweryEnabled()) {
         return;
     }
     if (state.tokens[0].type !== 'pageBr_open') {
@@ -21,8 +23,8 @@ export function homebrewAddWrapper(state: any) {
     }
 }
 
-export function homebrewReplacePages(state: any) {
-    if (state.tokens.length === 0 || !homebreweryEnabled()) {
+function homebrewReplacePages(state: any) {
+    if (state.tokens.length === 0 || !Settings.homebreweryEnabled()) {
         return;
     }
 

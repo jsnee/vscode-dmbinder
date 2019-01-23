@@ -1,6 +1,6 @@
 import { Campaign } from "./Campaign";
 import { ITreeItem } from "./ITreeItem";
-import { TreeItem, TreeItemCollapsibleState, Uri, workspace } from "vscode";
+import { TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import * as fse from "fs-extra";
 import * as path from "path";
 

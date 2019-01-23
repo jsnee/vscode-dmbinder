@@ -60,13 +60,13 @@
             ]
         },
         "viewsContainers": {
-          "activitybar": [
-            {
-              "id": "dmbinder",
-              "title": "DM Binder",
-              "icon": "./img/icon.svg"
-            }
-          ]
+            "activitybar": [
+                {
+                    "id": "dmbinder",
+                    "title": "DM Binder",
+                    "icon": "./img/icon.svg"
+                }
+            ]
         }
     },
     "scripts": {
@@ -78,13 +78,16 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.4",
+        "@types/markdown-it": "0.0.7",
         "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
+        "sync-exec": "^0.6.2",
         "tslint": "^5.8.0",
         "typescript": "^3.1.4",
         "vscode": "^1.1.25"
     },
     "dependencies": {
-        "fs-extra": "^7.0.1"
+        "fs-extra": "^7.0.1",
+        "markdown-it-container": "^2.0.0"
     }
 }
