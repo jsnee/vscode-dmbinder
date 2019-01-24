@@ -1,7 +1,7 @@
-import { Event, EventEmitter, TreeDataProvider, TreeItem, workspace, WorkspaceFolder, QuickPickItem, FileSystemError } from "vscode";
+import { Event, EventEmitter, TreeDataProvider, TreeItem, workspace, WorkspaceFolder, QuickPickItem } from "vscode";
 import { Campaign } from "./models/Campaign";
 import { ITreeItem } from "./models/ITreeItem";
-import { CampaignTreeItem } from "./models/CampaignTreeItem";
+import { CampaignTreeItem, CampaignItemType } from "./models/CampaignTreeItem";
 import * as fse from 'fs-extra';
 import * as path from 'path';
 
@@ -23,14 +23,14 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
 
-    public async getChildren(element?: ITreeItem): Promise<ITreeItem[] | null | undefined> {
+    public async getChildren(element?: ITreeItem, itemType?: CampaignItemType): Promise<ITreeItem[] | null | undefined> {
         if (element === undefined) {
             if (!workspace.workspaceFolders) {
                 return undefined;
             }
             if (workspace.workspaceFolders.length === 1) {
                 if (Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.path)) {
-                    return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.path)).getChildren();
+                    return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.path)).getChildren(itemType);
                 }
             }
             return Promise.resolve(mapCampaignTreeItems(workspace.workspaceFolders));
@@ -67,6 +67,45 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
 
     public refresh(item?: ITreeItem): void {
         return this._onDidChangeTreeData.fire(item);
+    }
+
+    public get sourcesExplorerProvider(): TreeDataProvider<ITreeItem> {
+        return {
+            getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
+            getChildren: async (element?: ITreeItem) => {
+                let children = await this.getChildren(element, CampaignItemType.Source);
+                if (!element && children && children.length === 1 && children[0].getChildren) {
+                    return children[0].getChildren();
+                }
+                return children;
+            }
+        };
+    }
+
+    public get templatesExplorerProvider(): TreeDataProvider<ITreeItem> {
+        return {
+            getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
+            getChildren: async (element?: ITreeItem) => {
+                let children = await this.getChildren(element, CampaignItemType.Template);
+                if (!element && children && children.length === 1 && children[0].getChildren) {
+                    return children[0].getChildren();
+                }
+                return children;
+            }
+        };
+    }
+
+    public get componentsExplorerProvider(): TreeDataProvider<ITreeItem> {
+        return {
+            getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
+            getChildren: async (element?: ITreeItem) => {
+                let children = await this.getChildren(element, CampaignItemType.Component);
+                if (!element && children && children.length === 1 && children[0].getChildren) {
+                    return children[0].getChildren();
+                }
+                return children;
+            }
+        };
     }
 }
 

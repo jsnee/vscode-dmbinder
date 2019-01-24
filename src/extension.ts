@@ -1,8 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn, QuickPickItem } from 'vscode';
+import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn } from 'vscode';
 import { registerHomebrewRenderer } from './HomebrewRenderer';
-import { buildComponent, promptInitCampaign } from './common';
+import { buildComponent, promptInitCampaign, updateTreeViewStyle } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { ITreeItem } from './models/ITreeItem';
 
@@ -13,8 +13,12 @@ export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-dm-binder" is now active!');
+    await updateTreeViewStyle();
     const tv = campaignExplorerProvider;
-    window.registerTreeDataProvider('dmbinder', tv);
+    //window.registerTreeDataProvider('dmbinder', tv);
+    window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider);
+    window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider);
+    window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider);
 
     let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', async () => {
         const currFolder = workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined;
@@ -40,7 +44,6 @@ export async function activate(context: ExtensionContext) {
     {
         const treeItem = await item.getTreeItem();
         const qpItemList = await campaignExplorerProvider.getTemplateItems();
-        //const qpItems = await campaignExplorerProvider.getTemplateItems();
         if (qpItemList) {
             const qpOpts: QuickPickOptions = {
                 canPickMany: false,

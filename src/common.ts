@@ -1,7 +1,8 @@
-import { Uri, window, workspace, ViewColumn } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import * as path from 'path';
+import * as Settings from './Settings';
 
 export async function promptInitCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
@@ -50,4 +51,21 @@ export async function buildComponent(templatePath: string, metadataPath: string)
             resolve(stderr || stdout);
         });
     });
+}
+
+export async function updateTreeViewStyle(): Promise<void> {
+    let viewStyle = {
+        composite: false,
+        split: false
+    };
+    switch (Settings.treeViewStyle()) {
+        case 'composite':
+            viewStyle.composite = true;
+            break;
+        case 'split':
+        default:
+            viewStyle.split = true;
+            break;
+    }
+    await commands.executeCommand('setContext', 'treeViewStyle', viewStyle);
 }

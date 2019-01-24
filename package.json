@@ -34,6 +34,19 @@
                 "dmbinder.homebrewPreviewEnabled": {
                     "type": "boolean",
                     "description": "Flag to render Markdown files using PHB styles."
+                },
+                "dmbinder.treeViewStyle": {
+                    "type": "string",
+                    "description": "Tree view layout for DM Binder resources",
+                    "enum": [
+                        "composite",
+                        "split"
+                    ],
+                    "enumDescriptions": [
+                        "Combined view listing all resources by type within each campaign.",
+                        "Split panel view listing resources grouped by resource type."
+                    ],
+                    "default": "split"
                 }
             }
         },
@@ -60,7 +73,20 @@
             "dmbinder": [
                 {
                     "id": "dmbinder",
-                    "name": "DM Binder"
+                    "name": "DM Binder",
+                    "when": "treeViewStyle.composite"
+                },
+                {
+                    "id": "dmbinder.sources",
+                    "name": "Sources"
+                },
+                {
+                    "id": "dmbinder.templates",
+                    "name": "Templates"
+                },
+                {
+                    "id": "dmbinder.components",
+                    "name": "Components"
                 }
             ]
         },
