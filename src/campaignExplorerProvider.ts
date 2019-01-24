@@ -65,6 +65,32 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
 
+    public async getComponentItems(): Promise<QuickPickItem[] | undefined> {
+        if (!workspace.workspaceFolders) {
+            return;
+        }
+        let components: string[] = [];
+        for (let folder of workspace.workspaceFolders) {
+            if (Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+                let campaign = new Campaign(folder.uri.fsPath);
+                for (let eachItem of campaign.componentPaths) {
+                    let absPath = path.join(folder.uri.fsPath, eachItem);
+                    let children = await expandDirectoryContents(absPath);
+                    if (children) {
+                        components.push(...children);
+                    }
+                }
+            }
+        }
+        return components.map(item => {
+            let result: QuickPickItem = {
+                label: path.basename(path.basename(item, '.json'), '.yaml'),
+                detail: item
+            };
+            return result;
+        });
+    }
+
     public refresh(item?: ITreeItem): void {
         return this._onDidChangeTreeData.fire(item);
     }

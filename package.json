@@ -20,11 +20,13 @@
         "commands": [
             {
                 "command": "dmbinder.campaign.init",
-                "title": "DMBinder: Initialize Campaign in Current Folder"
+                "title": "Initialize Campaign in Current Folder",
+                "category": "DM Binder"
             },
             {
                 "command": "dmbinder.component.build",
-                "title": "Build component"
+                "title": "Build component",
+                "category": "DM Binder"
             }
         ],
         "configuration": {

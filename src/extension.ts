@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn } from 'vscode';
+import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn, TreeItem, Uri } from 'vscode';
 import { registerHomebrewRenderer } from './HomebrewRenderer';
 import { buildComponent, promptInitCampaign, updateTreeViewStyle } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
@@ -40,29 +40,48 @@ export async function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(initCampaignDisposable);
 
-    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', async (item: ITreeItem) =>
+    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', async (item?: ITreeItem) =>
     {
-        const treeItem = await item.getTreeItem();
-        const qpItemList = await campaignExplorerProvider.getTemplateItems();
-        if (qpItemList) {
-            const qpOpts: QuickPickOptions = {
-                canPickMany: false,
-                ignoreFocusOut: true,
-                placeHolder: 'Select the template to use'
-            };
-            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
-            let templatePath: string | undefined;
-            if (templateItem) {
-                templatePath = templateItem.detail;
+        let componentUri: Uri | undefined;
+        if (!item) {
+            const qpComponentList = await campaignExplorerProvider.getComponentItems();
+            if (qpComponentList) {
+                const qpComponentOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    ignoreFocusOut: true,
+                    placeHolder: 'Select the component to use'
+                };
+                let componentItem = await window.showQuickPick(qpComponentList, qpComponentOpts);
+                if (componentItem && componentItem.detail) {
+                    componentUri = Uri.file(componentItem.detail);
+                }
             }
-            if (templatePath) {
-                let metadataPath = treeItem.resourceUri;
-                if (metadataPath) {
-                    const result = await buildComponent(templatePath, metadataPath.fsPath);
-                    const doc = await workspace.openTextDocument({
-                        content: result
-                    });
-                    await window.showTextDocument(doc, ViewColumn.Active);
+        } else {
+            const treeItem = await item.getTreeItem();
+            componentUri = treeItem.resourceUri;
+        }
+        if (componentUri) {
+            const qpItemList = await campaignExplorerProvider.getTemplateItems();
+            if (qpItemList) {
+                const qpOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    ignoreFocusOut: true,
+                    placeHolder: 'Select the template to use'
+                };
+                let templateItem = await window.showQuickPick(qpItemList, qpOpts);
+                let templatePath: string | undefined;
+                if (templateItem) {
+                    templatePath = templateItem.detail;
+                }
+                if (templatePath) {
+                    let metadataPath = componentUri;
+                    if (metadataPath) {
+                        const result = await buildComponent(templatePath, metadataPath.fsPath);
+                        const doc = await workspace.openTextDocument({
+                            content: result
+                        });
+                        await window.showTextDocument(doc, ViewColumn.Active);
+                    }
                 }
             }
         }
