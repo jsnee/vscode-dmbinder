@@ -65,7 +65,7 @@
             "view/item/context": [
                 {
                     "command": "dmbinder.component.build",
-                    "when": "view == dmbinder && viewItem == ComponentItem"
+                    "when": "view == dmbinder.components && viewItem == ComponentItem"
                 }
             ]
         },
