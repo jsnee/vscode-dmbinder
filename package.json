@@ -12,18 +12,19 @@
     "activationEvents": [
         "workspaceContains:.dmbinder/campaign.json",
         "onCommand:dmbinder.campaign.init",
+        "onCommand:dmbinder.component.build",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "dmbinder.campaign.create",
-                "title": "DMBinder: Create New Campaign"
-            },
-            {
                 "command": "dmbinder.campaign.init",
                 "title": "DMBinder: Initialize Campaign in Current Folder"
+            },
+            {
+                "command": "dmbinder.component.build",
+                "title": "Build component"
             }
         ],
         "configuration": {
@@ -47,15 +48,19 @@
             "./phb.standalone.css",
             "./jsnee-homebrew.css"
         ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "dmbinder.component.build",
+                    "when": "view == dmbinder && viewItem == ComponentItem"
+                }
+            ]
+        },
         "views": {
             "dmbinder": [
                 {
                     "id": "dmbinder",
                     "name": "DM Binder"
-                },
-                {
-                    "id": "dmbinder.sources",
-                    "name": "Binder Sources"
                 }
             ]
         },
@@ -81,13 +86,11 @@
         "@types/markdown-it": "0.0.7",
         "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
-        "sync-exec": "^0.6.2",
         "tslint": "^5.8.0",
         "typescript": "^3.1.4",
         "vscode": "^1.1.25"
     },
     "dependencies": {
-        "fs-extra": "^7.0.1",
-        "markdown-it-container": "^2.0.0"
+        "fs-extra": "^7.0.1"
     }
 }

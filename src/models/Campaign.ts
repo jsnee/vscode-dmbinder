@@ -5,6 +5,8 @@ import { Uri } from 'vscode';
 interface CampaignConfig {
     campaignName: string;
     sourcePaths: string[];
+    templatePaths: string[];
+    componentPaths: string[];
 }
 
 export class Campaign {
@@ -20,6 +22,26 @@ export class Campaign {
 
     public static async hasCampaignConfig(campaignPath: string): Promise<boolean> {
         return await fse.pathExists(getConfigPath(campaignPath));
+    }
+
+    public static async init(campaignPath: string, campaignName: string): Promise<boolean> {
+        if (!await Campaign.hasCampaignConfig(campaignPath)) {
+            let opts: fse.WriteOptions = {
+                spaces: 4
+            };
+            let config: CampaignConfig = {
+                campaignName: campaignName,
+                sourcePaths: ['./sources'],
+                templatePaths: ['./templates'],
+                componentPaths: ['./components']
+            };
+            await fse.writeJSON(getConfigPath(campaignPath), config, opts);
+            await fse.ensureDir(path.join(campaignPath, 'sources'));
+            await fse.ensureDir(path.join(campaignPath, 'templates'));
+            await fse.ensureDir(path.join(campaignPath, 'components'));
+            return true;
+        }
+        return false;
     }
 
     private get _configPath(): string {
@@ -59,6 +81,14 @@ export class Campaign {
 
     public get sourcePaths(): string[] {
         return this._config.sourcePaths;
+    }
+
+    public get templatePaths(): string[] {
+        return this._config.templatePaths;
+    }
+
+    public get componentPaths(): string[] {
+        return this._config.componentPaths;
     }
 }
 

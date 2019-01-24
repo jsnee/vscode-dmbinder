@@ -1,4 +1,4 @@
-import * as Settings from '../Settings';
+import * as Settings from './Settings';
 
 export function registerHomebrewRenderer(md: markdownit): markdownit {
     md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);

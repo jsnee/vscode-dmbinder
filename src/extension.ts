@@ -1,11 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands, ExtensionContext, QuickPickOptions, window, workspace } from 'vscode';
-import { registerHomebrewRenderer } from './renderers/HomebrewRenderer';
-import { promptInitCampaign } from './common';
+import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn, QuickPickItem } from 'vscode';
+import { registerHomebrewRenderer } from './HomebrewRenderer';
+import { buildComponent, promptInitCampaign } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
-import { registerDMBinderRenderer } from './renderers/DMBinderRenderer';
-//import * as homebrew from './HomebrewRenderer';
+import { ITreeItem } from './models/ITreeItem';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -37,6 +36,36 @@ export async function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(initCampaignDisposable);
 
+    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', async (item: ITreeItem) =>
+    {
+        const treeItem = await item.getTreeItem();
+        const qpItemList = await campaignExplorerProvider.getTemplateItems();
+        //const qpItems = await campaignExplorerProvider.getTemplateItems();
+        if (qpItemList) {
+            const qpOpts: QuickPickOptions = {
+                canPickMany: false,
+                ignoreFocusOut: true,
+                placeHolder: 'Select the template to use'
+            };
+            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
+            let templatePath: string | undefined;
+            if (templateItem) {
+                templatePath = templateItem.detail;
+            }
+            if (templatePath) {
+                let metadataPath = treeItem.resourceUri;
+                if (metadataPath) {
+                    const result = await buildComponent(templatePath, metadataPath.fsPath);
+                    const doc = await workspace.openTextDocument({
+                        content: result
+                    });
+                    await window.showTextDocument(doc, ViewColumn.Active);
+                }
+            }
+        }
+    });
+    context.subscriptions.push(buildComponentDisposable);
+
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
         if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {
             commands.executeCommand('markdown.preview.refresh', undefined);
@@ -46,7 +75,7 @@ export async function activate(context: ExtensionContext) {
 
     return {
         extendMarkdownIt(md: markdownit) {
-            return registerHomebrewRenderer(registerDMBinderRenderer(md));
+            return registerHomebrewRenderer(md);
         }
     };
 }

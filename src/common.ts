@@ -1,24 +1,21 @@
-import { Uri, window } from 'vscode';
-import { CampaignProvider } from './CampaignProvider';
+import { Uri, window, workspace, ViewColumn } from 'vscode';
+import { Campaign } from './models/Campaign';
+import { exec } from 'child_process';
+import * as path from 'path';
 
-export async function promptInitCampaign(path: Uri): Promise<CampaignProvider | undefined> {
+export async function promptInitCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
         window.showInformationMessage('Creating new campaign in: ' + path.fsPath);
-        const result = new CampaignProvider(path.fsPath);
-        if (await result.exists()) {
+        if (Campaign.hasCampaignConfig(path.fsPath)) {
             window.showInformationMessage('A DMBinder already exists in the selected folder.');
-            return result;
+            return new Campaign(path.fsPath);
         } else {
             const campaignName = await window.showInputBox({ placeHolder: 'Campaign Name', ignoreFocusOut: true });
 
             if (campaignName) {
-                let config = {
-                    campaignName: campaignName,
-                    sourcePaths: getDefaultCampaignSourcePaths()
-                };
-                if (await result.init(config)) {
+                if (await Campaign.init(path.fsPath, campaignName)) {
                     window.showInformationMessage('Campaign Created!');
-                    return result;
+                    return new Campaign(path.fsPath);
                 }
             } else {
                 window.showErrorMessage('Something happened while trying to setup the campaign...');
@@ -28,6 +25,29 @@ export async function promptInitCampaign(path: Uri): Promise<CampaignProvider | 
     return;
 }
 
-function getDefaultCampaignSourcePaths(): string[] {
-    return ['./source'];
+export async function promptBuildComponent(): Promise<void> {
+    let templatePath = await window.showInputBox({ placeHolder: 'templatePath', ignoreFocusOut: true });
+    if (templatePath) {
+        let metadataPath = await window.showInputBox({ placeHolder: 'metadataPath', ignoreFocusOut: true });
+        if (metadataPath) {
+            const currFolder = workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined;
+            if (currFolder) {
+                templatePath = path.join(currFolder.uri.fsPath, templatePath);
+                metadataPath = path.join(currFolder.uri.fsPath, metadataPath);
+            }
+            const result = await buildComponent(templatePath, metadataPath);
+            const doc = await workspace.openTextDocument({
+                content: result
+            });
+            await window.showTextDocument(doc, ViewColumn.Active);
+        }
+    }
+}
+
+export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        exec(`echo '' | pandoc --template=${templatePath} --metadata-file=${metadataPath} --metadata pagetitle=" "`, (error, stdout, stderr) => {
+            resolve(stderr || stdout);
+        });
+    });
 }
