@@ -1,13 +1,13 @@
 import { Campaign } from "./Campaign";
 import { ITreeItem } from "./ITreeItem";
-import { TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { TreeItem, TreeItemCollapsibleState, Uri, TextDocumentShowOptions } from "vscode";
 import * as fse from "fs-extra";
 import * as path from "path";
 
 export enum CampaignItemType {
-    Source = "SOURCE",
-    Template = "TEMPLATE",
-    Component = "COMPONENT"
+    Source = "SourceItem",
+    Template = "TemplateItem",
+    Component = "ComponentItem"
 }
 
 export class CampaignTreeItem implements ITreeItem {
@@ -84,14 +84,40 @@ export class CampaignTreeItem implements ITreeItem {
         let stats = await fse.stat(uri.fsPath);
         if (stats.isDirectory()) {
             return {
-                getContextValue: () => contextValue + "Dir",
-                getTreeItem: () => new TreeItem(uri, TreeItemCollapsibleState.Collapsed),
+                getContextValue: () => contextValue + "Folder",
+                getTreeItem: () => getChildTreeItem(uri, contextValue + "Folder"),
                 getChildren: async () => Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath))))
             };
         }
         return {
             getContextValue: () => contextValue,
-            getTreeItem: () => new TreeItem(uri)
+            getTreeItem: () => getChildTreeItem(uri, contextValue)
         };
     }
+}
+
+function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
+    let result = new TreeItem(uri);
+    switch (contextValue) {
+        case "SourceItemFolder":
+        case "TemplateItemFolder":
+        case "ComponentItemFolder":
+            result.collapsibleState = TreeItemCollapsibleState.Collapsed;
+            break;
+        case "SourceItem":
+            let opts: TextDocumentShowOptions = {
+                preview: true,
+                preserveFocus: true
+            };
+            result.command = {
+                command: "vscode.open",
+                title: "",
+                arguments: [uri, opts]
+            };
+        case "TemplateItem":
+        case "ComponentItem":
+        default:
+            break;
+    }
+    return result;
 }

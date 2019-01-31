@@ -12,7 +12,11 @@
     "activationEvents": [
         "workspaceContains:.dmbinder/campaign.json",
         "onCommand:dmbinder.campaign.init",
+        "onCommand:dmbinder.campaign.refresh",
+        "onCommand:dmbinder.config.toggleViewStyle",
+        "onCommand:dmbinder.source.edit",
         "onCommand:dmbinder.component.build",
+        "onCommand:dmbinder.component.insert",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",
@@ -24,9 +28,41 @@
                 "category": "DM Binder"
             },
             {
+                "command": "dmbinder.campaign.refresh",
+                "title": "Refresh the current campaign",
+                "category": "DM Binder",
+                "icon": {
+                  "light": "img/light/refresh.svg",
+                  "dark": "img/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "dmbinder.config.toggleViewStyle",
+                "title": "Toggle the Campaign treeview layout style",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.item.edit",
+                "title": "Edit item",
+                "category": "DM Binder",
+                "icon": {
+                  "light": "img/light/edit.svg",
+                  "dark": "img/dark/edit.svg"
+                }
+            },
+            {
                 "command": "dmbinder.component.build",
                 "title": "Build component",
                 "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.component.insert",
+                "title": "Insert component",
+                "category": "DM Binder",
+                "icon": {
+                  "light": "img/light/insertComponent.svg",
+                  "dark": "img/dark/insertComponent.svg"
+                }
             }
         ],
         "configuration": {
@@ -64,10 +100,30 @@
             "./jsnee-homebrew.css"
         ],
         "menus": {
+            "view/title": [
+                {
+                    "command": "dmbinder.campaign.refresh",
+                    "group": "navigation"
+                }
+            ],
             "view/item/context": [
                 {
                     "command": "dmbinder.component.build",
-                    "when": "view == dmbinder.components && viewItem == ComponentItem"
+                    "when": "viewItem == ComponentItem"
+                },
+                {
+                    "command": "dmbinder.component.insert",
+                    "when": "viewItem == ComponentItem && editorIsOpen"
+                },
+                {
+                    "command": "dmbinder.item.edit",
+                    "when": "viewItem == TemplateItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "dmbinder.item.edit",
+                    "when": "viewItem == ComponentItem",
+                    "group": "inline"
                 }
             ]
         },
@@ -76,19 +132,22 @@
                 {
                     "id": "dmbinder",
                     "name": "DM Binder",
-                    "when": "treeViewStyle.composite"
+                    "when": "config.dmbinder.treeViewStyle == composite"
                 },
                 {
                     "id": "dmbinder.sources",
-                    "name": "Sources"
-                },
-                {
-                    "id": "dmbinder.templates",
-                    "name": "Templates"
+                    "name": "Sources",
+                    "when": "config.dmbinder.treeViewStyle == split"
                 },
                 {
                     "id": "dmbinder.components",
-                    "name": "Components"
+                    "name": "Components",
+                    "when": "config.dmbinder.treeViewStyle == split"
+                },
+                {
+                    "id": "dmbinder.templates",
+                    "name": "Templates",
+                    "when": "config.dmbinder.treeViewStyle == split"
                 }
             ]
         },
@@ -97,7 +156,7 @@
                 {
                     "id": "dmbinder",
                     "title": "DM Binder",
-                    "icon": "./img/icon.svg"
+                    "icon": "img/icon.svg"
                 }
             ]
         }

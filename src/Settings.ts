@@ -1,9 +1,17 @@
 import { workspace } from "vscode";
 
-export function homebreweryEnabled(): boolean | undefined {
-    return workspace.getConfiguration('dmbinder').get('homebrewPreviewEnabled');
+class Settings {
+    public get homebreweryEnabled(): boolean | undefined {
+        return workspace.getConfiguration('dmbinder').get('homebrewPreviewEnabled');
+    }
+
+    public get treeViewStyle(): string | undefined {
+        return workspace.getConfiguration('dmbinder').get('treeViewStyle');
+    }
+
+    public set treeViewStyle(val: string | undefined) {
+        workspace.getConfiguration('dmbinder').update('treeViewStyle', val);
+    }
 }
 
-export function treeViewStyle(): string | undefined {
-    return workspace.getConfiguration('dmbinder').get('treeViewStyle');
-}
+export const DMBSettings: Settings = new Settings();

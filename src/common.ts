@@ -1,10 +1,11 @@
-import { Uri, window, workspace, ViewColumn, commands } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
-import * as path from 'path';
-import * as Settings from './Settings';
+import { ITreeItem } from './models/ITreeItem';
+import { campaignExplorerProvider } from './campaignExplorerProvider';
+import { DMBSettings } from './Settings';
 
-export async function promptInitCampaign(path: Uri): Promise<Campaign | undefined> {
+async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
         window.showInformationMessage('Creating new campaign in: ' + path.fsPath);
         if (Campaign.hasCampaignConfig(path.fsPath)) {
@@ -26,22 +27,92 @@ export async function promptInitCampaign(path: Uri): Promise<Campaign | undefine
     return;
 }
 
-export async function promptBuildComponent(): Promise<void> {
-    let templatePath = await window.showInputBox({ placeHolder: 'templatePath', ignoreFocusOut: true });
-    if (templatePath) {
-        let metadataPath = await window.showInputBox({ placeHolder: 'metadataPath', ignoreFocusOut: true });
-        if (metadataPath) {
-            const currFolder = workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined;
-            if (currFolder) {
-                templatePath = path.join(currFolder.uri.fsPath, templatePath);
-                metadataPath = path.join(currFolder.uri.fsPath, metadataPath);
-            }
-            const result = await buildComponent(templatePath, metadataPath);
-            const doc = await workspace.openTextDocument({
-                content: result
-            });
-            await window.showTextDocument(doc, ViewColumn.Active);
+export async function promptInitCampaign(): Promise<void> {
+    const currFolder = workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined;
+    if (currFolder) {
+        const qpOpts: QuickPickOptions = {
+            canPickMany: false,
+            ignoreFocusOut: true,
+            placeHolder: 'Create a new DM Binder campaign in the current folder? (' + currFolder.uri.path + ')'
+        };
+        const confirmInit = await window.showQuickPick(['Yes', 'No'], qpOpts);
+        if (confirmInit && confirmInit === 'Yes') {
+            // TODO: status bar tricks
+            await initCampaign(currFolder.uri);
         }
+    } else {
+        window.showErrorMessage('You need to open up a folder in VS Code before you can initialize a DMBinder campaign.');
+        return;
+    }
+}
+
+export async function editTreeItem(item?: ITreeItem): Promise<void> {
+    if (item) {
+        let treeItem = await item.getTreeItem();
+        if (treeItem && treeItem.resourceUri) {
+            let opts: TextDocumentShowOptions = {
+                preview: false
+            };
+            commands.executeCommand('vscode.open', treeItem.resourceUri, opts);
+        }
+    }
+}
+
+export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
+    let componentUri: Uri | undefined;
+    if (!item) {
+        const qpComponentList = await campaignExplorerProvider.getComponentItems();
+        if (qpComponentList) {
+            const qpComponentOpts: QuickPickOptions = {
+                canPickMany: false,
+                ignoreFocusOut: true,
+                placeHolder: 'Select the component to use'
+            };
+            let componentItem = await window.showQuickPick(qpComponentList, qpComponentOpts);
+            if (componentItem && componentItem.detail) {
+                componentUri = Uri.file(componentItem.detail);
+            }
+        }
+    } else {
+        const treeItem = await item.getTreeItem();
+        componentUri = treeItem.resourceUri;
+    }
+    if (componentUri) {
+        const qpItemList = await campaignExplorerProvider.getTemplateItems();
+        if (qpItemList) {
+            const qpOpts: QuickPickOptions = {
+                canPickMany: false,
+                ignoreFocusOut: true,
+                placeHolder: 'Select the template to use'
+            };
+            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
+            let templatePath: string | undefined;
+            if (templateItem) {
+                templatePath = templateItem.detail;
+            }
+            if (templatePath) {
+                let metadataPath = componentUri;
+                if (metadataPath) {
+                    const result = await buildComponent(templatePath, metadataPath.fsPath);
+                    const doc = await workspace.openTextDocument({
+                        content: result
+                    });
+                    await window.showTextDocument(doc, ViewColumn.Active);
+                }
+            }
+        }
+    }
+}
+
+export function toggleTreeViewStyle() {
+    switch (DMBSettings.treeViewStyle) {
+        case 'split':
+            DMBSettings.treeViewStyle = 'composite';
+            break;
+        case 'composite':
+        default:
+            DMBSettings.treeViewStyle = 'split';
+            break;
     }
 }
 
@@ -51,21 +122,4 @@ export async function buildComponent(templatePath: string, metadataPath: string)
             resolve(stderr || stdout);
         });
     });
-}
-
-export async function updateTreeViewStyle(): Promise<void> {
-    let viewStyle = {
-        composite: false,
-        split: false
-    };
-    switch (Settings.treeViewStyle()) {
-        case 'composite':
-            viewStyle.composite = true;
-            break;
-        case 'split':
-        default:
-            viewStyle.split = true;
-            break;
-    }
-    await commands.executeCommand('setContext', 'treeViewStyle', viewStyle);
 }

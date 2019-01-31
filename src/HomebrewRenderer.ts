@@ -1,4 +1,4 @@
-import * as Settings from './Settings';
+import { DMBSettings } from "./Settings";
 
 export function registerHomebrewRenderer(md: markdownit): markdownit {
     md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
@@ -7,7 +7,7 @@ export function registerHomebrewRenderer(md: markdownit): markdownit {
 }
 
 function homebrewAddWrapper(state: any) {
-    if (state.tokens.length === 0 || !Settings.homebreweryEnabled()) {
+    if (state.tokens.length === 0 || !DMBSettings.homebreweryEnabled) {
         return;
     }
     if (state.tokens[0].type !== 'pageBr_open') {
@@ -24,7 +24,7 @@ function homebrewAddWrapper(state: any) {
 }
 
 function homebrewReplacePages(state: any) {
-    if (state.tokens.length === 0 || !Settings.homebreweryEnabled()) {
+    if (state.tokens.length === 0 || !DMBSettings.homebreweryEnabled) {
         return;
     }
 

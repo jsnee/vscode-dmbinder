@@ -97,6 +97,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
 
     public get sourcesExplorerProvider(): TreeDataProvider<ITreeItem> {
         return {
+            onDidChangeTreeData: this._onDidChangeTreeData.event,
             getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
             getChildren: async (element?: ITreeItem) => {
                 let children = await this.getChildren(element, CampaignItemType.Source);
@@ -110,6 +111,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
 
     public get templatesExplorerProvider(): TreeDataProvider<ITreeItem> {
         return {
+            onDidChangeTreeData: this._onDidChangeTreeData.event,
             getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
             getChildren: async (element?: ITreeItem) => {
                 let children = await this.getChildren(element, CampaignItemType.Template);
@@ -123,6 +125,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
 
     public get componentsExplorerProvider(): TreeDataProvider<ITreeItem> {
         return {
+            onDidChangeTreeData: this._onDidChangeTreeData.event,
             getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
             getChildren: async (element?: ITreeItem) => {
                 let children = await this.getChildren(element, CampaignItemType.Component);
