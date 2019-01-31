@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn, TreeItem, Uri } from 'vscode';
+import { commands, ExtensionContext, QuickPickOptions, window, workspace, ViewColumn, Uri } from 'vscode';
 import { registerHomebrewRenderer } from './HomebrewRenderer';
 import { buildComponent, promptInitCampaign, updateTreeViewStyle } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
