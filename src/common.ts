@@ -1,9 +1,10 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { DMBSettings } from './Settings';
+import * as matter from 'gray-matter';
 
 async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
@@ -47,7 +48,7 @@ export async function promptInitCampaign(): Promise<void> {
 }
 
 export async function editTreeItem(item?: ITreeItem): Promise<void> {
-    if (item) {
+    if (item && item.getTreeItem) {
         let treeItem = await item.getTreeItem();
         if (treeItem && treeItem.resourceUri) {
             let opts: TextDocumentShowOptions = {
@@ -58,9 +59,9 @@ export async function editTreeItem(item?: ITreeItem): Promise<void> {
     }
 }
 
-export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
+export async function promptGenerateComponent(item?: ITreeItem): Promise<string | undefined> {
     let componentUri: Uri | undefined;
-    if (!item) {
+    if (!item || !item.getTreeItem) {
         const qpComponentList = await campaignExplorerProvider.getComponentItems();
         if (qpComponentList) {
             const qpComponentOpts: QuickPickOptions = {
@@ -80,58 +81,19 @@ export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
     if (componentUri) {
         const qpItemList = await campaignExplorerProvider.getTemplateItems();
         if (qpItemList) {
-            const qpOpts: QuickPickOptions = {
-                canPickMany: false,
-                ignoreFocusOut: true,
-                placeHolder: 'Select the template to use'
-            };
-            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
-            let templatePath: string | undefined;
-            if (templateItem) {
-                templatePath = templateItem.detail;
+            let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
+            let templateItem: QuickPickItem | undefined;
+            if (metadata && metadata.data && metadata.data.templateItem) {
+                templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
             }
-            if (templatePath) {
-                let metadataPath = componentUri;
-                if (metadataPath) {
-                    const result = await buildComponent(templatePath, metadataPath.fsPath);
-                    const doc = await workspace.openTextDocument({
-                        content: result
-                    });
-                    await window.showTextDocument(doc, ViewColumn.Active);
-                }
+            if (!templateItem) {
+                const qpOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    ignoreFocusOut: true,
+                    placeHolder: 'Select the template to use'
+                };
+                templateItem = await window.showQuickPick(qpItemList, qpOpts);
             }
-        }
-    }
-}
-
-export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
-    let componentUri: Uri | undefined;
-    if (!item) {
-        const qpComponentList = await campaignExplorerProvider.getComponentItems();
-        if (qpComponentList) {
-            const qpComponentOpts: QuickPickOptions = {
-                canPickMany: false,
-                ignoreFocusOut: true,
-                placeHolder: 'Select the component to use'
-            };
-            let componentItem = await window.showQuickPick(qpComponentList, qpComponentOpts);
-            if (componentItem && componentItem.detail) {
-                componentUri = Uri.file(componentItem.detail);
-            }
-        }
-    } else {
-        const treeItem = await item.getTreeItem();
-        componentUri = treeItem.resourceUri;
-    }
-    if (componentUri) {
-        const qpItemList = await campaignExplorerProvider.getTemplateItems();
-        if (qpItemList) {
-            const qpOpts: QuickPickOptions = {
-                canPickMany: false,
-                ignoreFocusOut: true,
-                placeHolder: 'Select the template to use'
-            };
-            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
             let templatePath: Uri | undefined;
             if (templateItem && templateItem.detail) {
                 templatePath = Uri.file(templateItem.detail);
@@ -139,22 +101,36 @@ export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
             if (templatePath) {
                 let metadataPath = componentUri;
                 if (metadataPath) {
-                    const result = await buildComponent(templatePath.fsPath, metadataPath.fsPath);
-                    let editor = window.activeTextEditor;
-                    if (editor) {
-                        let selection = editor.selection;
-                        await editor.edit((editBuilder) => {
-                            editBuilder.replace(selection, result);
-                        });
-                    }
+                    return await buildComponent(templatePath.fsPath, metadataPath.fsPath);
                 }
             }
         }
     }
+    return;
 }
 
-export async function sayHello(): Promise<void> {
-    await window.showInformationMessage("Hello World!");
+export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
+    let result = await promptGenerateComponent(item);
+    if (result) {
+        const doc = await workspace.openTextDocument({
+            content: result
+        });
+        await window.showTextDocument(doc, ViewColumn.Active);
+    }
+}
+
+export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
+    let result = await promptGenerateComponent(item);
+    if (result) {
+        let editor = window.activeTextEditor;
+        let res = result;
+        if (editor) {
+            let selection = editor.selection;
+            await editor.edit((editBuilder) => {
+                editBuilder.replace(selection, res);
+            });
+        }
+    }
 }
 
 export function toggleTreeViewStyle() {
@@ -171,7 +147,6 @@ export function toggleTreeViewStyle() {
 
 export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        console.log(templatePath);
         exec(`echo '' | pandoc --template="${templatePath}" --metadata-file="${metadataPath}" --metadata pagetitle=" "`, (error, stdout, stderr) => {
             resolve(stderr || stdout);
         });

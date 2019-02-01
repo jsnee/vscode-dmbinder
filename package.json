@@ -57,7 +57,7 @@
             },
             {
                 "command": "dmbinder.component.insert",
-                "title": "Insert component",
+                "title": "Insert DM Binder Component",
                 "category": "DM Binder",
                 "icon": {
                     "light": "img/light/insertComponent.svg",
@@ -130,6 +130,12 @@
                     "when": "viewItem == ComponentItem",
                     "group": "inline"
                 }
+            ],
+            "editor/context": [
+                {
+                    "command": "dmbinder.component.insert",
+                    "when": "resourceLangId == markdown"
+                }
             ]
         },
         "snippets": [
@@ -189,6 +195,7 @@
         "vscode": "^1.1.25"
     },
     "dependencies": {
-        "fs-extra": "^7.0.1"
+        "fs-extra": "^7.0.1",
+        "gray-matter": "^4.0.2"
     }
 }
