@@ -4,6 +4,7 @@
     "description": "",
     "publisher": "jpsnee",
     "version": "0.0.1",
+    "icon": "img/dmbinder_icon.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/jsnee/vscode-dmbinder"
