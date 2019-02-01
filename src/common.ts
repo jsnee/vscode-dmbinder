@@ -132,14 +132,14 @@ export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
                 placeHolder: 'Select the template to use'
             };
             let templateItem = await window.showQuickPick(qpItemList, qpOpts);
-            let templatePath: string | undefined;
-            if (templateItem) {
-                templatePath = templateItem.detail;
+            let templatePath: Uri | undefined;
+            if (templateItem && templateItem.detail) {
+                templatePath = Uri.file(templateItem.detail);
             }
             if (templatePath) {
                 let metadataPath = componentUri;
                 if (metadataPath) {
-                    const result = await buildComponent(templatePath, metadataPath.fsPath);
+                    const result = await buildComponent(templatePath.fsPath, metadataPath.fsPath);
                     let editor = window.activeTextEditor;
                     if (editor) {
                         let selection = editor.selection;
@@ -171,7 +171,8 @@ export function toggleTreeViewStyle() {
 
 export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        exec(`echo '' | pandoc --template='${templatePath}' --metadata-file='${metadataPath}' --metadata pagetitle=" "`, (error, stdout, stderr) => {
+        console.log(templatePath);
+        exec(`echo '' | pandoc --template="${templatePath}" --metadata-file="${metadataPath}" --metadata pagetitle=" "`, (error, stdout, stderr) => {
             resolve(stderr || stdout);
         });
     });

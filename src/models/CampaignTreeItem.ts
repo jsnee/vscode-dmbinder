@@ -61,7 +61,7 @@ export class CampaignTreeItem implements ITreeItem {
         if (this._campaign.templatePaths && this._campaign.templatePaths.length > 0) {
             return {
                 getContextValue: () => "Templates",
-                getTreeItem: () => new TreeItem("Templates", TreeItemCollapsibleState.Collapsed),
+                getTreeItem: () => new TreeItem("Templates", TreeItemCollapsibleState.Expanded),
                 getChildren: () => Promise.all(this._campaign.templatePaths.map(async templatePath => this._getChildren("TemplateItem", templatePath)))
             };
         }
@@ -72,7 +72,7 @@ export class CampaignTreeItem implements ITreeItem {
         if (this._campaign.componentPaths && this._campaign.componentPaths.length > 0) {
             return {
                 getContextValue: () => "Components",
-                getTreeItem: () => new TreeItem("Components", TreeItemCollapsibleState.Collapsed),
+                getTreeItem: () => new TreeItem("Components", TreeItemCollapsibleState.Expanded),
                 getChildren: () => Promise.all(this._campaign.componentPaths.map(async componentPath => this._getChildren("ComponentItem", componentPath)))
             };
         }
@@ -102,7 +102,7 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
         case "SourceItemFolder":
         case "TemplateItemFolder":
         case "ComponentItemFolder":
-            result.collapsibleState = TreeItemCollapsibleState.Collapsed;
+            result.collapsibleState = TreeItemCollapsibleState.Expanded;
             break;
         case "SourceItem":
             let opts: TextDocumentShowOptions = {
