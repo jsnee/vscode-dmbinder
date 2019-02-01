@@ -2,7 +2,7 @@
     "name": "vscode-dmbinder",
     "displayName": "DMBinder",
     "description": "",
-    "publisher": "jsnee",
+    "publisher": "jpsnee",
     "version": "0.0.1",
     "repository": {
         "type": "git",
