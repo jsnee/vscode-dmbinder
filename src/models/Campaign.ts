@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import { Uri } from 'vscode';
+import { DMBSettings } from '../Settings';
 
 interface CampaignConfig {
     campaignName: string;
@@ -26,19 +27,25 @@ export class Campaign {
 
     public static async init(campaignPath: string, campaignName: string): Promise<boolean> {
         if (!await Campaign.hasCampaignConfig(campaignPath)) {
+            await fse.ensureDir(path.join(campaignPath, '.dmbinder'));
             let opts: fse.WriteOptions = {
                 spaces: 4
             };
             let config: CampaignConfig = {
                 campaignName: campaignName,
-                sourcePaths: ['./sources'],
-                templatePaths: ['./templates'],
-                componentPaths: ['./components']
+                sourcePaths: [],
+                templatePaths: [],
+                componentPaths: []
             };
+            if (DMBSettings.generateGettingStartedEnabled) {
+                config.sourcePaths.push('./sources');
+                config.templatePaths.push('./templates');
+                config.componentPaths.push('./components');
+                await fse.ensureDir(path.join(campaignPath, 'sources'));
+                await fse.ensureDir(path.join(campaignPath, 'templates'));
+                await fse.ensureDir(path.join(campaignPath, 'components'));
+            }
             await fse.writeJSON(getConfigPath(campaignPath), config, opts);
-            await fse.ensureDir(path.join(campaignPath, 'sources'));
-            await fse.ensureDir(path.join(campaignPath, 'templates'));
-            await fse.ensureDir(path.join(campaignPath, 'components'));
             return true;
         }
         return false;

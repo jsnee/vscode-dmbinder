@@ -1,0 +1,138 @@
+{
+    "Homebrewery Note": {
+        "prefix": "phbNote",
+        "description": "Homebrewery 'note' item",
+        "body": [
+            "> ##### ${1:Note Title}",
+            "> $0"
+        ]
+    },
+    "Homebrewery Spell": {
+        "prefix": "phbSpell",
+        "description": "Homebrewery generic 'spell' item",
+        "body": [
+            "#### ${title:Grease}",
+            "*${level|Cantrip,1st-level,2nd-level,3rd-level,4th-level,5th-level,6th-level,7th-level,8th-level,9th-level|} ${school:Conjuration}*",
+            "___",
+            "- **Casting Time:** ${time:1 Action}",
+            "- **Range/Area:** ${range:60 ft}${area: (10 ft square)}",
+            "- **Components:** ${components:V, S, M (a bit of pork rind or butter)}",
+            "- **Duration:** ${duration:1 Minute}",
+            "",
+            "$0"
+        ]
+    },
+    "Homebrewery Spell List": {
+        "prefix": "phbSpellList",
+        "description": "Homebrewery 'spell list' item",
+        "body": [
+            "<div class='spellList'>
+            ##### Cantrips (0 Level) 
+            - Divine Spell of Crossdressing
+            - Sorcerous Dandruff Globe
+            - Steak Sauce Ray
+            - Ultimate Rite of the Confetti Angel
+            - Ball of Annoyance
+            - Necromantic Armor of Salad Dressing
+            - Hellish Cage of Mucus
+            - Luminous Erruption of Tea
+            - Eliminate Florists
+            - Sorcerous Enchantment of the Chimneysweep
+            - Occult Globe of Salad Dressing
+            - Cage of Yarn 
+            
+            ##### 2nd Level 
+            - Divine Spell of Crossdressing
+            - Alchemical Evocation of the Goths
+            - Sorcerous Dandruff Globe
+            - Induce Whining in Babysitter
+            - Occult Globe of Salad Dressing
+            - Ball of Annoyance
+            - Talk to Groupie 
+            
+            ##### 3rd Level 
+            - Cage of Yarn
+            - Ultimate Ritual of Mouthwash
+            - Ball of Annoyance
+            - Control Noodles Elemental
+            - Astounding Pasta Puddle
+            - Erruption of Immaturity
+            - Occult Transfiguration of Foot Fetish
+            - Extra-Planar Spell of Irritation
+            - Ultimate Rite of the Confetti Angel
+            - Create Nervousness 
+            
+            ##### 4th Level 
+            - Call Fangirl
+            - Cage of Yarn
+            - Ultimate Ritual of Mouthwash
+            - Astonishing Chant of Chocolate
+            - Magical Enchantment of Arrogance
+            - Control Noodles Elemental
+            - Dominate Ramen Giant
+            - Spiritual Invocation of the Costumers
+            - Astral Rite of Acne
+            - Eliminate Florists
+            - Ultimate Rite of the Confetti Angel
+            - Tinsel Blast
+            - Cure Baldness
+            - Occult Globe of Salad Dressing 
+            
+            ##### 5th Level 
+            - Luminous Erruption of Tea
+            - Cursed Ritual of Bad Hair
+            - Sorcerous Dandruff Globe
+            - Create Acne
+            - Cure Baldness
+            - Dominate Ramen Giant
+            - Ball of Annoyance
+            - Heal Bad Hygene
+            - Protection from Mucus Giant
+            - Illusionary Transfiguration of the Babysitter
+            - Flaming Disc of Inconvenience
+            - Occult Transfiguration of Foot Fetish
+            - Astonishing Chant of Chocolate 
+            
+            ##### 6th Level 
+            - Hellish Cage of Mucus
+            - Astral Rite of Acne
+            - Control Noodles Elemental
+            - Eliminate Florists
+            - Alchemical Evocation of the Goths
+            - Ball of Annoyance 
+            
+            ##### 7th Level 
+            - Spiritual Invocation of the Costumers
+            - Occult Transfiguration of Foot Fetish
+            - Eliminate Florists
+            - Ball of Annoyance
+            - Sorcerous Enchantment of the Chimneysweep
+            - Cursed Ramen Erruption
+            - Luminous Erruption of Tea
+            - Invoke Complaining 
+            
+            ##### 8th Level 
+            - Cursed Ritual of Bad Hair
+            - Control Noodles Elemental
+            - Hellish Cage of Mucus
+            - Spiritual Invocation of the Costumers
+            - Magical Enchantment of Arrogance
+            - Illusionary Transfiguration of the Babysitter
+            - Overwhelming Enchantment of the Chocolate Fairy
+            - Cursed Ramen Erruption
+            - Sorcerous Dandruff Globe
+            - Eliminate Florists
+            - Dark Chant of the Dentists
+            - Alchemical Evocation of the Goths 
+            
+            ##### 9th Level 
+            - Call Fangirl
+            - Cursed Ramen Erruption
+            - Ball of Annoyance
+            - Mystic Spell of the Poser
+            - Dispell Piles in Dentist 
+            
+            "</div>"
+        ]
+    }
+}

@@ -12,6 +12,10 @@ class Settings {
     public set treeViewStyle(val: string | undefined) {
         workspace.getConfiguration('dmbinder').update('treeViewStyle', val);
     }
+
+    public get generateGettingStartedEnabled(): boolean | undefined {
+        return workspace.getConfiguration('dmbinder').get('generateGettingStartedEnabled');
+    }
 }
 
 export const DMBSettings: Settings = new Settings();

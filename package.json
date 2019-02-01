@@ -14,9 +14,9 @@
         "onCommand:dmbinder.campaign.init",
         "onCommand:dmbinder.campaign.refresh",
         "onCommand:dmbinder.config.toggleViewStyle",
-        "onCommand:dmbinder.source.edit",
         "onCommand:dmbinder.component.build",
         "onCommand:dmbinder.component.insert",
+        "onCommand:dmbinder.item.edit",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",
@@ -32,8 +32,8 @@
                 "title": "Refresh the current campaign",
                 "category": "DM Binder",
                 "icon": {
-                  "light": "img/light/refresh.svg",
-                  "dark": "img/dark/refresh.svg"
+                    "light": "img/light/refresh.svg",
+                    "dark": "img/dark/refresh.svg"
                 }
             },
             {
@@ -46,8 +46,8 @@
                 "title": "Edit item",
                 "category": "DM Binder",
                 "icon": {
-                  "light": "img/light/edit.svg",
-                  "dark": "img/dark/edit.svg"
+                    "light": "img/light/edit.svg",
+                    "dark": "img/dark/edit.svg"
                 }
             },
             {
@@ -60,15 +60,20 @@
                 "title": "Insert component",
                 "category": "DM Binder",
                 "icon": {
-                  "light": "img/light/insertComponent.svg",
-                  "dark": "img/dark/insertComponent.svg"
+                    "light": "img/light/insertComponent.svg",
+                    "dark": "img/dark/insertComponent.svg"
                 }
             }
         ],
         "configuration": {
             "type": "object",
-            "title": "DMBinder",
+            "title": "DM Binder",
             "properties": {
+                "dmbinder.generateGettingStartedEnabled": {
+                    "type": "boolean",
+                    "description": "Generate getting started files when initializing the campaign.",
+                    "default": true
+                },
                 "dmbinder.homebrewPreviewEnabled": {
                     "type": "boolean",
                     "description": "Flag to render Markdown files using PHB styles."
@@ -127,6 +132,12 @@
                 }
             ]
         },
+        "snippets": [
+            {
+                "language": "markdown",
+                "path": "./snippets.json"
+            }
+        ],
         "views": {
             "dmbinder": [
                 {

@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { registerHomebrewRenderer } from './HomebrewRenderer';
-import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle } from './common';
+import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 
 // this method is called when your extension is activated
@@ -16,7 +16,7 @@ export async function activate(context: ExtensionContext) {
     window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider);
     window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider);
 
-    let refreshCampaignDisposable = commands.registerCommand('dmbinder.campaign.refresh', tv.refresh);
+    let refreshCampaignDisposable = commands.registerCommand('dmbinder.campaign.refresh', tv.refresh, tv);
     context.subscriptions.push(refreshCampaignDisposable);
 
     let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', editTreeItem);
@@ -27,6 +27,9 @@ export async function activate(context: ExtensionContext) {
 
     let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', promptBuildComponent);
     context.subscriptions.push(buildComponentDisposable);
+
+    let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', promptInsertComponent);
+    context.subscriptions.push(insertComponentDisposable);
 
     let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', toggleTreeViewStyle);
     context.subscriptions.push(toggleViewStyleDisposable);

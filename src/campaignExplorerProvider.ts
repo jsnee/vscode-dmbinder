@@ -92,7 +92,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     }
 
     public refresh(item?: ITreeItem): void {
-        return this._onDidChangeTreeData.fire(item);
+        this._onDidChangeTreeData.fire(item);
     }
 
     public get sourcesExplorerProvider(): TreeDataProvider<ITreeItem> {

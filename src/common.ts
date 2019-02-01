@@ -8,7 +8,7 @@ import { DMBSettings } from './Settings';
 async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
         window.showInformationMessage('Creating new campaign in: ' + path.fsPath);
-        if (Campaign.hasCampaignConfig(path.fsPath)) {
+        if (await Campaign.hasCampaignConfig(path.fsPath)) {
             window.showInformationMessage('A DMBinder already exists in the selected folder.');
             return new Campaign(path.fsPath);
         } else {
@@ -104,6 +104,59 @@ export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
     }
 }
 
+export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
+    let componentUri: Uri | undefined;
+    if (!item) {
+        const qpComponentList = await campaignExplorerProvider.getComponentItems();
+        if (qpComponentList) {
+            const qpComponentOpts: QuickPickOptions = {
+                canPickMany: false,
+                ignoreFocusOut: true,
+                placeHolder: 'Select the component to use'
+            };
+            let componentItem = await window.showQuickPick(qpComponentList, qpComponentOpts);
+            if (componentItem && componentItem.detail) {
+                componentUri = Uri.file(componentItem.detail);
+            }
+        }
+    } else {
+        const treeItem = await item.getTreeItem();
+        componentUri = treeItem.resourceUri;
+    }
+    if (componentUri) {
+        const qpItemList = await campaignExplorerProvider.getTemplateItems();
+        if (qpItemList) {
+            const qpOpts: QuickPickOptions = {
+                canPickMany: false,
+                ignoreFocusOut: true,
+                placeHolder: 'Select the template to use'
+            };
+            let templateItem = await window.showQuickPick(qpItemList, qpOpts);
+            let templatePath: string | undefined;
+            if (templateItem) {
+                templatePath = templateItem.detail;
+            }
+            if (templatePath) {
+                let metadataPath = componentUri;
+                if (metadataPath) {
+                    const result = await buildComponent(templatePath, metadataPath.fsPath);
+                    let editor = window.activeTextEditor;
+                    if (editor) {
+                        let selection = editor.selection;
+                        await editor.edit((editBuilder) => {
+                            editBuilder.replace(selection, result);
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+
+export async function sayHello(): Promise<void> {
+    await window.showInformationMessage("Hello World!");
+}
+
 export function toggleTreeViewStyle() {
     switch (DMBSettings.treeViewStyle) {
         case 'split':
@@ -118,7 +171,7 @@ export function toggleTreeViewStyle() {
 
 export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        exec(`echo '' | pandoc --template=${templatePath} --metadata-file=${metadataPath} --metadata pagetitle=" "`, (error, stdout, stderr) => {
+        exec(`echo '' | pandoc --template='${templatePath}' --metadata-file='${metadataPath}' --metadata pagetitle=" "`, (error, stdout, stderr) => {
             resolve(stderr || stdout);
         });
     });
