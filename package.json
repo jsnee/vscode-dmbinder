@@ -113,9 +113,9 @@
         ],
         "markdown.markdownItPlugins": true,
         "markdown.previewStyles": [
+            "./assets/phb-previewSpecific.css",
             "./assets/phb.standalone.css",
-            "./assets/jsnee-homebrew.css",
-            "./assets/phb-previewSpecific.css"
+            "./assets/jsnee-homebrew.css"
         ],
         "menus": {
             "view/title": [
