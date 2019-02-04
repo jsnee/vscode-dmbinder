@@ -19,9 +19,10 @@
         "workspaceContains:.dmbinder/campaign.json",
         "onCommand:dmbinder.campaign.init",
         "onCommand:dmbinder.campaign.refresh",
-        "onCommand:dmbinder.config.toggleViewStyle",
         "onCommand:dmbinder.component.build",
         "onCommand:dmbinder.component.insert",
+        "onCommand:dmbinder.config.toggleViewStyle",
+        "onCommand:dmbinder.config.toggleHomebreweryEnabled",
         "onCommand:dmbinder.item.edit",
         "onView:dmbinder"
     ],
@@ -45,6 +46,11 @@
             {
                 "command": "dmbinder.config.toggleViewStyle",
                 "title": "Toggle the Campaign treeview layout style",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.config.toggleHomebreweryEnabled",
+                "title": "Toggle Homebrewery styles for markdown preview",
                 "category": "DM Binder"
             },
             {

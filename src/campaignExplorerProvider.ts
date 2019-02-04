@@ -29,11 +29,11 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
                 return undefined;
             }
             if (workspace.workspaceFolders.length === 1) {
-                if (Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.path)) {
+                if (await Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.path)) {
                     return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.path)).getChildren(itemType);
                 }
             }
-            return Promise.resolve(mapCampaignTreeItems(workspace.workspaceFolders));
+            return await mapCampaignTreeItems(workspace.workspaceFolders);
         } else {
             return element.getChildren && element.getChildren();
         }
@@ -45,7 +45,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
         let templates: string[] = [];
         for (let folder of workspace.workspaceFolders) {
-            if (Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
                 let campaign = new Campaign(folder.uri.fsPath);
                 for (let eachItem of campaign.templatePaths) {
                     let absPath = path.join(folder.uri.fsPath, eachItem);
@@ -71,7 +71,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
         let components: string[] = [];
         for (let folder of workspace.workspaceFolders) {
-            if (Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
                 let campaign = new Campaign(folder.uri.fsPath);
                 for (let eachItem of campaign.componentPaths) {
                     let absPath = path.join(folder.uri.fsPath, eachItem);
@@ -157,13 +157,13 @@ async function expandDirectoryContents(itemPath: string): Promise<string[] | und
     return undefined;
 }
 
-function mapCampaignTreeItems(workspaceFolders: WorkspaceFolder[]): CampaignTreeItem[] {
+async function mapCampaignTreeItems(workspaceFolders: WorkspaceFolder[]): Promise<CampaignTreeItem[]> {
     let result: CampaignTreeItem[] = [];
-    workspaceFolders.forEach(workspaceFolder => {
-        if (Campaign.hasCampaignConfig(workspaceFolder.uri.fsPath)) {
+    for (let workspaceFolder of workspaceFolders) {
+        if (await Campaign.hasCampaignConfig(workspaceFolder.uri.fsPath)) {
             result.push(new CampaignTreeItem(new Campaign(workspaceFolder.uri.fsPath)));
         }
-    });
+    }
     return result;
 }
 

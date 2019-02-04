@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { registerHomebrewRenderer } from './HomebrewRenderer';
-import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent } from './common';
+import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 
 // this method is called when your extension is activated
@@ -33,6 +33,9 @@ export async function activate(context: ExtensionContext) {
 
     let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', toggleTreeViewStyle);
     context.subscriptions.push(toggleViewStyleDisposable);
+
+    let toggleHomebreweryEnabledDisposable = commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', toggleHomebreweryEnabled);
+    context.subscriptions.push(toggleHomebreweryEnabledDisposable);
 
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
         if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {

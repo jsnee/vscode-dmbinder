@@ -145,6 +145,10 @@ export function toggleTreeViewStyle() {
     }
 }
 
+export function toggleHomebreweryEnabled() {
+    DMBSettings.homebreweryEnabled = !DMBSettings.homebreweryEnabled;
+}
+
 export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         exec(`echo '' | pandoc --template="${templatePath}" --metadata-file="${metadataPath}" --metadata pagetitle=" "`, (error, stdout, stderr) => {

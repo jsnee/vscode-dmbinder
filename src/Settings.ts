@@ -5,6 +5,10 @@ class Settings {
         return workspace.getConfiguration('dmbinder').get('homebrewPreviewEnabled');
     }
 
+    public set homebreweryEnabled(val: boolean | undefined) {
+        workspace.getConfiguration('dmbinder').update('homebrewPreviewEnabled', val);
+    }
+
     public get treeViewStyle(): string | undefined {
         return workspace.getConfiguration('dmbinder').get('treeViewStyle');
     }
