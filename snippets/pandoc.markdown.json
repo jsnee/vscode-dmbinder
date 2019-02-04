@@ -1,0 +1,50 @@
+{
+    "Pandoc for Block": {
+        "prefix": "pandoc-for",
+        "description": "Pandoc 'for' block",
+        "body": [
+            "\\$for(${1:array})\\$",
+            "$0",
+            "\\$endfor\\$"
+        ]
+    },
+    "Pandoc for Block with Separator": {
+        "prefix": "pandoc-for-with-sep",
+        "description": "Pandoc 'for' block with separator",
+        "body": [
+            "\\$for(${1:array})\\$",
+            "$0",
+            "\\$sep\\$${2:separator}\\$endfor\\$"
+        ]
+    },
+    "Pandoc Inline for Statement": {
+        "prefix": "pandoc-for-inline",
+        "description": "Pandoc inline 'for' statement",
+        "body": [
+            "\\$for(${1:array})\\$$0\\$endfor\\$"
+        ]
+    },
+    "Pandoc Inline for Statement with Separator": {
+        "prefix": "pandoc-for-inline-with-sep",
+        "description": "Pandoc inline 'for' statement with separator",
+        "body": [
+            "\\$for(${1:array})\\$$0\\$sep\\$${2:separator}\\$endfor\\$"
+        ]
+    },
+    "Pandoc if Block": {
+        "prefix": "pandoc-if",
+        "description": "Pandoc 'if' block",
+        "body": [
+            "\\$if(${1:condition})\\$",
+            "$0",
+            "\\$endif\\$"
+        ]
+    },
+    "Pandoc Inline if Statement": {
+        "prefix": "pandoc-if-inline",
+        "description": "Pandoc inline 'if' statement",
+        "body": [
+            "\\$if(${1:condition})\\$$0\\$endif\\$"
+        ]
+    }
+}

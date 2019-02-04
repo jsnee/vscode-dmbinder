@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    line-height: 1;
+}
+
+.phb {
+    border: 0;
+    vertical-align: baseline;
+}
+
+.phb h1 {
+    border-bottom-width: 0px;
+}
+
+.phb p, .phb blockquote,
+.phb h1, .phb h2, .phb h3, .phb h4, .phb h5, .phb h6 {
+    margin: 0;
+}
+
+.phb th {
+    padding: 0;
+}
+
+.phb table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    vertical-align: baseline;
+    line-height: 1;
+}
+
+.phb p, .phb h5, .phb h6, .phb li, .phb strong,
+.phb th, .phb td, div.classTable h5 {
+    color: black;
+}
+
+div.classTable tr {
+    padding: 0;
+}

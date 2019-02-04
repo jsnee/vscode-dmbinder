@@ -107,8 +107,9 @@
         ],
         "markdown.markdownItPlugins": true,
         "markdown.previewStyles": [
-            "./phb.standalone.css",
-            "./jsnee-homebrew.css"
+            "./assets/phb.standalone.css",
+            "./assets/jsnee-homebrew.css",
+            "./assets/phb-previewSpecific.css"
         ],
         "menus": {
             "view/title": [
@@ -147,7 +148,11 @@
         "snippets": [
             {
                 "language": "markdown",
-                "path": "./snippets.json"
+                "path": "./snippets/homebrewery.markdown.json"
+            },
+            {
+                "language": "markdown",
+                "path": "./snippets/pandoc.markdown.json"
             }
         ],
         "views": {

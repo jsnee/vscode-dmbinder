@@ -1,6 +1,6 @@
 {
     "Homebrewery Note": {
-        "prefix": "phbNote",
+        "prefix": "phb-note",
         "description": "Homebrewery 'note' item",
         "body": [
             "> ##### ${1:Note Title}",
@@ -8,7 +8,7 @@
         ]
     },
     "Homebrewery Spell": {
-        "prefix": "phbSpell",
+        "prefix": "phb-spell",
         "description": "Homebrewery generic 'spell' item",
         "body": [
             "#### ${title:Grease}",
@@ -23,7 +23,7 @@
         ]
     },
     "Homebrewery Spell List": {
-        "prefix": "phbSpellList",
+        "prefix": "phb-spell-list",
         "description": "Homebrewery 'spell list' item",
         "body": [
             "<div class='spellList'>",
