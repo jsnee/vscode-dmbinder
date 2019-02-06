@@ -1,10 +1,11 @@
 {
     "name": "vscode-dmbinder",
     "displayName": "DMBinder",
-    "description": "",
+    "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
     "version": "0.0.4",
     "icon": "img/dmbinder_icon.png",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/jsnee/vscode-dmbinder"
