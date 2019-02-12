@@ -1,6 +1,7 @@
 body {
     margin: 0;
     line-height: 1;
+    color: black;
 }
 
 .phb {
@@ -26,11 +27,6 @@ body {
     border-spacing: 0;
     vertical-align: baseline;
     line-height: 1;
-}
-
-.phb p, .phb h5, .phb h6, .phb li, .phb strong,
-.phb th, .phb td, div.classTable h5 {
-    color: black;
 }
 
 div.classTable tr {
