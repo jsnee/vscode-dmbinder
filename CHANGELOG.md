@@ -1,4 +1,7 @@
 # Change Log
+## 0.0.5
+- Fix font color issue
+
 ## 0.0.4
 - Markdown preview bugfix
 
