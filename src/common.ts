@@ -1,4 +1,4 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
@@ -131,6 +131,14 @@ export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
             });
         }
     }
+}
+
+export function getExtensionPath(): string {
+    let result = extensions.getExtension('jpsnee.vscode-dmbinder');
+    if (!result) {
+        return '';
+    }
+    return result.extensionPath;
 }
 
 export function toggleTreeViewStyle() {

@@ -24,6 +24,7 @@
         "onCommand:dmbinder.component.insert",
         "onCommand:dmbinder.config.toggleViewStyle",
         "onCommand:dmbinder.config.toggleHomebreweryEnabled",
+        "onCommand:dmbinder.item.brew",
         "onCommand:dmbinder.item.edit",
         "onView:dmbinder"
     ],
@@ -52,6 +53,11 @@
             {
                 "command": "dmbinder.config.toggleHomebreweryEnabled",
                 "title": "Toggle Homebrewery styles for markdown preview",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.item.brew",
+                "title": "Render Markdown with Homebrewery Styles",
                 "category": "DM Binder"
             },
             {
@@ -136,12 +142,17 @@
                 },
                 {
                     "command": "dmbinder.item.edit",
-                    "when": "viewItem == TemplateItem",
+                    "when": "viewItem == ComponentItem",
                     "group": "inline"
                 },
                 {
                     "command": "dmbinder.item.edit",
-                    "when": "viewItem == ComponentItem",
+                    "when": "viewItem == TemplateItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "dmbinder.item.brew",
+                    "when": "viewItem == SourceItem",
                     "group": "inline"
                 }
             ],
