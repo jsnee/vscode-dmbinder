@@ -128,7 +128,23 @@
             "view/title": [
                 {
                     "command": "dmbinder.campaign.refresh",
-                    "group": "navigation"
+                    "group": "navigation",
+                    "when": "view == dmbinder"
+                },
+                {
+                    "command": "dmbinder.campaign.refresh",
+                    "group": "navigation",
+                    "when": "view == dmbinder.sources"
+                },
+                {
+                    "command": "dmbinder.campaign.refresh",
+                    "group": "navigation",
+                    "when": "view == dmbinder.components"
+                },
+                {
+                    "command": "dmbinder.campaign.refresh",
+                    "group": "navigation",
+                    "when": "view == dmbinder.templates"
                 }
             ],
             "view/item/context": [
