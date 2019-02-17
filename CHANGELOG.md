@@ -1,4 +1,7 @@
 # Change Log
+## 0.0.6
+- Fix refresh campaign showing up on other extensions
+
 ## 0.0.5
 - Fix font color issue
 
