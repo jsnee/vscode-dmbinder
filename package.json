@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.0.6",
+    "version": "0.1.0",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -57,8 +57,12 @@
             },
             {
                 "command": "dmbinder.item.brew",
-                "title": "Render Markdown with Homebrewery Styles",
-                "category": "DM Binder"
+                "title": "Render Markdown to PDF with Homebrewery Styles",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/renderBrews.svg",
+                    "dark": "img/dark/renderBrews.svg"
+                }
             },
             {
                 "command": "dmbinder.item.edit",

@@ -1,4 +1,7 @@
 # Change Log
+## 0.1.0
+- Added ability to render sources to PDF
+
 ## 0.0.6
 - Fix refresh campaign showing up on other extensions
 
