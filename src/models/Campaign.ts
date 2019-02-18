@@ -8,6 +8,7 @@ interface CampaignConfig {
     sourcePaths: string[];
     templatePaths: string[];
     componentPaths: string[];
+    outDirectory?: string;
 }
 
 export class Campaign {
@@ -19,6 +20,22 @@ export class Campaign {
         this._path = campaignPath;
         this._config = fse.readJsonSync(this._configPath);
         this._isConfigMutated = false;
+    }
+
+    public static async getCampaignInPath(filePath: string): Promise<Campaign | undefined> {
+        if (filePath === path.dirname(filePath)) {
+            return;
+        }
+        let stat = await fse.stat(filePath);
+        if (stat.isDirectory()) {
+            if (await Campaign.hasCampaignConfig(filePath)) {
+                return new Campaign(filePath);
+            }
+        }
+        if (await fse.pathExists(Uri.file(path.dirname(filePath)).fsPath)) {
+            return await Campaign.getCampaignInPath(path.dirname(filePath));
+        }
+        return;
     }
 
     public static async hasCampaignConfig(campaignPath: string): Promise<boolean> {
@@ -96,6 +113,15 @@ export class Campaign {
 
     public get componentPaths(): string[] {
         return this._config.componentPaths;
+    }
+
+    public set outDirectory(path: string | undefined) {
+        this._config.outDirectory = path;
+        this._isConfigMutated = true;
+    }
+
+    public get outDirectory(): string | undefined {
+        return this._config.outDirectory;
     }
 }
 

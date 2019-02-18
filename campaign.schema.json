@@ -27,10 +27,16 @@
             "items": {
                 "type": "string"
             }
+        },
+        "outDirectory": {
+            "description": "Directory to where PDF files will be rendered out. (If left blank, PDFs will be saved in same directory as source file)",
+            "type": "string"
         }
     },
     "required": [
         "campaignName",
-        "sourcePaths"
+        "sourcePaths",
+        "templatePaths",
+        "componentPaths"
     ]
 }

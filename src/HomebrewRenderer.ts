@@ -1,18 +1,25 @@
 import { DMBSettings } from "./Settings";
 import { ITreeItem } from "./models/ITreeItem";
 import { Uri, window } from "vscode";
+import { getExtensionPath } from "./common";
+import { contextProps } from "./extension";
 import * as fse from 'fs-extra';
 import * as path from "path";
-import { getExtensionPath } from "./common";
+import * as Puppeteer from 'puppeteer';
+import { Campaign } from "./models/Campaign";
 
 let vscMd: markdownit;
 
 async function renderHomebrewItem(uri: Uri): Promise<void> {
     let basename = path.basename(uri.path, '.md');
     window.setStatusBarMessage(`Printing '${basename}' to HTML ...`, 1000);
-    let outPath = path.join(path.dirname(uri.fsPath), basename + '.html');
+    let brewDir = path.join(contextProps.localStoragePath, 'dmbinder-brewing');
+    let brewPath = path.join(brewDir, basename + '.html');
 
-    const body = vscMd.render(await fse.readFile(uri.fsPath, 'utf-8'));
+    let data = await fse.readFile(uri.fsPath, 'utf-8');
+    console.log("Here!");
+    const body = vscMd.render(data);
+    console.log("There!");
     const html = `<!DOCTYPE html>
     <html>
     <head>
@@ -26,13 +33,26 @@ async function renderHomebrewItem(uri: Uri): Promise<void> {
     </body>
     </html>`;
 
-    fse.writeFile(outPath, html, 'utf-8', function (err) {
+    const assetPath = path.join(getExtensionPath(), 'assets');
+    await fse.copy(assetPath, brewDir, { recursive: true });
+
+    fse.writeFile(brewPath, html, 'utf-8', function (err) {
         if (err) { console.log(err); }
     });
-    window.showInformationMessage(`Created ${outPath}`);
+    window.showInformationMessage(`Created ${brewPath}`);
 
-    const assetPath = path.join(getExtensionPath(), 'assets');
-    await fse.copy(assetPath, path.dirname(outPath), { recursive: true });
+    const browser = await Puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
+
+    let outDir = path.dirname(uri.fsPath);
+    const campaign = await Campaign.getCampaignInPath(uri.fsPath);
+    if (campaign && campaign.outDirectory) {
+        outDir = campaign.outDirectory;
+    }
+    let outPath = path.join(outDir, basename + '.pdf');
+    await page.pdf({ path: outPath, format: 'Letter' });
+    await fse.remove(brewDir);
 }
 
 export async function renderHomebrew(item?: ITreeItem): Promise<void> {

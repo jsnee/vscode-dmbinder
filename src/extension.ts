@@ -3,6 +3,14 @@ import { registerHomebrewRenderer, renderHomebrew } from './HomebrewRenderer';
 import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 
+interface ContextProperties {
+    localStoragePath: string;
+}
+
+export const contextProps: ContextProperties = {
+    localStoragePath: ''
+};
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: ExtensionContext) {
@@ -10,6 +18,11 @@ export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-dm-binder" is now active!');
+
+    if (context.storagePath) {
+        contextProps.localStoragePath = context.storagePath;
+    }
+
     const tv = campaignExplorerProvider;
     window.registerTreeDataProvider('dmbinder', tv);
     window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider);
@@ -55,4 +68,4 @@ export async function activate(context: ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
