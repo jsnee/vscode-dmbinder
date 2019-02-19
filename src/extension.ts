@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { registerHomebrewRenderer, renderHomebrew } from './HomebrewRenderer';
-import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled } from './common';
+import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 
 interface ContextProperties {
@@ -34,6 +34,9 @@ export async function activate(context: ExtensionContext) {
 
     let brewTreeItemDisposable = commands.registerCommand('dmbinder.item.brew', renderHomebrew);
     context.subscriptions.push(brewTreeItemDisposable);
+
+    let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', renderCampaignSources);
+    context.subscriptions.push(brewCampaignDisposable);
 
     let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', editTreeItem);
     context.subscriptions.push(editTreeItemDisposable);

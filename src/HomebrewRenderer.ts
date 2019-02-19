@@ -10,16 +10,36 @@ import { Campaign } from "./models/Campaign";
 
 let vscMd: markdownit;
 
+function getBrewPath(): string {
+    return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
+}
+
+function getAssetPath(): string {
+    return path.join(getExtensionPath(), 'assets');
+}
+
+async function cleanupBrewDirectory(): Promise<void> {
+    let cleanupAction = fse.remove(getBrewPath());
+    window.setStatusBarMessage("Cleaning up...", cleanupAction);
+    await cleanupAction;
+}
+
+async function copyAssetsToBrewDirectory(): Promise<void> {
+    let copyAssets = fse.copy(getAssetPath(), getBrewPath(), { recursive: true });
+    window.setStatusBarMessage("Copying assets...", copyAssets);
+    await copyAssets;
+}
+
 async function renderHomebrewItem(uri: Uri): Promise<void> {
+    await copyAssetsToBrewDirectory();
+
     let basename = path.basename(uri.path, '.md');
     window.setStatusBarMessage(`Printing '${basename}' to HTML ...`, 1000);
-    let brewDir = path.join(contextProps.localStoragePath, 'dmbinder-brewing');
+    let brewDir = getBrewPath();
     let brewPath = path.join(brewDir, basename + '.html');
 
     let data = await fse.readFile(uri.fsPath, 'utf-8');
-    console.log("Here!");
     const body = vscMd.render(data);
-    console.log("There!");
     const html = `<!DOCTYPE html>
     <html>
     <head>
@@ -32,9 +52,6 @@ async function renderHomebrewItem(uri: Uri): Promise<void> {
         ${body}
     </body>
     </html>`;
-
-    const assetPath = path.join(getExtensionPath(), 'assets');
-    await fse.copy(assetPath, brewDir, { recursive: true });
 
     fse.writeFile(brewPath, html, 'utf-8', function (err) {
         if (err) { console.log(err); }
@@ -52,7 +69,82 @@ async function renderHomebrewItem(uri: Uri): Promise<void> {
     }
     let outPath = path.join(outDir, basename + '.pdf');
     await page.pdf({ path: outPath, format: 'Letter' });
-    await fse.remove(brewDir);
+    await cleanupBrewDirectory();
+}
+
+async function renderHtmlFile(filePath: string, outPath?: string): Promise<string> {
+    let basename = path.basename(filePath, '.md');
+    let brewPath = path.join(getBrewPath(), basename + '.html');
+    if (outPath) {
+        brewPath = path.join(getBrewPath(), outPath, basename + '.html');
+        await fse.ensureDir(path.join(getBrewPath(), outPath));
+    }
+
+    let data = await fse.readFile(Uri.file(filePath).fsPath, 'utf-8');
+    const body = vscMd.render(data);
+    const html = `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <link rel="stylesheet" href="jsnee-homebrew.css">
+        <link rel="stylesheet" href="phb-previewSpecific.css">
+        <link rel="stylesheet" href="phb.standalone.css">
+    </head>
+    <body class="vscode-body">
+        ${body}
+    </body>
+    </html>`;
+
+    await fse.writeFile(brewPath, html, 'utf-8');
+    return brewPath;
+}
+
+export async function renderCampaign(campaign: Campaign): Promise<void> {
+    await copyAssetsToBrewDirectory();
+
+    for (let source of campaign.sourcePaths) {
+        let sourcePath = path.join(campaign.campaignPath, source);
+        await renderCampaignSourceItem(campaign, sourcePath);
+    }
+
+    await cleanupBrewDirectory();
+}
+
+async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: string): Promise<void> {
+    let htmlPath = await renderHtmlFile(sourcePath, brewDir);
+
+    const browser = await Puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
+
+    let outPath = path.join(outDir, path.basename(sourcePath, '.md') + '.pdf');
+    await page.pdf({ path: outPath, format: 'Letter' });
+}
+
+async function renderCampaignSourceItem(campaign: Campaign, sourcePath: string, outPath?: string): Promise<void> {
+    let stat = await fse.stat(sourcePath);
+    if (stat.isDirectory()) {
+        let children = await fse.readdir(sourcePath);
+        for (let child of children) {
+            if (outPath) {
+                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.join(outPath, path.basename(sourcePath)));
+            } else {
+                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.basename(sourcePath));
+            }
+        }
+    }
+    if (stat.isFile() && sourcePath.endsWith(".md")) {
+        let outDirPath = campaign.campaignPath;
+        if (outPath) {
+            outDirPath = path.join(campaign.campaignPath, outPath);
+        }
+        // if (campaign.outDirectory) {
+        //     outDirPath = campaign.outDirectory;
+        // }
+        let renderAction = renderPdfFile(sourcePath, outDirPath, outPath);
+        window.setStatusBarMessage(`Rendering '${path.basename(sourcePath, '.md')}' to PDF ...`, renderAction);
+        await renderAction;
+    }
 }
 
 export async function renderHomebrew(item?: ITreeItem): Promise<void> {

@@ -91,6 +91,19 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
 
+    public async listCampaignPaths(): Promise<string[] | undefined> {
+        if (!workspace.workspaceFolders) {
+            return;
+        }
+        let result: string[] = [];
+        for (let folder of workspace.workspaceFolders) {
+            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+                result.push(folder.uri.fsPath);
+            }
+        }
+        return result;
+    }
+
     public refresh(item?: ITreeItem): void {
         this._onDidChangeTreeData.fire(item);
     }

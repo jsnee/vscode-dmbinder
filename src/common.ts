@@ -5,6 +5,7 @@ import { ITreeItem } from './models/ITreeItem';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { DMBSettings } from './Settings';
 import * as matter from 'gray-matter';
+import { renderCampaign } from './HomebrewRenderer';
 
 async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {
@@ -45,6 +46,45 @@ export async function promptInitCampaign(): Promise<void> {
         window.showErrorMessage('You need to open up a folder in VS Code before you can initialize a DMBinder campaign.');
         return;
     }
+}
+
+export async function promptSelectCampaign(promptText?: string): Promise<Campaign | undefined> {
+    const campaignPaths = await campaignExplorerProvider.listCampaignPaths();
+    if (campaignPaths) {
+        const qpCampaigns: QuickPickItem[] = [];
+        for (let campaignPath of campaignPaths) {
+            let campaign = new Campaign(campaignPath);
+            qpCampaigns.push({
+                label: campaign.campaignName,
+                detail: campaign.campaignPath
+            });
+        }
+        if (!promptText) {
+            promptText = "Select a campaign";
+        }
+        const qpOpts: QuickPickOptions = {
+            canPickMany: false,
+            ignoreFocusOut: true,
+            placeHolder: promptText
+        };
+        let campaignItem = await window.showQuickPick(qpCampaigns, qpOpts);
+        if (campaignItem && campaignItem.detail) {
+            return new Campaign(campaignItem.detail);
+        }
+    }
+    return;
+}
+
+export async function renderCampaignSources(campaignPath?: string): Promise<void> {
+    if (campaignPath && await Campaign.hasCampaignConfig(campaignPath)) {
+        await renderCampaign(new Campaign(campaignPath));
+    } else {
+        let campaign = await promptSelectCampaign();
+        if (campaign) {
+            await renderCampaign(campaign);
+        }
+    }
+    return;
 }
 
 export async function editTreeItem(item?: ITreeItem): Promise<void> {

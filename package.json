@@ -19,6 +19,7 @@
     "activationEvents": [
         "workspaceContains:.dmbinder/campaign.json",
         "onCommand:dmbinder.campaign.init",
+        "onCommand:dmbinder.campaign.brew",
         "onCommand:dmbinder.campaign.refresh",
         "onCommand:dmbinder.component.build",
         "onCommand:dmbinder.component.insert",
@@ -34,6 +35,11 @@
             {
                 "command": "dmbinder.campaign.init",
                 "title": "Initialize Campaign in Current Folder",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.campaign.brew",
+                "title": "Render all sources to PDF with Homebrewery Styles",
                 "category": "DM Binder"
             },
             {
