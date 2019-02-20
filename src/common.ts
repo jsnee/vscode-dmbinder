@@ -48,9 +48,12 @@ export async function promptInitCampaign(): Promise<void> {
     }
 }
 
-export async function promptSelectCampaign(promptText?: string): Promise<Campaign | undefined> {
+export async function promptSelectCampaign(promptText: string = "Select a campaign", noPromptIfOne: boolean = false): Promise<Campaign | undefined> {
     const campaignPaths = await campaignExplorerProvider.listCampaignPaths();
     if (campaignPaths) {
+        if (campaignPaths.length === 1 && noPromptIfOne) {
+            return new Campaign(campaignPaths[0]);
+        }
         const qpCampaigns: QuickPickItem[] = [];
         for (let campaignPath of campaignPaths) {
             let campaign = new Campaign(campaignPath);
@@ -58,9 +61,6 @@ export async function promptSelectCampaign(promptText?: string): Promise<Campaig
                 label: campaign.campaignName,
                 detail: campaign.campaignPath
             });
-        }
-        if (!promptText) {
-            promptText = "Select a campaign";
         }
         const qpOpts: QuickPickOptions = {
             canPickMany: false,
@@ -79,7 +79,7 @@ export async function renderCampaignSources(campaignPath?: string): Promise<void
     if (campaignPath && await Campaign.hasCampaignConfig(campaignPath)) {
         await renderCampaign(new Campaign(campaignPath));
     } else {
-        let campaign = await promptSelectCampaign();
+        let campaign = await promptSelectCampaign(undefined, true);
         if (campaign) {
             await renderCampaign(campaign);
         }
