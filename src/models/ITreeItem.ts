@@ -12,6 +12,14 @@ export interface ITreeItem {
      */
     getChildren?(): vscode.ProviderResult<ITreeItem[]>;
     /**
+     * If implemented, it will be triggered to get the path to the campaign root.
+     */
+    getCampaignPath?(): string;
+    /**
+     * If implemented, it will be triggered to get the path relative to the campaign root.
+     */
+    getContextPath?(): string;
+    /**
      * If implemented, it will be triggered to refresh tree item.
      */
     refresh?(): void | Promise<void>;

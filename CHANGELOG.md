@@ -1,4 +1,7 @@
 # Change Log
+## 0.1.1
+- Added new feature to render all files in campaign to PDF
+
 ## 0.1.0
 - Added ability to render sources to PDF
 

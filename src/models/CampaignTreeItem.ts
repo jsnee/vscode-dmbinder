@@ -39,6 +39,10 @@ export class CampaignTreeItem implements ITreeItem {
         return result;
     }
 
+    public getCampaignPath(): string {
+        return this._campaign.campaignPath;
+    }
+
     private _getEmptyChild(contextValue: string): ITreeItem {
         return {
             getContextValue: () => contextValue,
@@ -51,7 +55,8 @@ export class CampaignTreeItem implements ITreeItem {
             return {
                 getContextValue: () => "Sources",
                 getTreeItem: () => new TreeItem("Sources", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.sourcePaths.map(async srcPath => this._getChildren("SourceItem", srcPath)))
+                getChildren: () => Promise.all(this._campaign.sourcePaths.map(async srcPath => this._getChildren("SourceItem", srcPath))),
+                getCampaignPath: () => this._campaign.campaignPath
             };
         }
         return this._getEmptyChild("Sources");
@@ -62,7 +67,8 @@ export class CampaignTreeItem implements ITreeItem {
             return {
                 getContextValue: () => "Templates",
                 getTreeItem: () => new TreeItem("Templates", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.templatePaths.map(async templatePath => this._getChildren("TemplateItem", templatePath)))
+                getChildren: () => Promise.all(this._campaign.templatePaths.map(async templatePath => this._getChildren("TemplateItem", templatePath))),
+                getCampaignPath: () => this._campaign.campaignPath
             };
         }
         return this._getEmptyChild("Templates");
@@ -73,25 +79,38 @@ export class CampaignTreeItem implements ITreeItem {
             return {
                 getContextValue: () => "Components",
                 getTreeItem: () => new TreeItem("Components", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.componentPaths.map(async componentPath => this._getChildren("ComponentItem", componentPath)))
+                getChildren: () => Promise.all(this._campaign.componentPaths.map(async componentPath => this._getChildren("ComponentItem", componentPath))),
+                getCampaignPath: () => this._campaign.campaignPath
             };
         }
         return this._getEmptyChild("Components");
     }
 
-    private async _getChildren(contextValue: string, itemPath: string): Promise<ITreeItem> {
+    private async _getChildren(contextValue: string, itemPath: string, contextPath?: string): Promise<ITreeItem> {
         let uri = Uri.file(itemPath.startsWith("./") ? path.join(this._campaign.campaignPath, itemPath) : itemPath);
         let stats = await fse.stat(uri.fsPath);
+        let getContextPath = undefined;
+        if (contextPath) {
+            getContextPath = () => contextPath;
+        }
         if (stats.isDirectory()) {
+            let ctxPath = path.basename(itemPath);
+            if (contextPath) {
+                ctxPath = path.join(contextPath, ctxPath);
+            }
             return {
                 getContextValue: () => contextValue + "Folder",
                 getTreeItem: () => getChildTreeItem(uri, contextValue + "Folder"),
-                getChildren: async () => Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath))))
+                getChildren: async () => Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath), ctxPath))),
+                getCampaignPath: () => this._campaign.campaignPath,
+                getContextPath: getContextPath
             };
         }
         return {
             getContextValue: () => contextValue,
-            getTreeItem: () => getChildTreeItem(uri, contextValue)
+            getTreeItem: () => getChildTreeItem(uri, contextValue),
+            getCampaignPath: () => this._campaign.campaignPath,
+            getContextPath: getContextPath
         };
     }
 }

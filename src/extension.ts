@@ -1,7 +1,8 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
-import { registerHomebrewRenderer, renderHomebrew } from './HomebrewRenderer';
+import { renderHomebrew } from './HomebrewRenderer';
 import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
+import { registerHomebrewRenderer } from './markdownHomebrewery';
 
 interface ContextProperties {
     localStoragePath: string;

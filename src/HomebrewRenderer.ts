@@ -1,14 +1,12 @@
-import { DMBSettings } from "./Settings";
 import { ITreeItem } from "./models/ITreeItem";
-import { Uri, window } from "vscode";
+import { Uri, window, ProgressLocation, CancellationToken } from "vscode";
 import { getExtensionPath } from "./common";
 import { contextProps } from "./extension";
 import * as fse from 'fs-extra';
 import * as path from "path";
 import * as Puppeteer from 'puppeteer';
 import { Campaign } from "./models/Campaign";
-
-let vscMd: markdownit;
+import { getVsMd } from "./markdownHomebrewery";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
@@ -30,7 +28,29 @@ async function copyAssetsToBrewDirectory(): Promise<void> {
     await copyAssets;
 }
 
-async function renderHomebrewItem(uri: Uri): Promise<void> {
+async function renderFileContents(uri: Uri): Promise<string> {
+    let data = await fse.readFile(uri.fsPath, 'utf-8');
+    const md = getVsMd();
+    if (!md) {
+        console.error("VSCode markdown-it not found.");
+        throw new Error("VSCode markdown-it not found.");
+    }
+    const body = md.render(data);
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <link rel="stylesheet" href="${path.join(getBrewPath(), 'jsnee-homebrew.css')}">
+        <link rel="stylesheet" href="${path.join(getBrewPath(), 'phb-previewSpecific.css')}">
+        <link rel="stylesheet" href="${path.join(getBrewPath(), 'phb.standalone.css')}">
+    </head>
+    <body class="vscode-body">
+        ${body}
+    </body>
+    </html>`;
+}
+
+async function renderHomebrewStandalone(uri: Uri): Promise<void> {
     await copyAssetsToBrewDirectory();
 
     let basename = path.basename(uri.path, '.md');
@@ -38,35 +58,17 @@ async function renderHomebrewItem(uri: Uri): Promise<void> {
     let brewDir = getBrewPath();
     let brewPath = path.join(brewDir, basename + '.html');
 
-    let data = await fse.readFile(uri.fsPath, 'utf-8');
-    const body = vscMd.render(data);
-    const html = `<!DOCTYPE html>
-    <html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-        <link rel="stylesheet" href="jsnee-homebrew.css">
-        <link rel="stylesheet" href="phb-previewSpecific.css">
-        <link rel="stylesheet" href="phb.standalone.css">
-    </head>
-    <body class="vscode-body">
-        ${body}
-    </body>
-    </html>`;
+    const html = await renderFileContents(uri);
 
     fse.writeFile(brewPath, html, 'utf-8', function (err) {
         if (err) { console.log(err); }
     });
-    window.showInformationMessage(`Created ${brewPath}`);
 
     const browser = await Puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
 
     let outDir = path.dirname(uri.fsPath);
-    const campaign = await Campaign.getCampaignInPath(uri.fsPath);
-    if (campaign && campaign.outDirectory) {
-        outDir = campaign.outDirectory;
-    }
     let outPath = path.join(outDir, basename + '.pdf');
     await page.pdf({ path: outPath, format: 'Letter' });
     await cleanupBrewDirectory();
@@ -80,34 +82,12 @@ async function renderHtmlFile(filePath: string, outPath?: string): Promise<strin
         await fse.ensureDir(path.join(getBrewPath(), outPath));
     }
 
-    let data = await fse.readFile(Uri.file(filePath).fsPath, 'utf-8');
-    const body = vscMd.render(data);
-    const html = `<!DOCTYPE html>
-    <html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-        <link rel="stylesheet" href="jsnee-homebrew.css">
-        <link rel="stylesheet" href="phb-previewSpecific.css">
-        <link rel="stylesheet" href="phb.standalone.css">
-    </head>
-    <body class="vscode-body">
-        ${body}
-    </body>
-    </html>`;
+    const html = await renderFileContents(Uri.file(filePath));
 
-    await fse.writeFile(brewPath, html, 'utf-8');
+    fse.writeFile(brewPath, html, 'utf-8', function (err) {
+        if (err) { console.log(err); }
+    });
     return brewPath;
-}
-
-export async function renderCampaign(campaign: Campaign): Promise<void> {
-    await copyAssetsToBrewDirectory();
-
-    for (let source of campaign.sourcePaths) {
-        let sourcePath = path.join(campaign.campaignPath, source);
-        await renderCampaignSourceItem(campaign, sourcePath);
-    }
-
-    await cleanupBrewDirectory();
 }
 
 async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: string): Promise<void> {
@@ -121,30 +101,128 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
     await page.pdf({ path: outPath, format: 'Letter' });
 }
 
-async function renderCampaignSourceItem(campaign: Campaign, sourcePath: string, outPath?: string): Promise<void> {
+async function renderCampaignSourceItem(campaign: Campaign, sourcePath: string, outPath?: string, progressAction?: (message: string) => void, token?: CancellationToken): Promise<void> {
+    let isCancelled = false;
+    if (token) {
+        isCancelled = token.isCancellationRequested;
+        token.onCancellationRequested(() => isCancelled = true);
+    }
+    if (isCancelled) {
+        return;
+    }
     let stat = await fse.stat(sourcePath);
     if (stat.isDirectory()) {
         let children = await fse.readdir(sourcePath);
         for (let child of children) {
+            if (isCancelled) {
+                return;
+            }
             if (outPath) {
-                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.join(outPath, path.basename(sourcePath)));
+                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.join(outPath, path.basename(sourcePath)), progressAction, token);
             } else {
-                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.basename(sourcePath));
+                await renderCampaignSourceItem(campaign, path.join(sourcePath, child), path.basename(sourcePath), progressAction, token);
             }
         }
     }
     if (stat.isFile() && sourcePath.endsWith(".md")) {
         let outDirPath = campaign.campaignPath;
-        if (outPath) {
-            outDirPath = path.join(campaign.campaignPath, outPath);
+        if (campaign.outDirectory) {
+            if (path.isAbsolute(campaign.outDirectory)) {
+                outDirPath = campaign.outDirectory;
+            } else {
+                outDirPath = path.join(campaign.campaignPath, campaign.outDirectory);
+            }
         }
-        // if (campaign.outDirectory) {
-        //     outDirPath = campaign.outDirectory;
-        // }
+        if (outPath) {
+            outDirPath = path.join(outDirPath, outPath);
+        }
+        await fse.ensureDir(outDirPath);
         let renderAction = renderPdfFile(sourcePath, outDirPath, outPath);
-        window.setStatusBarMessage(`Rendering '${path.basename(sourcePath, '.md')}' to PDF ...`, renderAction);
+        if (progressAction) {
+            progressAction(`Rendering '${path.basename(sourcePath, '.md')}' to PDF`);
+        } else {
+            window.setStatusBarMessage(`Rendering '${path.basename(sourcePath, '.md')}' to PDF ...`, renderAction);
+        }
         await renderAction;
     }
+}
+
+async function renderSingleCampaignSource(campaign: Campaign, sourcePath: string, outPath?: string): Promise<void> {
+    await copyAssetsToBrewDirectory();
+
+    await renderCampaignSourceItem(campaign, sourcePath, outPath);
+
+    await cleanupBrewDirectory();
+}
+
+async function getFileCountRecursive(paths: string[], pathBase: string, extensionFilter?: string | string[]): Promise<number> {
+    let result = 0;
+    for (let eachPath of paths.map((ea) => path.join(pathBase, ea))) {
+        let stat = await fse.stat(eachPath);
+        if (stat.isDirectory()) {
+            result += await getFileCountRecursive(await fse.readdir(eachPath), path.join(pathBase, path.basename(eachPath)), extensionFilter);
+        } else if (stat.isFile()) {
+            if (extensionFilter) {
+                if (!hasFileExtension(eachPath, ...extensionFilter)) {
+                    continue;
+                }
+            }
+            result++;
+        }
+    }
+    return result;
+}
+
+function hasFileExtension(filename: string, ...exts: string[]): boolean {
+    for (let ext of exts) {
+        if (filename.endsWith(ext)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export async function renderCampaign(campaign: Campaign): Promise<void> {
+    let progOpts = {
+        location: ProgressLocation.Notification,
+        cancellable: true,
+        title: `${campaign.campaignName}`
+    };
+
+    let fileCount = await getFileCountRecursive(campaign.sourcePaths, campaign.campaignPath, '.md');
+
+    window.withProgress(progOpts, async (progress, token) => {
+        let isCancelled = false;
+        token.onCancellationRequested(async () => {
+            window.showWarningMessage(`Cancelled rendering files from "${campaign.campaignName}".`);
+            window.setStatusBarMessage("Cancelling...", 1000);
+        });
+        progress.report({
+            message: "Copying Assets..."
+        });
+        await copyAssetsToBrewDirectory();
+
+        for (let source of campaign.sourcePaths) {
+            if (isCancelled) {
+                break;
+            }
+            let sourcePath = path.join(campaign.campaignPath, source);
+            await renderCampaignSourceItem(campaign, sourcePath, undefined, (message) => {
+                progress.report({
+                    message: message,
+                    increment: 100 / fileCount
+                });
+            }, token);
+        }
+
+        progress.report({
+            message: "Cleaning Up..."
+        });
+        if (isCancelled) {
+            window.setStatusBarMessage("Cleaning Up...", 1000);
+        }
+        await cleanupBrewDirectory();
+    });
 }
 
 export async function renderHomebrew(item?: ITreeItem): Promise<void> {
@@ -153,75 +231,15 @@ export async function renderHomebrew(item?: ITreeItem): Promise<void> {
             case "SourceItem":
                 let treeItem = await item.getTreeItem();
                 if (treeItem.resourceUri) {
-                    return renderHomebrewItem(treeItem.resourceUri);
+                    if (item.getCampaignPath && await Campaign.hasCampaignConfig(item.getCampaignPath())) {
+                        let campaign = new Campaign(item.getCampaignPath());
+                        return renderSingleCampaignSource(campaign, treeItem.resourceUri.fsPath, item.getContextPath ? item.getContextPath() : undefined);
+                    }
+                    return renderHomebrewStandalone(treeItem.resourceUri);
                 }
                 break;
             default:
                 break;
         }
     }
-}
-
-export function registerHomebrewRenderer(md: markdownit): markdownit {
-    vscMd = md;
-    md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
-    md.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
-    return md;
-}
-
-function homebrewAddWrapper(state: any) {
-    if (state.tokens.length === 0 || !DMBSettings.homebreweryEnabled) {
-        return;
-    }
-    if (state.tokens[0].type !== 'pageBr_open') {
-        const open = new state.Token('pageBr_open', 'div', 1);
-        open.attrPush(['class', 'phb']);
-        open.attrPush(['id', 'p1']);
-        open.attrPush(['style', 'margin-bottom: 30px;']);
-        state.tokens.splice(0, 0, open);
-    }
-    if (state.tokens[state.tokens.length - 1].type !== 'pageBr_close') {
-        const close = new state.Token('pageBr_close', 'div', -1);
-        state.tokens.push(close);
-    }
-}
-
-function homebrewReplacePages(state: any) {
-    if (state.tokens.length === 0 || !DMBSettings.homebreweryEnabled) {
-        return;
-    }
-
-    let currentPage = 2;
-
-    for (let i = state.tokens.length - 1; i >= 0; i--) {
-        if (state.tokens[i].type !== 'inline') {
-            continue;
-        }
-        if (state.tokens[i].content === '\\page') {
-            let token;
-            const inlineTokens = state.tokens[i].children;
-            for (let j = inlineTokens.length - 1; j >= 0; j--) {
-                token = inlineTokens[j];
-                if (token.type === 'text') {
-                    if (token.content === '\\page') {
-                        replaceToken(state, i, currentPage);
-                        currentPage++;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
-
-function replaceToken(state: any, tokenPos: any, currentPage: any) {
-    const close = new state.Token('pageBr_close', 'div', -1);
-    const open = new state.Token('pageBr_open', 'div', 1);
-    open.attrPush(['class', 'phb']);
-    open.attrPush(['style', 'margin-bottom: 30px;']);
-    open.attrPush(['id', `p${currentPage}`]);
-
-    state.tokens[tokenPos-1] = close;
-    state.tokens[tokenPos+1] = open;
-    state.tokens.splice(tokenPos, 1);
 }
