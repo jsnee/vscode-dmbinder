@@ -5,7 +5,7 @@ import { ITreeItem } from './models/ITreeItem';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { DMBSettings } from './Settings';
 import * as matter from 'gray-matter';
-import { renderCampaign } from './HomebrewRenderer';
+import { renderCampaign } from './renderer';
 
 async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {

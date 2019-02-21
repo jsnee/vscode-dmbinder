@@ -1,5 +1,5 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
-import { renderHomebrew } from './HomebrewRenderer';
+import { renderHomebrew } from './renderer';
 import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
