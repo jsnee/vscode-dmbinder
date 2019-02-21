@@ -32,3 +32,7 @@ body {
 div.classTable tr {
     padding: 0;
 }
+
+.phb:not(:last-child) {
+    margin-bottom: 30px;
+}

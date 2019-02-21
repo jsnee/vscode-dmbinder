@@ -21,7 +21,6 @@ function homebrewAddWrapper(state: any) {
         const open = new state.Token('pageBr_open', 'div', 1);
         open.attrPush(['class', 'phb']);
         open.attrPush(['id', 'p1']);
-        open.attrPush(['style', 'margin-bottom: 30px;']);
         state.tokens.splice(0, 0, open);
     }
     if (state.tokens[state.tokens.length - 1].type !== 'pageBr_close') {
@@ -62,7 +61,6 @@ function replaceToken(state: any, tokenPos: any, currentPage: any) {
     const close = new state.Token('pageBr_close', 'div', -1);
     const open = new state.Token('pageBr_open', 'div', 1);
     open.attrPush(['class', 'phb']);
-    open.attrPush(['style', 'margin-bottom: 30px;']);
     open.attrPush(['id', `p${currentPage}`]);
 
     state.tokens[tokenPos-1] = close;
