@@ -8,7 +8,7 @@ Visual Studio Code extension for managing campaign documents.
 
 ## Requirements
 
-- [Pandoc](https://pandoc.org) > 2.3
+- [Pandoc](https://pandoc.org) >= 2.3
 
 ## Usage
 **Coming Soon**
