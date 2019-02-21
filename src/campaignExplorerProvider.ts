@@ -29,8 +29,8 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
                 return undefined;
             }
             if (workspace.workspaceFolders.length === 1) {
-                if (await Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.path)) {
-                    return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.path)).getChildren(itemType);
+                if (await Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.fsPath)) {
+                    return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.fsPath)).getChildren(itemType);
                 }
             }
             return await mapCampaignTreeItems(workspace.workspaceFolders);
