@@ -1,4 +1,9 @@
 # Change Log
+## 0.1.2
+- Added file type filtering to 'Split' views
+- Fixed the PDF renderer adding an extra blank page
+- Bugfixes
+
 ## 0.1.1
 - Added new feature to render all files in campaign to PDF
 
