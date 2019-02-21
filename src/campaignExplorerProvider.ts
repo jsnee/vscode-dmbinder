@@ -33,7 +33,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
                     return new CampaignTreeItem(new Campaign(workspace.workspaceFolders[0].uri.fsPath)).getChildren(itemType);
                 }
             }
-            return await mapCampaignTreeItems(workspace.workspaceFolders);
+            return await mapCampaignTreeItems(workspace.workspaceFolders, itemType);
         } else {
             return element.getChildren && element.getChildren();
         }
@@ -170,11 +170,11 @@ async function expandDirectoryContents(itemPath: string): Promise<string[] | und
     return undefined;
 }
 
-async function mapCampaignTreeItems(workspaceFolders: WorkspaceFolder[]): Promise<CampaignTreeItem[]> {
+async function mapCampaignTreeItems(workspaceFolders: WorkspaceFolder[], itemType?: CampaignItemType): Promise<CampaignTreeItem[]> {
     let result: CampaignTreeItem[] = [];
     for (let workspaceFolder of workspaceFolders) {
         if (await Campaign.hasCampaignConfig(workspaceFolder.uri.fsPath)) {
-            result.push(new CampaignTreeItem(new Campaign(workspaceFolder.uri.fsPath)));
+            result.push(new CampaignTreeItem(new Campaign(workspaceFolder.uri.fsPath), itemType));
         }
     }
     return result;

@@ -12,9 +12,11 @@ export enum CampaignItemType {
 
 export class CampaignTreeItem implements ITreeItem {
     private _campaign: Campaign;
+    private _campaignItemType?: CampaignItemType;
 
-    constructor(campaign: Campaign) {
+    constructor(campaign: Campaign, campaignItemType?: CampaignItemType) {
         this._campaign = campaign;
+        this._campaignItemType = campaignItemType;
     }
 
     public getContextValue(): string {
@@ -26,6 +28,9 @@ export class CampaignTreeItem implements ITreeItem {
     }
 
     public async getChildren(itemType?: CampaignItemType): Promise<ITreeItem[]> {
+        if (!itemType && this._campaignItemType) {
+            return this.getChildren(this._campaignItemType);
+        }
         let result: ITreeItem[] = [];
         if (!itemType || itemType === CampaignItemType.Source) {
             result.push(await this._getSourcesChild());
