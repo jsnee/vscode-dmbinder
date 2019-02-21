@@ -1,4 +1,4 @@
-# vscode-dm-binder
+# vscode-dmbinder
 
 Visual Studio Code extension for managing campaign documents.
 
