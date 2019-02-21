@@ -4,6 +4,7 @@
 import * as vscode from "vscode";
 
 export interface ITreeItem {
+    isEmpty?: boolean;
     getContextValue(): string;
     getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem>;
 

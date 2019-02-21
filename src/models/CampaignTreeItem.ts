@@ -43,10 +43,12 @@ export class CampaignTreeItem implements ITreeItem {
         return this._campaign.campaignPath;
     }
 
-    private _getEmptyChild(contextValue: string): ITreeItem {
+    private _getEmptyChild(contextValue: string, hasUnrelatedContents: boolean = false): ITreeItem {
+        let label = hasUnrelatedContents ? `Contains non-${contextValue.replace("Item", " Item(s)")}` : `${contextValue.replace("Item", " Folder")} (empty)`;
         return {
-            getContextValue: () => contextValue,
-            getTreeItem: () => new TreeItem(contextValue + " (empty)")
+            isEmpty: !hasUnrelatedContents,
+            getContextValue: () => `Empty${contextValue}`,
+            getTreeItem: () => new TreeItem(label)
         };
     }
 
@@ -101,7 +103,7 @@ export class CampaignTreeItem implements ITreeItem {
             return {
                 getContextValue: () => contextValue + "Folder",
                 getTreeItem: () => getChildTreeItem(uri, contextValue + "Folder"),
-                getChildren: async () => Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath), ctxPath))),
+                getChildren: async () => await this._listFilteredNodeChildren(contextValue, uri, ctxPath),
                 getCampaignPath: () => this._campaign.campaignPath,
                 getContextPath: getContextPath
             };
@@ -112,6 +114,42 @@ export class CampaignTreeItem implements ITreeItem {
             getCampaignPath: () => this._campaign.campaignPath,
             getContextPath: getContextPath
         };
+    }
+
+    private async _listFilteredNodeChildren(contextValue: string, parentUri: Uri, contextPath: string): Promise<ITreeItem[]> {
+        //Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath), ctxPath)))
+        let children = await fse.readdir(parentUri.fsPath);
+        let result: ITreeItem[] = [];
+        for (let childFragment of children) {
+            let childPath = path.join(parentUri.fsPath, childFragment);
+            let child = await this._getChildren(contextValue, childPath, contextPath);
+            if (!child.getChildren) {
+                switch (contextValue) {
+                    case "SourceItem":
+                        if (childPath.endsWith(".md")) {
+                            result.push(child);
+                        }
+                        continue;
+                    case "TemplateItem":
+                        if (childPath.endsWith(".md")) {
+                            result.push(child);
+                        }
+                        continue;
+                    case "ComponentItem":
+                        if (childPath.endsWith(".yaml") || childPath.endsWith(".json")) {
+                            result.push(child);
+                        }
+                        continue;
+                    default:
+                        continue;
+                }
+            }
+            result.push(child);
+        }
+        if (result.length === 0) {
+            result.push(this._getEmptyChild(contextValue, children.length !== 0));
+        }
+        return result;
     }
 }
 
