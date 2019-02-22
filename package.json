@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -23,6 +23,8 @@
         "onCommand:dmbinder.campaign.refresh",
         "onCommand:dmbinder.component.build",
         "onCommand:dmbinder.component.insert",
+        "onCommand:dmbinder.config.chooseChromePath",
+        "onCommand:dmbinder.config.downloadChromiumRevision",
         "onCommand:dmbinder.config.toggleViewStyle",
         "onCommand:dmbinder.config.toggleHomebreweryEnabled",
         "onCommand:dmbinder.item.brew",
@@ -50,6 +52,16 @@
                     "light": "img/light/refresh.svg",
                     "dark": "img/dark/refresh.svg"
                 }
+            },
+            {
+                "command": "dmbinder.config.chooseChromePath",
+                "title": "Choose the path to the chrome instance to use to render PDFs",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.config.downloadChromiumRevision",
+                "title": "Download a specific revision of Chromium to use to render PDFs",
+                "category": "DM Binder"
             },
             {
                 "command": "dmbinder.config.toggleViewStyle",
@@ -119,6 +131,11 @@
                         "Split panel view listing resources grouped by resource type."
                     ],
                     "default": "split"
+                },
+                "dmbinder.chromeExecutablePath": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path to Chrome executable used to render PDFs (if left empty, will use puppeteer's default)"
                 }
             }
         },

@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { renderHomebrew } from './renderer';
-import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources } from './common';
+import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources, promptChooseChromeExecutable, promptDownloadChromiumRevision } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
 
@@ -50,6 +50,12 @@ export async function activate(context: ExtensionContext) {
 
     let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
+
+    let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', promptChooseChromeExecutable);
+    context.subscriptions.push(chooseChromeExecDisposable);
+
+    let downloadChromiumDisposable = commands.registerCommand('dmbinder.config.downloadChromiumRevision', promptDownloadChromiumRevision);
+    context.subscriptions.push(downloadChromiumDisposable);
 
     let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', toggleTreeViewStyle);
     context.subscriptions.push(toggleViewStyleDisposable);

@@ -1,4 +1,9 @@
 # Change Log
+## 0.2.0
+- Added the ability for Puppeteer to use a local Chrome executable to render PDFs
+- Added a command to download specific revisions of Chromium for use by Puppeteer to render PDFs
+- Fixed some README typos
+
 ## 0.1.2
 - Added file type filtering to 'Split' views
 - Fixed the PDF renderer adding an extra blank page

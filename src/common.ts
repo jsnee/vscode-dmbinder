@@ -1,11 +1,64 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, FileSystemError, ProgressLocation, ProgressOptions } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { DMBSettings } from './Settings';
-import * as matter from 'gray-matter';
 import { renderCampaign } from './renderer';
+import * as matter from 'gray-matter';
+import * as fse from 'fs-extra';
+import { BrowserFetcher } from './BrowserFetcher';
+
+export async function promptChooseChromeExecutable(): Promise<void> {
+    const execPath = await window.showOpenDialog({
+        openLabel: "Use Selected Chrome",
+        canSelectMany: false
+    });
+    if (!execPath && DMBSettings.chromeExecutablePath) {
+        // let items: QuickPickItem[] = [
+        //     {
+        //         label: "Keep Existing",
+        //         description: DMBSettings.chromeExecutablePath
+        //     },
+        //     {
+        //         label: "Clear Existing",
+        //         description: "Use Default Instead"
+        //     }
+        // ];
+        // const keepExistingChoice = await window.showQuickPick(items, { })
+    }
+    if (execPath && execPath.length === 1 && await fse.pathExists(execPath[0].fsPath)) {
+        DMBSettings.chromeExecutablePath = execPath[0].fsPath;
+    }
+}
+
+export async function promptDownloadChromiumRevision(): Promise<void> {
+    const chromeRev = await window.showInputBox({
+        placeHolder: "Chromium Revision Number"
+    });
+    if (chromeRev) {
+        let fetcher = new BrowserFetcher();
+        if (await fetcher.canDownload(chromeRev)) {
+            let progOpts: ProgressOptions = {
+                location: ProgressLocation.Notification,
+                title: `Downloading Chromium Revision`
+            };
+            window.withProgress(progOpts, async (progress, token) => {
+                progress.report({
+                    message: chromeRev
+                });
+                let revInfo = await fetcher.download(chromeRev);
+                if (revInfo) {
+                    DMBSettings.chromeExecutablePath = revInfo.executablePath;
+                } else {
+                    window.showErrorMessage(`Failed to download Chromium revision ${chromeRev}`);
+                }
+            });
+        } else {
+            window.showErrorMessage(`"${chromeRev}" is not a valid Chromium revision number for the given platform (${await fetcher.platform()})`);
+        }
+    }
+}
 
 async function initCampaign(path: Uri): Promise<Campaign | undefined> {
     if (path) {

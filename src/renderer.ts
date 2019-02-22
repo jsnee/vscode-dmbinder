@@ -2,11 +2,12 @@ import { ITreeItem } from "./models/ITreeItem";
 import { Uri, window, ProgressLocation, CancellationToken } from "vscode";
 import { getExtensionPath } from "./common";
 import { contextProps } from "./extension";
+import { Campaign } from "./models/Campaign";
+import { getVsMd } from "./markdownHomebrewery";
+import { DMBSettings } from "./Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
 import * as Puppeteer from 'puppeteer';
-import { Campaign } from "./models/Campaign";
-import { getVsMd } from "./markdownHomebrewery";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
@@ -61,7 +62,9 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
     const html = await renderFileContents(uri);
 
     fse.writeFile(brewPath, html, 'utf-8', function (err) {
-        if (err) { console.log(err); }
+        if (err) {
+            console.error(err);
+        }
     });
 
     const browser = await Puppeteer.launch();
@@ -93,7 +96,13 @@ async function renderHtmlFile(filePath: string, outPath?: string): Promise<strin
 async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: string): Promise<void> {
     let htmlPath = await renderHtmlFile(sourcePath, brewDir);
 
-    const browser = await Puppeteer.launch();
+    let opts: Puppeteer.LaunchOptions | undefined = undefined;
+    if (DMBSettings.chromeExecutablePath) {
+        opts = {
+            executablePath: DMBSettings.chromeExecutablePath
+        };
+    }
+    const browser = await Puppeteer.launch(opts);
     const page = await browser.newPage();
     await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
 
@@ -152,7 +161,7 @@ async function renderSingleCampaignSource(campaign: Campaign, sourcePath: string
 
     await renderCampaignSourceItem(campaign, sourcePath, outPath);
 
-    await cleanupBrewDirectory();
+    //await cleanupBrewDirectory();
 }
 
 async function getFileCountRecursive(paths: string[], pathBase: string, extensionFilter?: string | string[]): Promise<number> {

@@ -17,6 +17,14 @@ class Settings {
         workspace.getConfiguration('dmbinder').update('treeViewStyle', val);
     }
 
+    public get chromeExecutablePath(): string | undefined {
+        return workspace.getConfiguration('dmbinder').get('chromeExecutablePath');
+    }
+
+    public set chromeExecutablePath(val: string | undefined) {
+        workspace.getConfiguration('dmbinder').update('chromeExecutablePath', val);
+    }
+
     public get generateGettingStartedEnabled(): boolean | undefined {
         return workspace.getConfiguration('dmbinder').get('generateGettingStartedEnabled');
     }
