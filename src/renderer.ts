@@ -161,7 +161,7 @@ async function renderSingleCampaignSource(campaign: Campaign, sourcePath: string
 
     await renderCampaignSourceItem(campaign, sourcePath, outPath);
 
-    //await cleanupBrewDirectory();
+    await cleanupBrewDirectory();
 }
 
 async function getFileCountRecursive(paths: string[], pathBase: string, extensionFilter?: string | string[]): Promise<number> {

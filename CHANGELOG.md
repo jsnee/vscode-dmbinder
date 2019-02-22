@@ -1,4 +1,7 @@
 # Change Log
+## 0.2.1
+- Bugfix for cleaning up temporary files used to generate PDFs
+
 ## 0.2.0
 - Added the ability for Puppeteer to use a local Chrome executable to render PDFs
 - Added a command to download specific revisions of Chromium for use by Puppeteer to render PDFs
