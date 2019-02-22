@@ -1,4 +1,4 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, FileSystemError, ProgressLocation, ProgressOptions } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, ProgressLocation, ProgressOptions } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
