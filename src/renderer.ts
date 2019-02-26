@@ -1,6 +1,5 @@
 import { ITreeItem } from "./models/ITreeItem";
 import { Uri, window, ProgressLocation, CancellationToken } from "vscode";
-import { getExtensionPath } from "./common";
 import { contextProps } from "./extension";
 import { Campaign } from "./models/Campaign";
 import { getVsMd } from "./markdownHomebrewery";
@@ -8,13 +7,14 @@ import { DMBSettings } from "./Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
 import * as Puppeteer from 'puppeteer';
+import { Utils } from "./Utils";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
 }
 
 function getAssetPath(): string {
-    return path.join(getExtensionPath(), 'assets');
+    return path.join(Utils.getExtensionPath(), 'assets');
 }
 
 async function cleanupBrewDirectory(): Promise<void> {
@@ -67,13 +67,20 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
         }
     });
 
-    const browser = await Puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
+    try {
+        const browser = await Puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
 
-    let outDir = path.dirname(uri.fsPath);
-    let outPath = path.join(outDir, basename + '.pdf');
-    await page.pdf({ path: outPath, format: 'Letter' });
+        let outDir = path.dirname(uri.fsPath);
+        let outPath = path.join(outDir, basename + '.pdf');
+        await page.pdf({ path: outPath, format: 'Letter' });
+    } catch (ex) {
+        console.error(ex);
+        if (ex instanceof Error) {
+            Utils.alertError(ex as Error);
+        }
+    }
     await cleanupBrewDirectory();
 }
 
@@ -102,12 +109,19 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
             executablePath: DMBSettings.chromeExecutablePath
         };
     }
-    const browser = await Puppeteer.launch(opts);
-    const page = await browser.newPage();
-    await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
-
-    let outPath = path.join(outDir, path.basename(sourcePath, '.md') + '.pdf');
-    await page.pdf({ path: outPath, format: 'Letter' });
+    try {
+        const browser = await Puppeteer.launch(opts);
+        const page = await browser.newPage();
+        await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
+    
+        let outPath = path.join(outDir, path.basename(sourcePath, '.md') + '.pdf');
+        await page.pdf({ path: outPath, format: 'Letter' });
+    } catch (ex) {
+        console.error(ex);
+        if (ex instanceof Error) {
+            Utils.alertError(ex as Error);
+        }
+    }
 }
 
 async function renderCampaignSourceItem(campaign: Campaign, sourcePath: string, outPath?: string, progressAction?: (message: string) => void, token?: CancellationToken): Promise<void> {
@@ -192,6 +206,12 @@ function hasFileExtension(filename: string, ...exts: string[]): boolean {
 }
 
 export async function renderCampaign(campaign: Campaign): Promise<void> {
+    if (!(await Utils.puppeteerHasBrowserInstance())) {
+        if (!(await Utils.modalNoPuppeteerBrowser())) {
+            window.showErrorMessage("No Chrome/Chromium instance found or specified");
+            return;
+        }
+    }
     let progOpts = {
         location: ProgressLocation.Notification,
         cancellable: true,
@@ -235,6 +255,12 @@ export async function renderCampaign(campaign: Campaign): Promise<void> {
 }
 
 export async function renderHomebrew(item?: ITreeItem): Promise<void> {
+    if (!(await Utils.puppeteerHasBrowserInstance())) {
+        if (!(await Utils.modalNoPuppeteerBrowser())) {
+            window.showErrorMessage("No Chrome/Chromium instance found or specified");
+            return;
+        }
+    }
     if (item) {
         switch (item.getContextValue()) {
             case "SourceItem":

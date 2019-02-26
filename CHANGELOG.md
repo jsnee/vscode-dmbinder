@@ -1,4 +1,8 @@
 # Change Log
+## 0.2.2
+- Remove included Win64 Chromium executable (to reduce extension size)
+- Added recommended Chromium revision (one that renders fonts correctly)
+
 ## 0.2.1
 - Bugfix for cleaning up temporary files used to generate PDFs
 

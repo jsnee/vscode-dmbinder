@@ -1,8 +1,8 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { renderHomebrew } from './renderer';
-import { promptInitCampaign, promptBuildComponent, editTreeItem, toggleTreeViewStyle, promptInsertComponent, toggleHomebreweryEnabled, renderCampaignSources, promptChooseChromeExecutable, promptDownloadChromiumRevision } from './common';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
+import { Utils } from './Utils';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -19,6 +19,9 @@ export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-dm-binder" is now active!');
+    if (!(await Utils.puppeteerHasBrowserInstance())) {
+        Utils.alertNoPuppeteerBrowser();
+    }
 
     if (context.storagePath) {
         contextProps.localStoragePath = context.storagePath;
@@ -36,31 +39,31 @@ export async function activate(context: ExtensionContext) {
     let brewTreeItemDisposable = commands.registerCommand('dmbinder.item.brew', renderHomebrew);
     context.subscriptions.push(brewTreeItemDisposable);
 
-    let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', renderCampaignSources);
+    let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', Utils.renderCampaignSources);
     context.subscriptions.push(brewCampaignDisposable);
 
-    let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', editTreeItem);
+    let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', Utils.editTreeItem);
     context.subscriptions.push(editTreeItemDisposable);
 
-    let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', promptInitCampaign);
+    let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', Utils.promptInitCampaign);
     context.subscriptions.push(initCampaignDisposable);
 
-    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', promptBuildComponent);
+    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', Utils.promptBuildComponent);
     context.subscriptions.push(buildComponentDisposable);
 
-    let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', promptInsertComponent);
+    let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', Utils.promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
 
-    let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', promptChooseChromeExecutable);
+    let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', Utils.promptChooseChromeExecutable);
     context.subscriptions.push(chooseChromeExecDisposable);
 
-    let downloadChromiumDisposable = commands.registerCommand('dmbinder.config.downloadChromiumRevision', promptDownloadChromiumRevision);
+    let downloadChromiumDisposable = commands.registerCommand('dmbinder.config.downloadChromiumRevision', Utils.promptDownloadChromiumRevision);
     context.subscriptions.push(downloadChromiumDisposable);
 
-    let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', toggleTreeViewStyle);
+    let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', Utils.toggleTreeViewStyle);
     context.subscriptions.push(toggleViewStyleDisposable);
 
-    let toggleHomebreweryEnabledDisposable = commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', toggleHomebreweryEnabled);
+    let toggleHomebreweryEnabledDisposable = commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', Utils.toggleHomebreweryEnabled);
     context.subscriptions.push(toggleHomebreweryEnabledDisposable);
 
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {

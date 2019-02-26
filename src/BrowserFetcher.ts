@@ -71,4 +71,12 @@ export class BrowserFetcher {
     public async platform(): Promise<string> {
         return this._fetcher.platform();
     }
+
+    public async remove(revision: string): Promise<void> {
+        return this._fetcher.remove(revision);
+    }
+
+    public revisionInfo(revision: string): BrowserRevisionInfo {
+        return this._fetcher.revisionInfo(revision);
+    }
 }
