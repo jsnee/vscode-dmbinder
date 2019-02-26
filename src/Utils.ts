@@ -38,9 +38,11 @@ export namespace Utils {
     }
 
     export async function promptDownloadChromiumRevision(): Promise<void> {
+        let suggestedRevision = require('../package.json').puppeteer.chromium_revision;
         const chromeRev = await window.showInputBox({
-            placeHolder: "Chromium Revision Number",
-            value: require('../package.json').puppeteer.chromium_revision
+            prompt: `Recommended revision: ${suggestedRevision}`,
+            value: suggestedRevision,
+            placeHolder: "Chromium Revision Number"
         });
         if (chromeRev) {
             let fetcher = new BrowserFetcher();
