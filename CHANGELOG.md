@@ -1,4 +1,7 @@
 # Change Log
+## 0.2.3
+- Render PDFs using own MarkdownIt instance
+
 ## 0.2.2
 - Remove included Win64 Chromium executable (to reduce extension size)
 - Added recommended Chromium revision (one that renders fonts correctly)

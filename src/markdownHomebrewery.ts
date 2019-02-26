@@ -1,16 +1,19 @@
 import { DMBSettings } from "./Settings";
+const MarkdownIt = require('markdown-it');
 
-let vsmd: markdownit | undefined;
+let md: markdownit | undefined;
 
-export function getVsMd(): markdownit | undefined {
-    return vsmd;
+export function getMd(): markdownit | undefined {
+    if (!md) {
+        md = registerHomebrewRenderer(new MarkdownIt({ html: true }));
+    }
+    return md;
 }
 
-export function registerHomebrewRenderer(md: markdownit): markdownit {
-    vsmd = md;
-    md.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
-    md.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
-    return md;
+export function registerHomebrewRenderer(ogMd: markdownit): markdownit {
+    ogMd.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
+    ogMd.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
+    return ogMd;
 }
 
 function homebrewAddWrapper(state: any) {

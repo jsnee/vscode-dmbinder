@@ -2,7 +2,7 @@ import { ITreeItem } from "./models/ITreeItem";
 import { Uri, window, ProgressLocation, CancellationToken } from "vscode";
 import { contextProps } from "./extension";
 import { Campaign } from "./models/Campaign";
-import { getVsMd } from "./markdownHomebrewery";
+import { getMd } from "./markdownHomebrewery";
 import { DMBSettings } from "./Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
@@ -31,10 +31,10 @@ async function copyAssetsToBrewDirectory(): Promise<void> {
 
 async function renderFileContents(uri: Uri): Promise<string> {
     let data = await fse.readFile(uri.fsPath, 'utf-8');
-    const md = getVsMd();
+    const md = getMd();
     if (!md) {
-        console.error("VSCode markdown-it not found.");
-        throw new Error("VSCode markdown-it not found.");
+        console.error("Markdown-It not found.");
+        throw new Error("Markdown-It not found.");
     }
     const body = md.render(data);
     return `<!DOCTYPE html>
