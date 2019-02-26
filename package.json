@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -18,6 +18,18 @@
     },
     "categories": [
         "Other"
+    ],
+    "keywords": [
+        "dnd",
+        "homebrewery",
+        "markdown",
+        "5e",
+        "pathfinder",
+        "rpg",
+        "dungeons and dragons",
+        "DM",
+        "dungeon master",
+        "campaign"
     ],
     "activationEvents": [
         "workspaceContains:.dmbinder/campaign.json",
