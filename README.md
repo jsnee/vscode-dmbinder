@@ -9,6 +9,7 @@ Visual Studio Code extension for managing campaign documents.
 
 - Generation of Hombrewery elements using snippets and Pandoc templating
 - Rendering of markdown files to PDF using Puppeteer
+- DMBinder view that helps organize campaign documents
 
 <details>
 <summary>DMBinder Explorer screenshot</summary>
@@ -135,6 +136,9 @@ description: You fire a small orb of acid at the target. You must succeed on a r
     "description": "You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round."
 }
 ```
+
+#### Example Output
+![Build Component Example Screenshot](img/screenshots/example-output.png)
 
 </details>
 
