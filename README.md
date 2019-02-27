@@ -478,4 +478,4 @@ See [Changelog](CHANGELOG.md) for release notes.
 
 ## Related Projects
 - [Homebrewery](https://github.com/naturalcrit/homebrewery)
-- [homebrewery-vscode](https://github.com/OfficerHalf/homebrewery-vscode))
+- [homebrewery-vscode](https://github.com/OfficerHalf/homebrewery-vscode)
