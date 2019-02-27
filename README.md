@@ -7,7 +7,8 @@ Visual Studio Code extension for managing campaign documents.
 
 ## Features
 
-- Generation of Hombrewery elements using snippets and pandoc templating
+- Generation of Hombrewery elements using snippets and Pandoc templating
+- Rendering of markdown files to PDF using Puppeteer
 
 <details>
 <summary>DMBinder Explorer screenshot</summary>
