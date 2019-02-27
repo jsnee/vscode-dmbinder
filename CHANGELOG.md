@@ -1,4 +1,8 @@
 # Change Log
+## 0.2.4
+- Added usage and other documentation
+- Various minor tweaks
+
 ## 0.2.3
 - Render PDFs using own MarkdownIt instance
 
