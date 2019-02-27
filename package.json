@@ -113,7 +113,7 @@
             },
             {
                 "command": "dmbinder.component.insert",
-                "title": "Insert DM Binder Component",
+                "title": "Insert component",
                 "category": "DM Binder",
                 "icon": {
                     "light": "img/light/insertComponent.svg",
