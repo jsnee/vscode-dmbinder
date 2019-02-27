@@ -1,4 +1,7 @@
 # Change Log
+## 0.2.5
+- Fix pretty nasty README issue that screwed up most of the documentation
+
 ## 0.2.4
 - Added usage and other documentation
 - Various minor tweaks

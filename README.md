@@ -29,27 +29,26 @@ More information on how to format the data used in component files can be found 
 **Template** files are used to specify how to insert the component data into your campaign document.
 (Template files should be markdown, `.md`, files and should use [Pandoc](https://pandoc.org/MANUAL.html#using-variables-in-templates)'s variable syntax)
 
-<details>
-<summary id="template-component-example">Template/Component Example</summary>
+##### Template Component Example
 
 Below are pictured an example template and component for the Pathfinder spell *Acid Splash*.
 
 #### Spell Block Template
 Example:
 ``` markdown
-#### name$
-**Source** source$
-**School** school$; **Level** for(classes)$classes.name$ classes.level$sep$, endfor$
+#### $name$
+**Source** $source$
+**School** $school$; **Level** $for(classes)$$classes.name$ $classes.level$$sep$, $endfor$
 ___
-- **Casting Time** casttime$
-- **Components** for(components)$components$sep$, endfor$
-- **Range** range$ if(area)$(area$)endif$
-- **Effect** effect$
-- **Duration** duration$
-if(savingthrow)$- **Saving Throw** savingthrow$endif$
-if(resistance)$- **Spell Resistance** resistance$endif$
+- **Casting Time** $casttime$
+- **Components** $for(components)$$components$$sep$, $endfor$
+- **Range** $range$ $if(area)$($area$)$endif$
+- **Effect** $effect$
+- **Duration** $duration$
+$if(savingthrow)$- **Saving Throw** $savingthrow$$endif$
+$if(resistance)$- **Spell Resistance** $resistance$$endif$
 
-description$
+$description$
 
 ```
 
@@ -140,8 +139,6 @@ description: You fire a small orb of acid at the target. You must succeed on a r
 #### Example Output
 ![Build Component Example Screenshot](img/screenshots/example-output.png)
 
-</details>
-
 ## Usage
 In order to render files to PDF, you'll need to do one of the following:
 - Point to a local Chrome installation by using `dmbinder.config.chooseChromePath`
@@ -221,9 +218,9 @@ If using `.yaml` components, the metadata needs to be preceeded with `---` and p
 Despite looking somewhat messy, Pandoc's templating system was implemented over using VS Code or TextMate "snippets", due to their benefits, particularly regarding the handling of lists and conditional logic. Template files should look just like regular Markdown (`.md`) files, but with specially formatted placeholders that will be replaced with the data from a component. This allows, for example, all the descriptive blocks (spells, items, monsters, NPCs, magic shops, cities, etc) in your campaign documents to have a similar and consistent layout. Gone are the days where the order of monster stats changed from monster to monster!
 
 There are 3 main features of Pandoc's templating system:
-- Variables: `variableName$`
-- Conditions: `if(variableName)Render if variable has value: variableName$. Cool, right?endif$`
-- Loops: `for(listVariable)Each value: listVariable$sep$, endfor$`
+- Variables: `$variableName$`
+- Conditions: `$if(variableName)$Render if variable has value: $variableName$. Cool, right?$endif$`
+- Loops: `$for(listVariable)$Each value: $listVariable$$sep$, $endfor$`
 
 #### Variables
 
@@ -246,8 +243,8 @@ equipment:
 ##### Template
 
 ``` markdown
-**Name:** name$
-name$ wields a *equipment.weapon$* and is protected by their hardy *equipment.armor$*.
+**Name:** $name$
+$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
 ```
 
 ##### Output
@@ -277,9 +274,9 @@ equipment:
 
 ##### Template
 ``` markdown
-**Name:** name$
-name$ wields a *equipment.weapon$*if(equipment.armor)$ and is protected by their hardy *equipment.armor$*endif$.
-if(equipment.rangedWeapon)$name$ also is pretty handy with their equipment.rangedWeapon$, too!endif$
+**Name:** $name$
+$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.
+$if(equipment.rangedWeapon)$$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
 ```
 
 ##### Output
@@ -294,11 +291,11 @@ The part about the armor is output because `equipment.armor` has a value, but th
 </details>
 
 ***Important Note:***
-Notice that in the example provided, there is a blank line displayed at the end, because there is a new line *before* the `if(equipment.rangedWeapon)$`. In order to not see that empty line, you would need to start the `if()$` statement at the end of the previous line like so:
+Notice that in the example provided, there is a blank line displayed at the end, because there is a new line *before* the `$if(equipment.rangedWeapon)$`. In order to not see that empty line, you would need to start the `$if()$` statement at the end of the previous line like so:
 ``` markdown
-**Name:** name$
-name$ wields a *equipment.weapon$*if(equipment.armor)$ and is protected by their hardy *equipment.armor$*endif$.if(equipment.rangedWeapon)$
-name$ also is pretty handy with their equipment.rangedWeapon$, too!endif$
+**Name:** $name$
+$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.$if(equipment.rangedWeapon)$
+$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
 ```
 *This* is why template files can start to look incredibly messy using Pandoc, but the benefits can outweigh the clutter.
 
@@ -331,18 +328,18 @@ saleItems:
 
 ##### Template
 ``` markdown
-**Name:** name$
-name$ wields a *equipment.weapon$* and is protected by their hardy *equipment.armor$*.
+**Name:** $name$
+$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
 **Inventory:**
-for(inventory)$
-- inventory$
-endfor$
+$for(inventory)$
+- $inventory$
+$endfor$
 **Items For Sale:**
 | Name | Cost |
 |:----:|:----:|
-for(saleItems)$
-| saleItems.name$ | saleItems.cost$ |
-endfor$
+$for(saleItems)$
+| $saleItems.name$ | $saleItems.cost$ |
+$endfor$
 ```
 
 ##### Output
@@ -368,7 +365,7 @@ Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
 
 Another nifty feature of Pandoc is that you can define a separator for loops.
 The separator is optional and is specified at the very end of the loop.
-If present, anything put between `sep$` and the `endfor$` will be added between every item in the list.
+If present, anything put between `$sep$` and the `$endfor$` will be added between every item in the list.
 For instance, if you wanted a list to generate a comma separated list you could do something like this:
 
 <details>
@@ -383,11 +380,13 @@ inventory:
   - rations (x7)
   - 7 gp
 ```
+
 Template:
 ``` markdown
-**Name:** name$
-name$ is holding for(inventory)$inventory$sep$, endfor$.
+**Name:** $name$
+$name$ is holding $for(inventory)$$inventory$$sep$, $endfor$.
 ```
+
 Output:
 ``` markdown
 **Name:** Cool Dude
