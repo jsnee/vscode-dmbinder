@@ -28,10 +28,17 @@ export async function activate(context: ExtensionContext) {
     }
 
     const tv = campaignExplorerProvider;
-    window.registerTreeDataProvider('dmbinder', tv);
-    window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider);
-    window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider);
-    window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider);
+    context.subscriptions.push(window.registerTreeDataProvider('dmbinder', tv));
+    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider));
+    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider));
+    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider));
+
+    let configWatcherDisposable = workspace.createFileSystemWatcher("**/.dmbinder/*.json", true, false, true);
+    let onConfigChangeDisposable = configWatcherDisposable.onDidChange(() => {
+        tv.refresh();
+    });
+    context.subscriptions.push(onConfigChangeDisposable);
+    context.subscriptions.push(configWatcherDisposable);
 
     let refreshCampaignDisposable = commands.registerCommand('dmbinder.campaign.refresh', tv.refresh, tv);
     context.subscriptions.push(refreshCampaignDisposable);
