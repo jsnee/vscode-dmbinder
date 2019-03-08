@@ -167,6 +167,20 @@
             "./assets/jsnee-homebrew.css"
         ],
         "menus": {
+            "commandPalette": [
+                {
+                    "command": "dmbinder.item.edit",
+                    "when": "false"
+                },
+                {
+                    "command": "dmbinder.component.insert",
+                    "when": "editorIsOpen"
+                },
+                {
+                    "command": "dmbinder.item.brew",
+                    "when": "editorLangId == markdown"
+                }
+            ],
             "view/title": [
                 {
                     "command": "dmbinder.campaign.refresh",
