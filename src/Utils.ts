@@ -182,10 +182,17 @@ export namespace Utils {
         if (componentUri) {
             const qpItemList = await campaignExplorerProvider.getTemplateItems();
             if (qpItemList) {
-                let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
                 let templateItem: QuickPickItem | undefined;
-                if (metadata && metadata.data && metadata.data.templateItem) {
-                    templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
+                if (componentUri.fsPath.endsWith(".yaml")) {
+                    let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
+                    if (metadata && metadata.data && metadata.data.templateItem) {
+                        templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
+                    }
+                } else if (componentUri.fsPath.endsWith(".json")) {
+                    let metadata = await fse.readJSON(componentUri.fsPath);
+                    if (metadata && metadata.templateItem) {
+                        templateItem = qpItemList.find((each) => each.label === `${metadata.templateItem}`);
+                    }
                 }
                 if (!templateItem) {
                     const qpOpts: QuickPickOptions = {
