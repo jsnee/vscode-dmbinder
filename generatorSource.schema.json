@@ -1,0 +1,40 @@
+{
+    "title": "DMBinder Generator Source schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "generatorType": {
+            "description": "The type of generator",
+            "type": "string",
+            "enum": [
+                "basic",
+                "markov"
+            ]
+        },
+        "sourceFile": {
+            "description": "URIs to other generator source files",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "values": {
+            "description": "A list of templates or values to use when generating strings",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "sources": {
+            "description": "A list of dependent sources required by this generator",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#"
+            }
+        }
+    },
+    "required": [
+        "generatorType"
+    ]
+}
