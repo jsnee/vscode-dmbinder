@@ -8,7 +8,8 @@
             "type": "string",
             "enum": [
                 "basic"
-            ]
+            ],
+            "default": "basic"
         },
         "sourceFile": {
             "description": "URIs to other generator source files",
@@ -23,7 +24,8 @@
             "type": "array",
             "items": {
                 "type": "string"
-            }
+            },
+            "default": []
         },
         "sources": {
             "description": "A list of dependent sources required by this generator",

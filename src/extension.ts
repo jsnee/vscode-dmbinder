@@ -62,6 +62,9 @@ export async function activate(context: ExtensionContext) {
     let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', Utils.promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
 
+    let generateElementDisposable = commands.registerCommand('dmbinder.generator.generateElement', Utils.generateElementFromConfig);
+    context.subscriptions.push(generateElementDisposable);
+
     let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', Utils.promptChooseChromeExecutable);
     context.subscriptions.push(chooseChromeExecDisposable);
 

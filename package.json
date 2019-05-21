@@ -119,6 +119,11 @@
                     "light": "img/light/insertComponent.svg",
                     "dark": "img/dark/insertComponent.svg"
                 }
+            },
+            {
+                "command": "dmbinder.generator.generateElement",
+                "title": "Generate Content",
+                "category": "DM Binder"
             }
         ],
         "configuration": {
@@ -234,6 +239,11 @@
                 {
                     "command": "dmbinder.item.brew",
                     "when": "viewItem == SourceItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "dmbinder.generator.generateElement",
+                    "when": "viewItem == GeneratorItem",
                     "group": "inline"
                 }
             ],

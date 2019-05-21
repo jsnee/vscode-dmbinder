@@ -8,6 +8,7 @@ import { renderCampaign } from './renderer';
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
 import { BrowserFetcher } from './BrowserFetcher';
+import { GeneratorSource } from './models/GeneratorSource';
 
 export namespace Utils {
     export function alertError(error: Error): Thenable<void> {
@@ -317,5 +318,18 @@ export namespace Utils {
                     return Promise.resolve();
             }
         });
+    }
+
+    export async function generateElementFromConfig(item?: ITreeItem): Promise<void> {
+        let generatorUri: Uri | undefined;
+        if (!item || !item.getTreeItem) {
+        } else {
+            const treeItem = await item.getTreeItem();
+            generatorUri = treeItem.resourceUri;
+        }
+        if (generatorUri) {
+            let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
+            //console.log(await generator.generateContent());
+        }
     }
 }
