@@ -28,6 +28,13 @@
                 "type": "string"
             }
         },
+        "generatorPaths": {
+            "description": "A list of paths that contain JSON generator source data",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "outDirectory": {
             "description": "Directory to where PDF files will be rendered out. (If left blank, PDFs will be saved in same directory as source file)",
             "type": "string"
@@ -37,6 +44,7 @@
         "campaignName",
         "sourcePaths",
         "templatePaths",
-        "componentPaths"
+        "componentPaths",
+        "generatorPaths"
     ]
 }

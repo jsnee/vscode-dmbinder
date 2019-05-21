@@ -205,6 +205,11 @@
                     "command": "dmbinder.campaign.refresh",
                     "group": "navigation",
                     "when": "view == dmbinder.templates"
+                },
+                {
+                    "command": "dmbinder.campaign.refresh",
+                    "group": "navigation",
+                    "when": "view == dmbinder.generators"
                 }
             ],
             "view/item/context": [
@@ -269,6 +274,11 @@
                 {
                     "id": "dmbinder.templates",
                     "name": "Templates",
+                    "when": "config.dmbinder.treeViewStyle == split"
+                },
+                {
+                    "id": "dmbinder.generators",
+                    "name": "Generators",
                     "when": "config.dmbinder.treeViewStyle == split"
                 }
             ]

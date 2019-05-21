@@ -7,7 +7,8 @@ import * as path from "path";
 export enum CampaignItemType {
     Source = "SourceItem",
     Template = "TemplateItem",
-    Component = "ComponentItem"
+    Component = "ComponentItem",
+    Generator = "GeneratorItem"
 }
 
 export class CampaignTreeItem implements ITreeItem {
@@ -40,6 +41,9 @@ export class CampaignTreeItem implements ITreeItem {
         }
         if (!itemType || itemType === CampaignItemType.Component) {
             result.push(await this._getComponentsChild());
+        }
+        if (!itemType || itemType === CampaignItemType.Generator) {
+            result.push(await this._getGeneratorsChild());
         }
         return result;
     }
@@ -93,6 +97,18 @@ export class CampaignTreeItem implements ITreeItem {
         return this._getEmptyChild("Components");
     }
 
+    private async _getGeneratorsChild(): Promise<ITreeItem> {
+        if (this._campaign.generatorPaths && this._campaign.generatorPaths.length > 0) {
+            return {
+                getContextValue: () => "Generators",
+                getTreeItem: () => new TreeItem("Generators", TreeItemCollapsibleState.Expanded),
+                getChildren: () => Promise.all(this._campaign.generatorPaths.map(async generatorPath => this._getChildren("GeneratorItem", generatorPath))),
+                getCampaignPath: () => this._campaign.campaignPath
+            };
+        }
+        return this._getEmptyChild("Generators");
+    }
+
     private async _getChildren(contextValue: string, itemPath: string, contextPath?: string): Promise<ITreeItem> {
         let uri = Uri.file(itemPath.startsWith("./") ? path.join(this._campaign.campaignPath, itemPath) : itemPath);
         let stats = await fse.stat(uri.fsPath);
@@ -140,11 +156,16 @@ export class CampaignTreeItem implements ITreeItem {
                             result.push(child);
                         }
                         continue;
-                    case "ComponentItem":
-                        if (childPath.endsWith(".yaml") || childPath.endsWith(".json")) {
-                            result.push(child);
-                        }
-                        continue;
+                        case "ComponentItem":
+                            if (childPath.endsWith(".yaml") || childPath.endsWith(".json")) {
+                                result.push(child);
+                            }
+                            continue;
+                        case "GeneratorItem":
+                            if (childPath.endsWith(".dmbgen.json")) {
+                                result.push(child);
+                            }
+                            continue;
                     default:
                         continue;
                 }
@@ -164,6 +185,7 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
         case "SourceItemFolder":
         case "TemplateItemFolder":
         case "ComponentItemFolder":
+        case "GeneratorItemFolder":
             result.collapsibleState = TreeItemCollapsibleState.Expanded;
             break;
         case "SourceItem":
@@ -178,6 +200,7 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
             };
         case "TemplateItem":
         case "ComponentItem":
+        case "GeneratorItem":
         default:
             break;
     }

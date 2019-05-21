@@ -8,6 +8,7 @@ interface CampaignConfig {
     sourcePaths: string[];
     templatePaths: string[];
     componentPaths: string[];
+    generatorPaths: string[];
     outDirectory?: string;
 }
 
@@ -52,15 +53,18 @@ export class Campaign {
                 campaignName: campaignName,
                 sourcePaths: [],
                 templatePaths: [],
-                componentPaths: []
+                componentPaths: [],
+                generatorPaths: []
             };
             if (DMBSettings.generateGettingStartedEnabled) {
                 config.sourcePaths.push('./sources');
                 config.templatePaths.push('./templates');
                 config.componentPaths.push('./components');
+                config.generatorPaths.push('./generator-sources');
                 await fse.ensureDir(path.join(campaignPath, 'sources'));
                 await fse.ensureDir(path.join(campaignPath, 'templates'));
                 await fse.ensureDir(path.join(campaignPath, 'components'));
+                await fse.ensureDir(path.join(campaignPath, 'generator-sources'));
             }
             await fse.writeJSON(getConfigPath(campaignPath), config, opts);
             return true;
@@ -113,6 +117,10 @@ export class Campaign {
 
     public get componentPaths(): string[] {
         return this._config.componentPaths;
+    }
+
+    public get generatorPaths(): string[] {
+        return this._config.generatorPaths;
     }
 
     public set outDirectory(path: string | undefined) {

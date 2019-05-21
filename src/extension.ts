@@ -32,6 +32,7 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider));
     context.subscriptions.push(window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider));
     context.subscriptions.push(window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider));
+    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.generators', tv.generatorsExplorerProvider));
 
     let configWatcherDisposable = workspace.createFileSystemWatcher("**/.dmbinder/*.json", true, false, true);
     let onConfigChangeDisposable = configWatcherDisposable.onDidChange(() => {

@@ -149,6 +149,20 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
             }
         };
     }
+
+    public get generatorsExplorerProvider(): TreeDataProvider<ITreeItem> {
+        return {
+            onDidChangeTreeData: this._onDidChangeTreeData.event,
+            getTreeItem: (element: ITreeItem) => this.getTreeItem(element),
+            getChildren: async (element?: ITreeItem) => {
+                let children = await this.getChildren(element, CampaignItemType.Generator);
+                if (!element && children && children.length === 1 && children[0].getChildren) {
+                    return children[0].getChildren();
+                }
+                return children;
+            }
+        };
+    }
 }
 
 async function expandDirectoryContents(itemPath: string): Promise<string[] | undefined> {
