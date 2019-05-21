@@ -189,6 +189,9 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
             result.collapsibleState = TreeItemCollapsibleState.Expanded;
             break;
         case "SourceItem":
+        case "TemplateItem":
+        case "ComponentItem":
+        case "GeneratorItem":
             let opts: TextDocumentShowOptions = {
                 preview: true,
                 preserveFocus: true
@@ -198,9 +201,6 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
                 title: "",
                 arguments: [uri, opts]
             };
-        case "TemplateItem":
-        case "ComponentItem":
-        case "GeneratorItem":
         default:
             break;
     }
