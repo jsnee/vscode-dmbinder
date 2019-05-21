@@ -7,8 +7,7 @@
             "description": "The type of generator",
             "type": "string",
             "enum": [
-                "basic",
-                "markov"
+                "basic"
             ]
         },
         "sourceFile": {

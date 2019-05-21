@@ -157,7 +157,11 @@
         "jsonValidation": [
             {
                 "fileMatch": "/.dmbinder/campaign.json",
-                "url": "./campaign.schema.json"
+                "url": "./jsonSchemas/campaign.schema.json"
+            },
+            {
+                "fileMatch": "*.dmbgen.json",
+                "url": "./jsonSchemas/generatorSource.schema.json"
             }
         ],
         "markdown.markdownItPlugins": true,
