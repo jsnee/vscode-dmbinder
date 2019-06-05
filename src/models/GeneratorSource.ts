@@ -48,7 +48,7 @@ export class GeneratorSource {
     public async generateContent(): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate())
+            return await this.generateFromTemplate(generator.generate());
         }
         return "";
     }
