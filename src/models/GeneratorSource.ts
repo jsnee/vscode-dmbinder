@@ -1,9 +1,12 @@
 import * as fse from 'fs-extra';
 import { BaseContentGenerator } from '../generators/BaseContentGenerator';
 import { BasicContentGenerator } from '../generators/BasicContentGenerator';
+import { MarkovContentGenerator } from '../generators/MarkovContentGenerator';
+import { window } from 'vscode';
 
 export enum GeneratorSourceType {
-    Basic = "basic"
+    Basic = "basic",
+    Markov = "markov"
 }
 
 enum TemplateMatch {
@@ -112,7 +115,10 @@ export function getContentGenerator(generatorConfig: GeneratorSourceConfig): Bas
     switch (generatorConfig.generatorType) {
         case GeneratorSourceType.Basic:
             return new BasicContentGenerator(generatorConfig);
+        case GeneratorSourceType.Markov:
+            return new MarkovContentGenerator(generatorConfig);
         default:
+            window.showErrorMessage(`Unexpected value for generatorType encountered: ${generatorConfig.generatorType}`);
             return;
     }
 }
