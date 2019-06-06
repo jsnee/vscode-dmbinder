@@ -123,7 +123,11 @@
             {
                 "command": "dmbinder.generator.generateElement",
                 "title": "Generate Content",
-                "category": "DM Binder"
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/generate.svg",
+                    "dark": "img/dark/generate.svg"
+                }
             }
         ],
         "configuration": {

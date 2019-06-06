@@ -329,7 +329,14 @@ export namespace Utils {
         }
         if (generatorUri) {
             let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
-            //console.log(await generator.generateContent());
+            let editor = window.activeTextEditor;
+            let res = await generator.generateContent();
+            if (editor) {
+                let selection = editor.selection;
+                await editor.edit((editBuilder) => {
+                    editBuilder.replace(selection, res);
+                });
+            }
         }
     }
 }
