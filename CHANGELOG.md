@@ -1,4 +1,7 @@
 # Change Log
+## 0.2.7
+- Fix generator source file issue
+
 ## 0.2.6
 - Apply filtering to Command Palette for certain commands
 - Automatically refresh the campaign when 'campaign.json' is modified

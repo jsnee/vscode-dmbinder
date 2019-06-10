@@ -13,12 +13,8 @@
             "default": "basic"
         },
         "sourceFile": {
-            "description": "URIs to other generator source files",
-            "type": "array",
-            "items": {
-                "type": "string",
-                "format": "uri"
-            }
+            "description": "URI to other generator source file",
+            "type": "string"
         },
         "values": {
             "description": "A list of templates or values to use when generating strings",
@@ -35,8 +31,5 @@
                 "$ref": "#"
             }
         }
-    },
-    "required": [
-        "generatorType"
-    ]
+    }
 }

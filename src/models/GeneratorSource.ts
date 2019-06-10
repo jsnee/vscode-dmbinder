@@ -1,4 +1,5 @@
 import * as fse from 'fs-extra';
+import * as path from 'path';
 import { BaseContentGenerator } from '../generators/BaseContentGenerator';
 import { BasicContentGenerator } from '../generators/BasicContentGenerator';
 import { MarkovContentGenerator } from '../generators/MarkovContentGenerator';
@@ -16,7 +17,7 @@ enum TemplateMatch {
 }
 
 export interface GeneratorSourceConfig {
-    generatorType: string;
+    generatorType?: string;
     sourceFile?: string;
     values?: string[];
     sources?: GeneratorSourceCollection;
@@ -38,7 +39,16 @@ export class GeneratorSource {
     }
 
     private static async loadGeneratorSourceConfig(generatorPath: string): Promise<GeneratorSourceConfig> {
-        return await fse.readJson(generatorPath);
+        let config: GeneratorSourceConfig = await fse.readJson(generatorPath);
+        if (config.sources) {
+            for (let sourceName in config.sources) {
+                let sourcePath = config.sources[sourceName].sourceFile;
+                if (sourcePath) {
+                    config.sources[sourceName].sourceFile = path.join(path.dirname(generatorPath), sourcePath);
+                }
+            }
+        }
+        return config;
     }
 
     public static async loadGeneratorSource(generatorPath: string): Promise<GeneratorSource> {
