@@ -3,6 +3,7 @@
 - Apply filtering to Command Palette for certain commands
 - Automatically refresh the campaign when 'campaign.json' is modified
 - Handle JSON components specifying templateItem
+- Added text generation system
 
 ## 0.2.5
 - Fix pretty nasty README issue that screwed up most of the documentation
