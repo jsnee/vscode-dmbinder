@@ -1,6 +1,7 @@
 # Change Log
 ## 0.2.8
 - Added new generator type ("import") to specify generators to be imported from a separate config file
+- Added Command Palette command for generator that prompts the user to optionally override each template token
 
 ## 0.2.7
 - Fix generator source file issue

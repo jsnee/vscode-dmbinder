@@ -91,6 +91,32 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
 
+    public async getGeneratorItems(): Promise<QuickPickItem[] | undefined> {
+        if (!workspace.workspaceFolders) {
+            return;
+        }
+        let generators: string[] = [];
+        for (let folder of workspace.workspaceFolders) {
+            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+                let campaign = new Campaign(folder.uri.fsPath);
+                for (let eachItem of campaign.generatorPaths) {
+                    let absPath = path.join(folder.uri.fsPath, eachItem);
+                    let children = await expandDirectoryContents(absPath);
+                    if (children) {
+                        generators.push(...children);
+                    }
+                }
+            }
+        }
+        return generators.map(item => {
+            let result: QuickPickItem = {
+                label: path.basename(item, '.dmbgen.json'),
+                detail: item
+            };
+            return result;
+        });
+    }
+
     public async listCampaignPaths(): Promise<string[] | undefined> {
         if (!workspace.workspaceFolders) {
             return;

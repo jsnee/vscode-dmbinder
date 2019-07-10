@@ -1,4 +1,4 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, ProgressLocation, ProgressOptions, MessageItem } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, ProgressLocation, ProgressOptions, MessageItem, InputBoxOptions } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
@@ -323,6 +323,19 @@ export namespace Utils {
     export async function generateElementFromConfig(item?: ITreeItem): Promise<void> {
         let generatorUri: Uri | undefined;
         if (!item || !item.getTreeItem) {
+            const qpItemList = await campaignExplorerProvider.getGeneratorItems();
+            if (qpItemList && qpItemList.length) {
+                const qpOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    placeHolder: 'Select the generator to use'
+                };
+                const generatorItem = await window.showQuickPick(qpItemList, qpOpts);
+                if (generatorItem && generatorItem.detail) {
+                    generatorUri = Uri.file(generatorItem.detail);
+                }
+            } else {
+                window.showWarningMessage("No valid generator configs found.");
+            }
         } else {
             const treeItem = await item.getTreeItem();
             generatorUri = treeItem.resourceUri;
@@ -331,6 +344,47 @@ export namespace Utils {
             let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
             let editor = window.activeTextEditor;
             let res = await generator.generateContent();
+            if (editor) {
+                let selection = editor.selection;
+                await editor.edit((editBuilder) => {
+                    editBuilder.replace(selection, res);
+                });
+            }
+        }
+    }
+
+    async function promptGeneratorInput(source: string): Promise<string | undefined> {
+        const inputOptions: InputBoxOptions = {
+            placeHolder: `{${source}}`,
+            prompt: `Override value for "{${source}}"?`
+        };
+        return await window.showInputBox(inputOptions);
+    }
+
+    export async function generateElementFromConfigPromptArgs(item?: ITreeItem): Promise<void> {
+        let generatorUri: Uri | undefined;
+        if (!item || !item.getTreeItem) {
+            const qpItemList = await campaignExplorerProvider.getGeneratorItems();
+            if (qpItemList && qpItemList.length) {
+                const qpOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    placeHolder: 'Select the generator to use'
+                };
+                const generatorItem = await window.showQuickPick(qpItemList, qpOpts);
+                if (generatorItem && generatorItem.detail) {
+                    generatorUri = Uri.file(generatorItem.detail);
+                }
+            } else {
+                window.showWarningMessage("No valid generator configs found.");
+            }
+        } else {
+            const treeItem = await item.getTreeItem();
+            generatorUri = treeItem.resourceUri;
+        }
+        if (generatorUri) {
+            let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
+            let editor = window.activeTextEditor;
+            let res = await generator.generateContent({}, promptGeneratorInput);
             if (editor) {
                 let selection = editor.selection;
                 await editor.edit((editBuilder) => {

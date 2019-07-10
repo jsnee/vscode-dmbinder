@@ -1,4 +1,4 @@
-import { BaseContentGenerator } from "./BaseContentGenerator";
+import { BaseContentGenerator, GeneratorVars } from "./BaseContentGenerator";
 import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
 
 export class BasicContentGenerator extends BaseContentGenerator {
@@ -6,7 +6,7 @@ export class BasicContentGenerator extends BaseContentGenerator {
         super(generatorSource);
     }
 
-    public generate(): string {
+    public generate(vars: GeneratorVars): string {
         return this.getRandomValue() || "";
     }
 }

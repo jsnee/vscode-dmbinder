@@ -41,15 +41,15 @@ export class GeneratorSource {
         return new GeneratorSource(await this.loadGeneratorSourceConfig(generatorPath));
     }
 
-    public async generateContent(vars: GeneratorVars = {}): Promise<string> {
+    public async generateContent(vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate(vars));
+            return await this.generateFromTemplate(generator.generate(vars), {}, paramCallback);
         }
         return "";
     }
 
-    private async generateFromTemplate(template: string, vars: GeneratorVars = {}): Promise<string> {
+    private async generateFromTemplate(template: string, vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
         let regEx = /\{(\w+)(?::(\w+))?\}/;
         let matches = template.match(regEx);
         if (!matches) {
@@ -60,12 +60,23 @@ export class GeneratorSource {
         if (varName !== undefined && vars[varName]) {
             value = vars[varName];
         } else {
-            value = await this.generateBySourceName(matches[TemplateMatch.SourceName]);
+            let valueOverride: string | undefined = undefined;
+            if (paramCallback) {
+                let valueTemplate = await paramCallback(matches[TemplateMatch.SourceName]);
+                if (valueTemplate) {
+                    valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
+                }
+            }
+            if (valueOverride === undefined) {
+                value = await this.generateBySourceName(matches[TemplateMatch.SourceName]);
+            } else {
+                value = valueOverride;
+            }
             if (varName !== undefined) {
                 vars[varName] = value;
             }
         }
-        return await this.generateFromTemplate(template.replace(regEx, value), vars);
+        return await this.generateFromTemplate(template.replace(regEx, value), vars, paramCallback);
     }
 
     private async generateBySourceName(sourceName: string, vars: GeneratorVars = {}): Promise<string> {
