@@ -1,6 +1,6 @@
-import { BaseContentGenerator } from "./BaseContentGenerator";
-import { GeneratorSourceConfig } from "../models/GeneratorSource";
+import { BaseContentGenerator, GeneratorVars } from "./BaseContentGenerator";
 import { MarkovChain } from "../models/MarkovChain";
+import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
 
 export class MarkovContentGenerator extends BaseContentGenerator {
     private _chainCache: MarkovChain;
@@ -13,7 +13,7 @@ export class MarkovContentGenerator extends BaseContentGenerator {
         }
     }
 
-    public generate(): string {
+    public generate(vars: GeneratorVars): string {
         var wordCount = this._chainCache.selectWordCount();
         var results: string[] = [];
 

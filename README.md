@@ -475,6 +475,7 @@ See [Changelog](CHANGELOG.md) for release notes.
 ## Icon Sources
 - [Material Design Icons](https://materialdesignicons.com/)
 - Official icons (various icons from Microsoft's vscode repo)
+- [GitHub's Octicons](https://github.com/primer/octicons/tree/master/lib/octicons_node) using [Microsoft's vscode icon tool](https://github.com/microsoft/vscode-octicons-font)
 
 ## Related Projects
 - [Homebrewery](https://github.com/naturalcrit/homebrewery)

@@ -1,4 +1,8 @@
-import { GeneratorSourceConfig } from "../models/GeneratorSource";
+import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
+
+export interface GeneratorVars {
+    [varName: string]: string;
+}
 
 export abstract class BaseContentGenerator {
     protected _source: GeneratorSourceConfig;
@@ -7,7 +11,7 @@ export abstract class BaseContentGenerator {
         this._source = generatorSource;
     }
 
-    abstract generate(): string;
+    abstract generate(vars: GeneratorVars): string;
 
     protected getRandomValue(): string | undefined {
         if (!this._source.values || this._source.values.length === 0) {

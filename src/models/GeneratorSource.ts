@@ -1,34 +1,15 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { BaseContentGenerator } from '../generators/BaseContentGenerator';
+import { BaseContentGenerator, GeneratorVars } from '../generators/BaseContentGenerator';
 import { BasicContentGenerator } from '../generators/BasicContentGenerator';
 import { MarkovContentGenerator } from '../generators/MarkovContentGenerator';
 import { window } from 'vscode';
-
-export enum GeneratorSourceType {
-    Basic = "basic",
-    Markov = "markov"
-}
+import { GeneratorSourceConfig, GeneratorSourceCollection, GeneratorSourceType } from './GeneratorSourceConfig';
 
 enum TemplateMatch {
     Whole = 0,
     SourceName = 1,
     VariableName = 2
-}
-
-export interface GeneratorSourceConfig {
-    generatorType?: string;
-    sourceFile?: string;
-    values?: string[];
-    sources?: GeneratorSourceCollection;
-}
-
-export interface GeneratorVars {
-    [varName: string]: string;
-}
-
-interface GeneratorSourceCollection {
-    [generatorName: string]: GeneratorSourceConfig;
 }
 
 export class GeneratorSource {
@@ -42,9 +23,14 @@ export class GeneratorSource {
         let config: GeneratorSourceConfig = await fse.readJson(generatorPath);
         if (config.sources) {
             for (let sourceName in config.sources) {
-                let sourcePath = config.sources[sourceName].sourceFile;
-                if (sourcePath) {
-                    config.sources[sourceName].sourceFile = path.join(path.dirname(generatorPath), sourcePath);
+                if (config.sources[sourceName].generatorType && config.sources[sourceName].generatorType === GeneratorSourceType.Import)
+                {
+                    let sourcePath = config.sources[sourceName].sourceFile;
+                    if (sourcePath) {
+                        config.sources[sourceName].sourceFile = path.join(path.dirname(generatorPath), sourcePath);
+                    } else {
+                        window.showErrorMessage(`Invalid sourcePath specified for imported generator "${sourceName}" referenced in generator config at: ${generatorPath}`);
+                    }
                 }
             }
         }
@@ -55,10 +41,10 @@ export class GeneratorSource {
         return new GeneratorSource(await this.loadGeneratorSourceConfig(generatorPath));
     }
 
-    public async generateContent(): Promise<string> {
+    public async generateContent(vars: GeneratorVars = {}): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate());
+            return await this.generateFromTemplate(generator.generate(vars));
         }
         return "";
     }
@@ -82,12 +68,12 @@ export class GeneratorSource {
         return await this.generateFromTemplate(template.replace(regEx, value), vars);
     }
 
-    private async generateBySourceName(sourceName: string): Promise<string> {
+    private async generateBySourceName(sourceName: string, vars: GeneratorVars = {}): Promise<string> {
         let config = await this.loadGenerator(sourceName);
         if (config) {
             let generator = getContentGenerator(config);
             if (generator) {
-                return generator.generate();
+                return generator.generate(vars);
             }
         }
         return "";
@@ -127,6 +113,9 @@ export function getContentGenerator(generatorConfig: GeneratorSourceConfig): Bas
             return new BasicContentGenerator(generatorConfig);
         case GeneratorSourceType.Markov:
             return new MarkovContentGenerator(generatorConfig);
+        case GeneratorSourceType.Import:
+            window.showErrorMessage("Encountered unexpected issue when attempting to process imported content generator");
+            return;
         default:
             window.showErrorMessage(`Unexpected value for generatorType encountered: ${generatorConfig.generatorType}`);
             return;

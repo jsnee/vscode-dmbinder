@@ -8,6 +8,7 @@
             "type": "string",
             "enum": [
                 "basic",
+                "import",
                 "markov"
             ],
             "default": "basic"
@@ -21,6 +22,31 @@
             "type": "array",
             "items": {
                 "type": "string"
+            },
+            "default": []
+        },
+        "conditionalValues": {
+            "description": "A list of templates or values to use when generating strings",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "condition": {
+                        "type": "string"
+                    },
+                    "values": {
+                        "description": "A list of templates or values to use when generating strings if condition evaluates to true",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
+                    }
+                },
+                "required": [
+                    "condition",
+                    "values"
+                ]
             },
             "default": []
         },

@@ -1,5 +1,5 @@
 import { BaseContentGenerator } from "./BaseContentGenerator";
-import { GeneratorSourceConfig } from "../models/GeneratorSource";
+import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
 
 export class BasicContentGenerator extends BaseContentGenerator {
     constructor(generatorSource: GeneratorSourceConfig) {
