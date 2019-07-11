@@ -3,6 +3,7 @@ import { renderHomebrew } from './renderer';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
 import { Utils } from './Utils';
+import { PandocConverter, PandocFormat } from './PandocConverter';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -43,6 +44,12 @@ export async function activate(context: ExtensionContext) {
 
     let refreshCampaignDisposable = commands.registerCommand('dmbinder.campaign.refresh', tv.refresh, tv);
     context.subscriptions.push(refreshCampaignDisposable);
+
+    let aaa = commands.registerCommand('dmbinder.foo.bar', async function () {
+        const converter = new PandocConverter(PandocFormat.Markdown, PandocFormat.Markdown, '--template="c:\Users\SneeJ\Documents\dm-binder-test\dmbinder-test\templates\pathfinder\monster-stat-block.md"', '--metadata pagetitle=" "');
+        console.log(await converter.convert("---\nname: Herald of Razmir\n..."));
+    });
+    context.subscriptions.push(aaa);
 
     let brewTreeItemDisposable = commands.registerCommand('dmbinder.item.brew', renderHomebrew);
     context.subscriptions.push(brewTreeItemDisposable);

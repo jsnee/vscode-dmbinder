@@ -46,11 +46,17 @@
         "onCommand:dmbinder.item.edit",
         "onCommand:dmbinder.generator.generateElement",
         "onCommand:dmbinder.generator.generateElementWithPrompt",
+        "onCommand:dmbinder.foo.bar",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",
     "contributes": {
         "commands": [
+            {
+                "command": "dmbinder.foo.bar",
+                "title": "Hello World",
+                "category": "DM Binder"
+            },
             {
                 "command": "dmbinder.campaign.init",
                 "title": "Initialize Campaign in Current Folder",
