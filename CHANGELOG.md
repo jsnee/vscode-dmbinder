@@ -1,4 +1,7 @@
 # Change Log
+## 0.2.9
+- Added multi-line generators which use *all* the strings listed in the "values" array, separated by newline characters
+
 ## 0.2.8
 - Added new generator type ("import") to specify generators to be imported from a separate config file
 - Added Command Palette command for generator that prompts the user to optionally override each template token

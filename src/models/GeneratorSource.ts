@@ -5,6 +5,7 @@ import { BasicContentGenerator } from '../generators/BasicContentGenerator';
 import { MarkovContentGenerator } from '../generators/MarkovContentGenerator';
 import { window } from 'vscode';
 import { GeneratorSourceConfig, GeneratorSourceCollection, GeneratorSourceType } from './GeneratorSourceConfig';
+import { MultilineContentGenerator } from '../generators/MultilineContentGenerator';
 
 enum TemplateMatch {
     Whole = 0,
@@ -124,6 +125,8 @@ export function getContentGenerator(generatorConfig: GeneratorSourceConfig): Bas
             return new BasicContentGenerator(generatorConfig);
         case GeneratorSourceType.Markov:
             return new MarkovContentGenerator(generatorConfig);
+        case GeneratorSourceType.Multiline:
+            return new MultilineContentGenerator(generatorConfig);
         case GeneratorSourceType.Import:
             window.showErrorMessage("Encountered unexpected issue when attempting to process imported content generator");
             return;

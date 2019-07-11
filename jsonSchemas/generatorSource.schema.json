@@ -9,7 +9,8 @@
             "enum": [
                 "basic",
                 "import",
-                "markov"
+                "markov",
+                "multiline"
             ],
             "default": "basic"
         },

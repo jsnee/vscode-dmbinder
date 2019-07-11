@@ -13,7 +13,8 @@ export interface GeneratorSourceConfig {
 export enum GeneratorSourceType {
     Basic = "basic",
     Import = "import",
-    Markov = "markov"
+    Markov = "markov",
+    Multiline = "multiline"
 }
 
 export interface ConditionalValue {
