@@ -1,4 +1,9 @@
 # Change Log
+## 0.3.0
+- Removed abandoned "conditionalValues" feature from content generator code and dmbgen.json schema definition
+- Fixed content generator variable storage and recall to use last set value (variables are set with syntax "{generatorName:variableToSet}") when recalling values (variables are recalled with syntax"{:variableToRecall}")
+- Bugfix to add in some DMBinder commands that were missing from the extension activation events listing
+
 ## 0.2.9
 - Added multi-line generators which use *all* the strings listed in the "values" array, separated by newline characters
 

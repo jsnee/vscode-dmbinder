@@ -6,7 +6,6 @@ export interface GeneratorSourceConfig {
     generatorType?: string;
     sourceFile?: string;
     values?: string[];
-    conditionalValues?: ConditionalValue[];
     sources?: GeneratorSourceCollection;
 }
 

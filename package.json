@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.2.9",
+    "version": "0.3.0",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -44,6 +44,8 @@
         "onCommand:dmbinder.config.toggleHomebreweryEnabled",
         "onCommand:dmbinder.item.brew",
         "onCommand:dmbinder.item.edit",
+        "onCommand:dmbinder.generator.generateElement",
+        "onCommand:dmbinder.generator.generateElementWithPrompt",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",

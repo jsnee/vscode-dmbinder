@@ -10,7 +10,8 @@ import { MultilineContentGenerator } from '../generators/MultilineContentGenerat
 enum TemplateMatch {
     Whole = 0,
     SourceName = 1,
-    VariableName = 2
+    SetVariableName = 2,
+    GetVariableName = 3
 }
 
 export class GeneratorSource {
@@ -51,30 +52,42 @@ export class GeneratorSource {
     }
 
     private async generateFromTemplate(template: string, vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
-        let regEx = /\{(\w+)(?::(\w+))?\}/;
+        let regEx = /\{(?:(?:(\w+)(?::(\w+))?)|:(\w+))\}/;
         let matches = template.match(regEx);
         if (!matches) {
             return template;
         }
         let value: string;
-        let varName = matches[TemplateMatch.VariableName];
-        if (varName !== undefined && vars[varName]) {
-            value = vars[varName];
+        let tokenName = matches[TemplateMatch.SourceName];
+        if (tokenName === undefined) {
+            let getVarName = matches[TemplateMatch.GetVariableName];
+            if (getVarName === undefined) {
+                const errMsg = `Error encountered while generating content on match: ${matches[TemplateMatch.Whole]}`;
+                window.showErrorMessage(errMsg);
+                throw new Error(errMsg);
+            }
+            if (vars[getVarName]) {
+                value = vars[getVarName];
+            } else {
+                window.showWarningMessage(`Tried to access undefined generator variable: ${getVarName}`);
+                value = "";
+            }
         } else {
+            let setVarName = matches[TemplateMatch.SetVariableName];
             let valueOverride: string | undefined = undefined;
             if (paramCallback) {
-                let valueTemplate = await paramCallback(matches[TemplateMatch.SourceName]);
+                let valueTemplate = await paramCallback(tokenName);
                 if (valueTemplate) {
                     valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
                 }
             }
             if (valueOverride === undefined) {
-                value = await this.generateBySourceName(matches[TemplateMatch.SourceName]);
+                value = await this.generateBySourceName(tokenName);
             } else {
                 value = valueOverride;
             }
-            if (varName !== undefined) {
-                vars[varName] = value;
+            if (setVarName !== undefined) {
+                vars[setVarName] = value;
             }
         }
         return await this.generateFromTemplate(template.replace(regEx, value), vars, paramCallback);
