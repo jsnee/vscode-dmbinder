@@ -1,6 +1,6 @@
 import { BaseContentGenerator, GeneratorVars } from "./BaseContentGenerator";
-import { MarkovChain } from "../models/MarkovChain";
-import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
+import { MarkovChain } from "../../models/MarkovChain";
+import { GeneratorSourceConfig } from "../../models/GeneratorSourceConfig";
 
 export class MarkovContentGenerator extends BaseContentGenerator {
     private _chainCache: MarkovChain;

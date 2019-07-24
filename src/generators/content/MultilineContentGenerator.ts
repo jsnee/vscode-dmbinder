@@ -1,5 +1,5 @@
 import { BaseContentGenerator, GeneratorVars } from "./BaseContentGenerator";
-import { GeneratorSourceConfig } from "../models/GeneratorSourceConfig";
+import { GeneratorSourceConfig } from "../../models/GeneratorSourceConfig";
 
 export class MultilineContentGenerator extends BaseContentGenerator {
     constructor(generatorSource: GeneratorSourceConfig) {

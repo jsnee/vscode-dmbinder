@@ -1,11 +1,11 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { BaseContentGenerator, GeneratorVars } from '../generators/BaseContentGenerator';
-import { BasicContentGenerator } from '../generators/BasicContentGenerator';
-import { MarkovContentGenerator } from '../generators/MarkovContentGenerator';
+import { BaseContentGenerator, GeneratorVars } from '../generators/content/BaseContentGenerator';
+import { BasicContentGenerator } from '../generators/content/BasicContentGenerator';
+import { MarkovContentGenerator } from '../generators/content/MarkovContentGenerator';
 import { window } from 'vscode';
 import { GeneratorSourceConfig, GeneratorSourceCollection, GeneratorSourceType } from './GeneratorSourceConfig';
-import { MultilineContentGenerator } from '../generators/MultilineContentGenerator';
+import { MultilineContentGenerator } from '../generators/content/MultilineContentGenerator';
 
 enum TemplateMatch {
     Whole = 0,
