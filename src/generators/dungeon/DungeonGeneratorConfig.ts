@@ -13,7 +13,7 @@ export interface DungeonGeneratorConfig {
     cellSize: number;
 }
 
-export function getConfig(
+export function getDungeonGeneratorConfig(
     seed: number = Date.now(),
     rowCount: number = 39,
     columnCount: number = 39,

@@ -1,5 +1,6 @@
 import { DungeonGeneratorConfig, DungeonLayout, RoomLayout } from "./DungeonGeneratorConfig";
 import seedrandom = require("seedrandom");
+import { DungeonCanvasConfig, DungeonCanvas, DungeonCanvasColors, DungeonDoor, DungeonDoorType } from "./DungeonCanvas";
 
 enum DungeonCellType {
     Nothing = 0 << 0,
@@ -210,6 +211,7 @@ class DungeonGeneratorRaster {
     _maximumRoomSize: number;
     _connections: string[];
     _corridorLayoutComplexity: number;
+    _cellSize: number;
 
     public constructor(config: DungeonGeneratorConfig) {
         this.cells = [];
@@ -223,6 +225,7 @@ class DungeonGeneratorRaster {
         this._minimumRoomSize = config.minimumRoomSize;
         this._maximumRoomSize = config.maximumRoomSize;
         this._corridorLayoutComplexity = config.corridorLayout;
+        this._cellSize = config.cellSize;
         for (let r = 0; r <= this._numRows; r++) {
             this.cells[r] = [];
             for (let c = 0; c <= this._numCols; c++) {
@@ -379,8 +382,64 @@ class DungeonGeneratorRaster {
         this.emptyBlocks();
     }
 
-    public imageDungeon(): void {
-        
+    public drawMap(colors: DungeonCanvasColors, scale: number = 1.0): string {
+        let config: DungeonCanvasConfig = {
+            width: this._numCols,
+            height: this._numRows,
+            cellSize: this._cellSize,
+            colors: colors,
+            scale: scale
+        };
+        let canvas = new DungeonCanvas(config);
+        let foregroundTiles: number[] = [];
+        for (let row = 0; row <= this._numRows; row++) {
+            for (let col = 0; col <= this._numCols; col++) {
+                if (this.cells[row][col] & DungeonCellType.OpenSpace) {
+                    let tileId = (row * this._numCols) + col;
+                    foregroundTiles.push(tileId);
+                }
+            }
+        }
+        canvas.fillSpaces(foregroundTiles);
+        canvas.fillDoors(this.getDoors());
+        return canvas.draw();
+    }
+
+    private getDoors(): DungeonDoor[] {
+        let results: DungeonDoor[] = [];
+        for (let door of this.doors) {
+            let doorType: DungeonDoorType;
+            switch (door.key) {
+                case "arch":
+                    doorType = DungeonDoorType.Arch;
+                    break;
+                case "open":
+                    doorType = DungeonDoorType.Regular;
+                    break;
+                case "lock":
+                    doorType = DungeonDoorType.Locked;
+                    break;
+                case "trap":
+                    doorType = DungeonDoorType.Trapped;
+                    break;
+                case "secret":
+                    doorType = DungeonDoorType.Secret;
+                    break;
+                case "portc":
+                    doorType = DungeonDoorType.Portcullis;
+                    break;
+                default:
+                    continue;
+            }
+            let tileId = (door.row * this._numCols) + door.col;
+            let isHorizontal = !!(this.cells[door.row][door.col - 1] & DungeonCellType.OpenSpace);
+            results.push({
+                tileId: tileId,
+                doorType: doorType,
+                isHorizontal: isHorizontal
+            });
+        }
+        return results;
     }
 
     private allocateRooms(): number {
@@ -533,6 +592,7 @@ class DungeonGeneratorRaster {
                     continue;
                 }
                 let outId = sill.outId;
+                // tslint:disable-next-line:triple-equals
                 if (outId != null) {
                     let connection = Math.min(room.id, outId) + "," + Math.max(room.id, outId);
                     if (this._connections.indexOf(connection) !== -1) {
@@ -903,7 +963,7 @@ export class DungeonGenerator {
         this.validateConfig();
     }
 
-    public generate(): any {
+    public generate(): string {
         let raster = new DungeonGeneratorRaster(this._config);
         raster.initializeCellMask(this._config.dungeonLayout);
         switch (this._config.roomLayout) {
@@ -920,15 +980,19 @@ export class DungeonGenerator {
         raster.emplaceStairs(this._config.addStairCount);
         raster.cleanDungeon(this._config.removeDeadendsRatio);
 
-        raster.imageDungeon();
-        //return raster;
+        return raster.drawMap({
+            backgroundFill: "black",
+            foregroundFill: "white",
+            foregroundStroke: "black",
+            textStroke: "black"
+        });
     }
 
     private validateConfig(): void {
-        if ((this._config.rowCount % 2) === 1) {
+        if ((this._config.rowCount % 2) !== 1) {
             throw Error("Invalid DungeonGeneratorConfig: rowCount must be an odd number!");
         }
-        if ((this._config.columnCount % 2) === 1) {
+        if ((this._config.columnCount % 2) !== 1) {
             throw Error("Invalid DungeonGeneratorConfig: columnCount must be an odd number!");
         }
         if (this._config.removeDeadendsRatio < 0 || this._config.removeDeadendsRatio > 100) {

@@ -9,6 +9,8 @@ import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
 import { BrowserFetcher } from './BrowserFetcher';
 import { GeneratorSource } from './models/GeneratorSource';
+import { getDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
+import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
 
 export namespace Utils {
     export function alertError(error: Error): Thenable<void> {
@@ -391,6 +393,20 @@ export namespace Utils {
                     editBuilder.replace(selection, res);
                 });
             }
+        }
+    }
+
+    export async function generateDungeonMap(): Promise<void> {
+        let config = getDungeonGeneratorConfig();
+        try {
+            let generator = new DungeonGenerator(config);
+            let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
+            const doc = await workspace.openTextDocument({
+                content: result
+            });
+            await window.showTextDocument(doc, ViewColumn.Active);
+        } catch (e) {
+            console.log(e);
         }
     }
 }
