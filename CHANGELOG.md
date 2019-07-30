@@ -1,4 +1,7 @@
 # Change Log
+## 0.3.1
+- Added a dungeon generator, based on the one from donjon.bin.sh written in Perl
+
 ## 0.3.0
 - Removed abandoned "conditionalValues" feature from content generator code and dmbgen.json schema definition
 - Fixed content generator variable storage and recall to use last set value (variables are set with syntax "{generatorName:variableToSet}") when recalling values (variables are recalled with syntax"{:variableToRecall}")

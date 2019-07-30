@@ -10,6 +10,7 @@ Visual Studio Code extension for managing campaign documents.
 - Generation of Hombrewery elements using snippets and Pandoc templating
 - Rendering of markdown files to PDF using Puppeteer
 - DMBinder view that helps organize campaign documents
+- Randomly generate dungeon maps
 
 <details>
 <summary>DMBinder Explorer screenshot</summary>
@@ -465,6 +466,9 @@ Below is an example Campaign configuration file:
     "outDirectory": "./out/"
 }
 ```
+
+## Dungeon Generator
+Based on the logic behind [donjon.bin.sh dungeon generator](https://donjon.bin.sh/code/dungeon/)
 
 See [generator-dmbinder](https://github.com/jsnee/generator-dmbinder) for a yeoman generator to help bootstrap a campaign binder.
 
