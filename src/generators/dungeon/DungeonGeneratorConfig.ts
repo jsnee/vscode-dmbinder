@@ -1,5 +1,5 @@
 export interface DungeonGeneratorConfig {
-    seed: number;
+    seed: string;
     rowCount: number;
     columnCount: number;
     dungeonLayout: DungeonLayout;
@@ -14,7 +14,7 @@ export interface DungeonGeneratorConfig {
 }
 
 export function getDungeonGeneratorConfig(
-    seed: number = Date.now(),
+    seed: string = String(Date.now()),
     rowCount: number = 39,
     columnCount: number = 39,
     dungeonLayout: DungeonLayout = DungeonLayout.None,

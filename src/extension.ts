@@ -45,13 +45,6 @@ export async function activate(context: ExtensionContext) {
     let refreshCampaignDisposable = commands.registerCommand('dmbinder.campaign.refresh', tv.refresh, tv);
     context.subscriptions.push(refreshCampaignDisposable);
 
-    // let aaa = commands.registerCommand('dmbinder.foo.bar', async function () {
-    //     const converter = new PandocConverter(PandocFormat.Markdown, PandocFormat.Markdown, '--template="c:\Users\SneeJ\Documents\dm-binder-test\dmbinder-test\templates\pathfinder\monster-stat-block.md"', '--metadata pagetitle=" "');
-    //     console.log(await converter.convert("---\nname: Herald of Razmir\n..."));
-    // });
-    let aaa = commands.registerCommand('dmbinder.foo.bar', Utils.generateDungeonMap);
-    context.subscriptions.push(aaa);
-
     let brewTreeItemDisposable = commands.registerCommand('dmbinder.item.brew', renderHomebrew);
     context.subscriptions.push(brewTreeItemDisposable);
 
@@ -69,6 +62,9 @@ export async function activate(context: ExtensionContext) {
 
     let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', Utils.promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
+
+    let promptGenerateDungeon = commands.registerCommand('dmbinder.dungeon.promptGenerate', Utils.promptGenerateDungeonMap);
+    context.subscriptions.push(promptGenerateDungeon);
 
     let generateElementDisposable = commands.registerCommand('dmbinder.generator.generateElement', Utils.generateElementFromConfig);
     context.subscriptions.push(generateElementDisposable);

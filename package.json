@@ -53,11 +53,6 @@
     "contributes": {
         "commands": [
             {
-                "command": "dmbinder.foo.bar",
-                "title": "Hello World",
-                "category": "DM Binder"
-            },
-            {
                 "command": "dmbinder.campaign.init",
                 "title": "Initialize Campaign in Current Folder",
                 "category": "DM Binder"
@@ -127,6 +122,11 @@
                     "light": "img/light/insertComponent.svg",
                     "dark": "img/dark/insertComponent.svg"
                 }
+            },
+            {
+                "command": "dmbinder.dungeon.promptGenerate",
+                "title": "Generate Dungeon",
+                "category": "DM Binder"
             },
             {
                 "command": "dmbinder.generator.generateElement",

@@ -219,7 +219,7 @@ class DungeonGeneratorRaster {
         this.stairs = [];
         this.doors = [];
         this._roomCount = 0;
-        this._rng = seedrandom(String(config.seed));
+        this._rng = seedrandom(config.seed);
         this._rowSteps = Math.floor(config.rowCount / 2);
         this._colSteps = Math.floor(config.columnCount / 2);
         this._minimumRoomSize = config.minimumRoomSize;
