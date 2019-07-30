@@ -11,6 +11,7 @@ Visual Studio Code extension for managing campaign documents.
 - Rendering of markdown files to PDF using Puppeteer
 - DMBinder view that helps organize campaign documents
 - Randomly generate dungeon maps
+- Generation of content (like names, titles, locations, etc.) using randomized lists or Markov chains
 
 <details>
 <summary>DMBinder Explorer screenshot</summary>
@@ -443,6 +444,9 @@ In the DMBinder Explorer, you can click on the "Render Markdown to PDF with Home
 
 Additionally, you can render all sources for a single campaign by using the `dmbinder.campaign.brew` command. If there is more than one campaign in the current workspace, it will list all of them and prompt you to select which campaign.
 
+### Content Generation
+Coming Soon!
+
 ### Included Snippets
 Coming Soon!
 
@@ -462,6 +466,9 @@ Below is an example Campaign configuration file:
     ],
     "componentPaths": [
         "./components/"
+    ],
+    "generatorPaths": [
+        "./generator-sources"
     ],
     "outDirectory": "./out/"
 }
