@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, window, workspace, ViewColumn } from 'vscode';
+import { commands, ExtensionContext, window, workspace } from 'vscode';
 import { renderHomebrew } from './renderer';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';

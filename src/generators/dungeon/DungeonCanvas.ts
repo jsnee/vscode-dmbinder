@@ -31,6 +31,7 @@ export enum DungeonDoorType {
 export class DungeonCanvas {
     private _foregroundPath: string = "";
     private _doorPath: string = "";
+    private _secretPath: string = "";
     private _config: DungeonCanvasConfig;
 
     public constructor(config: DungeonCanvasConfig) {
@@ -52,22 +53,29 @@ export class DungeonCanvas {
     }
 
     public fillDoors(doors: DungeonDoor[]): void {
+        // Remove duplicate doors (why are there duplciate doors?)
+        doors = this.dedupeDoors(doors);
         // Make sure doors are in order (to simplify SVG drawing path)
         doors.sort((a, b) => a.tileId - b.tileId);
         let door = doors.shift();
         let moveX = 0;
+        let isFirstDoorInRow = true;
 
         for (let row = 0; row < this.height; row++) {
             if (!door) {
                 // No more doors
                 break;
             }
-            this._doorPath += this.svgNewLine(row);
+            isFirstDoorInRow = true;
             moveX = 0;
             for (let col = 0; col < this.width; col++) {
                 if (door) {
                     let tileId = (row * this.width) + col;
                     if (door.tileId === tileId) {
+                        if (isFirstDoorInRow) {
+                            this._doorPath += this.svgNewLine(row);
+                            isFirstDoorInRow = false;
+                        }
                         if (moveX) {
                             this._doorPath += `m${moveX * this.cellSize},0`;
                         }
@@ -83,6 +91,7 @@ export class DungeonCanvas {
                 }
             }
         }
+        console.log(`Doors missed: ${doors.length}`);
     }
 
     public draw(): string {
@@ -91,11 +100,12 @@ export class DungeonCanvas {
             + this.svgBackground + "\n"
             + this.svgForeground + "\n"
             + this.svgDoors + "\n"
+            + this.svgSecrets + "\n"
             + this.svgFoot;
     }
 
     private get svgHead(): string {
-        return `<svg width="${(this.width + 2) * this.cellSize}" height="${(this.height + 2) * this.cellSize}">`;
+        return `<svg width="${(this.width + (2 * this.MapPadding)) * this.cellSize}" height="${(this.height + (2 * this.MapPadding)) * this.cellSize}">`;
     }
 
     private get svgFoot(): string {
@@ -107,11 +117,16 @@ export class DungeonCanvas {
             + `\n    #dungeonBackground { fill: ${this._config.colors.backgroundFill}; } `
             + `\n    #dungeonForeground { stroke: ${this._config.colors.foregroundStroke}; fill: ${this._config.colors.foregroundFill}; }`
             + `\n    #dungeonDoors { stroke: ${this._config.colors.foregroundStroke}; fill: ${this._config.colors.backgroundFill}; }`
+            + `\n    #dungeonSecrets { stroke: ${this._config.colors.foregroundStroke}; fill: transparent; }`
             + "]]></style></defs>";
     }
 
+    private get MapPadding(): number {
+        return 1;
+    }
+
     private get svgBackground(): string {
-        return `<rect id="dungeonBackground" width="${(this.width + 2)  * this.cellSize}" height="${(this.height + 2) * this.cellSize}"/>`;
+        return `<rect id="dungeonBackground" width="${(this.width + (2 * this.MapPadding))  * this.cellSize}" height="${(this.height + (2 * this.MapPadding)) * this.cellSize}"/>`;
     }
 
     private get svgForeground(): string {
@@ -120,6 +135,10 @@ export class DungeonCanvas {
 
     private get svgDoors(): string {
         return `<path id="dungeonDoors" d="${this._doorPath}"/>`;
+    }
+
+    private get svgSecrets(): string {
+        return `<path id="dungeonSecrets" d="${this._secretPath}"/>`;
     }
 
     private get cellSize(): number {
@@ -159,7 +178,19 @@ export class DungeonCanvas {
     }
 
     private svgNewLine(row: number): string {
-        return `M${this.cellSize},${row * this.cellSize + this.cellSize}`;
+        return `M${this.cellSize},${row * this.cellSize + (this.cellSize * this.MapPadding)}`;
+    }
+
+    private dedupeDoors(doors: DungeonDoor[]): DungeonDoor[] {
+        let results: DungeonDoor[] = [];
+        let doorIds: number[] = [];
+        for (let door of doors) {
+            if (doorIds.indexOf(door.tileId) === -1) {
+                doorIds.push(door.tileId);
+                results.push(door);
+            }
+        }
+        return results;
     }
 
     private drawDoor(door: DungeonDoor): void {
@@ -180,7 +211,7 @@ export class DungeonCanvas {
                 this.drawPortcullis(door.isHorizontal);
                 break;
             case DungeonDoorType.Secret:
-                this.drawSecret(door.isHorizontal);
+                this.drawSecret(door);
                 break;
             case DungeonDoorType.Arch:
             default:
@@ -288,31 +319,22 @@ export class DungeonCanvas {
         }
     }
 
-    private drawSecret(isHorizontal: boolean): void {
-        if (isHorizontal) {
-            this._doorPath += `m${this.cellMidpoint - 1},${this.cellMidpoint - this.doorThickness}`
-                + "h3"
-                + "m-4,1"
-                + `v${this.doorThickness - 2}`
-                + "m1,1"
-                + "h2"
-                + "m1,1"
-                + `v${this.doorThickness - 2}`
-                + "m-4,1"
-                + "h3"
-                + `m-${this.cellMidpoint + 1},-${this.cellMidpoint + this.doorThickness}`;
+    private drawSecret(door: DungeonDoor): void {
+        let col = door.tileId % this.width;
+        let row = (door.tileId - col) / this.width;
+        this._secretPath += `M${this.cellSize * (col + this.MapPadding)},${this.cellSize * (row + this.MapPadding)}`;
+        if (door.isHorizontal) {
+            this._secretPath += `m${this.cellMidpoint + (this.doorThickness / 2) + this.jambThickness},${this.jambWidth + 1}`
+                + `h-${this.jambThickness}`
+                + `c-${this.trapThickness},0,-${this.trapThickness},${this.doorWidth / 2},-${this.doorThickness / 2},${this.doorWidth / 2}`
+                + `s${this.trapThickness},${this.doorWidth / 2},-${this.doorThickness / 2},${this.doorWidth / 2}`
+                + `h-${this.jambThickness}`;
         } else {
-            this._doorPath += `m${this.cellMidpoint - this.doorThickness},${this.cellMidpoint - 1}`
-                + "v3"
-                + "m1,-4"
-                + `h${this.doorThickness - 2}`
-                + "m1,1"
-                + "v2"
-                + "m1,1"
-                + `h${this.doorThickness - 2}`
-                + "m1,-4"
-                + "v3"
-                + `m-${this.cellMidpoint + this.doorThickness},-${this.cellMidpoint + 1}`;
+            this._secretPath += `m${this.jambWidth + 1},${this.cellMidpoint - (this.doorThickness / 2) - this.jambThickness}`
+                + `v${this.jambThickness}`
+                + `c0,${this.trapThickness},${this.doorWidth / 2},${this.trapThickness},${this.doorWidth / 2},${this.doorThickness / 2}`
+                + `s${this.doorWidth / 2},-${this.trapThickness},${this.doorWidth / 2},${this.doorThickness / 2}`
+                + `v${this.jambThickness}`;
         }
     }
 }

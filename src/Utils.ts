@@ -402,7 +402,8 @@ export namespace Utils {
             let generator = new DungeonGenerator(config);
             let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
             const doc = await workspace.openTextDocument({
-                content: result
+                content: result,
+                language: "markdown"
             });
             await window.showTextDocument(doc, ViewColumn.Active);
         } catch (e) {
