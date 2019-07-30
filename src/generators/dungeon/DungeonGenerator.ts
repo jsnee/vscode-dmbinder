@@ -265,8 +265,8 @@ class DungeonGeneratorRaster {
             case DungeonLayout.Cross:
                 let mask = getLayoutMask(dungeonLayout);
                 if (mask !== undefined) {
-                    let rowScalar = mask.length * 1.0 / this._numRows + 1;
-                    let colScalar = mask[0].length * 1.0 / this._numCols + 1;
+                    let rowScalar = mask.length * 1.0 / (this._numRows + 1);
+                    let colScalar = mask[0].length * 1.0 / (this._numCols + 1);
                     for (let r = 0; r <= this._numRows; r++) {
                         for (let c = 0; c <= this._numCols; c++) {
                             this.cells[r][c] = mask[Math.floor(r * rowScalar)][Math.floor(c * colScalar)] === 1
