@@ -124,7 +124,7 @@
                 }
             },
             {
-                "command": "dmbinder.dungeon.promptGenerate",
+                "command": "dmbinder.dungeon.generate",
                 "title": "Generate Dungeon",
                 "category": "DM Binder"
             },

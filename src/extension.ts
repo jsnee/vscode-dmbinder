@@ -63,8 +63,8 @@ export async function activate(context: ExtensionContext) {
     let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', Utils.promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
 
-    let promptGenerateDungeon = commands.registerCommand('dmbinder.dungeon.promptGenerate', Utils.promptGenerateDungeonMap);
-    context.subscriptions.push(promptGenerateDungeon);
+    let generateDungeon = commands.registerCommand('dmbinder.dungeon.generate', Utils.generateDungeonMap);
+    context.subscriptions.push(generateDungeon);
 
     let generateElementDisposable = commands.registerCommand('dmbinder.generator.generateElement', Utils.generateElementFromConfig);
     context.subscriptions.push(generateElementDisposable);

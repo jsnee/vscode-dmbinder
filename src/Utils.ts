@@ -1,4 +1,4 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, ProgressLocation, ProgressOptions, MessageItem, InputBoxOptions } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, QuickPickItem, extensions, ProgressLocation, ProgressOptions, MessageItem, InputBoxOptions, TextEditor, Range } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { exec } from 'child_process';
 import { ITreeItem } from './models/ITreeItem';
@@ -9,7 +9,7 @@ import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
 import { BrowserFetcher } from './BrowserFetcher';
 import { GeneratorSource } from './models/GeneratorSource';
-import { getDungeonGeneratorConfig, DungeonLayout, RoomLayout, CorridorLayout } from './generators/dungeon/DungeonGeneratorConfig';
+import { getDungeonGeneratorConfig, DungeonLayout, RoomLayout, CorridorLayout, DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
 
 export namespace Utils {
@@ -397,21 +397,63 @@ export namespace Utils {
     }
 
     export async function generateDungeonMap(): Promise<void> {
-        let config = getDungeonGeneratorConfig();
-        try {
-            let generator = new DungeonGenerator(config);
-            let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
-            const doc = await workspace.openTextDocument({
-                content: result,
-                language: "markdown"
-            });
-            await window.showTextDocument(doc, ViewColumn.Active);
-        } catch (e) {
-            console.log(e);
+        let activeTextEditor = window.activeTextEditor;
+        let config: DungeonGeneratorConfig | undefined;
+        if (activeTextEditor && activeTextEditor.selection && !activeTextEditor.selection.isEmpty) {
+            let selection = activeTextEditor.selection;
+            // Try to grab config from selection
+            let selectedText = activeTextEditor.document.getText(new Range(selection.start, selection.end));
+            if (matter.test(selectedText, { delimiters: ['---', '...'] })) {
+                let data = matter(selectedText, { delimiters: ['---', '...'] }).data;
+                
+                if (data.seed !== undefined ||
+                    data.rowCount !== undefined ||
+                    data.columnCount !== undefined ||
+                    data.dungeonLayout !== undefined ||
+                    data.minimumRoomSize !== undefined ||
+                    data.maximumRoomSize !== undefined ||
+                    data.roomLayout !== undefined ||
+                    data.corridorLayout !== undefined ||
+                    data.removeDeadendsRatio !== undefined ||
+                    data.addStairCount !== undefined ||
+                    data.mapStyle !== undefined ||
+                    data.cellSize !== undefined) {
+                    config = parseDungeonGeneratorConfig(
+                        data.seed,
+                        data.rowCount,
+                        data.columnCount,
+                        data.dungeonLayout,
+                        data.minimumRoomSize,
+                        data.maximumRoomSize,
+                        data.roomLayout,
+                        data.corridorLayout,
+                        data.removeDeadendsRatio,
+                        data.addStairCount,
+                        data.mapStyle,
+                        data.cellSize);
+                    }
+            }
+        }
+        if (!config) {
+            // Prompt for the config
+            config = await promptGenerateDungeonMapSettings();
+        }
+        if (config) {
+            try {
+                let generator = new DungeonGenerator(config);
+                let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
+                const doc = await workspace.openTextDocument({
+                    content: result,
+                    language: "markdown"
+                });
+                await window.showTextDocument(doc, ViewColumn.Active);
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
 
-    export async function promptGenerateDungeonMap(): Promise<void> {
+    async function promptGenerateDungeonMapSettings(): Promise<DungeonGeneratorConfig | undefined> {
         let config = getDungeonGeneratorConfig();
 
         // Prompt for the seed
@@ -562,16 +604,7 @@ export namespace Utils {
             return;
         }
         config.cellSize = parseInt(cellSize);
-        try {
-            let generator = new DungeonGenerator(config);
-            let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
-            const doc = await workspace.openTextDocument({
-                content: result,
-                language: "markdown"
-            });
-            await window.showTextDocument(doc, ViewColumn.Active);
-        } catch (e) {
-            console.log(e);
-        }
+
+        return config;
     }
 }
