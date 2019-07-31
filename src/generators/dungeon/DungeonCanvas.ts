@@ -25,6 +25,14 @@ export interface DungeonLabel {
     text: string;
 }
 
+export interface DungeonStair {
+    row: number;
+    col: number;
+    nextRow: number;
+    nextCol: number;
+    isDown: boolean;
+}
+
 export enum DungeonDoorType {
     Arch,
     Regular,
@@ -51,6 +59,7 @@ export class DungeonCanvas {
     private _doorPath: string = "";
     private _secretPath: string = "";
     private _labels: SvgText[] = [];
+    private _stairPath: string = "";
     private _config: DungeonCanvasConfig;
 
     public constructor(config: DungeonCanvasConfig) {
@@ -124,6 +133,70 @@ export class DungeonCanvas {
         }
     }
 
+    public fillStairs(stairs: DungeonStair[]): void {
+        let s_px = Math.floor(this.cellSize / 2);
+        let t_px = Math.floor(this.cellSize / 20) + 2;
+        for (let stair of stairs) {
+            if (stair.nextRow > stair.row) {
+                let xc = (stair.col + this.mapPadding + 0.5) * this.cellSize;
+                let y1 = (stair.row + this.mapPadding) * this.cellSize;
+                let y2 = (stair.nextRow + this.mapPadding + 1) * this.cellSize;
+
+                for (let y = y1; y < y2; y += t_px) {
+                    let dx: number;
+                    if (stair.isDown) {
+                        dx = Math.floor(((y - y1) / (y2 - y1)) * s_px);
+                    } else {
+                        dx = s_px;
+                    }
+                    this._stairPath += `M${xc - dx},${y}L${xc + dx},${y}`;
+                }
+            } else if (stair.nextRow < stair.row) {
+                let xc = (stair.col + this.mapPadding + 0.5) * this.cellSize;
+                let y1 = (stair.row + this.mapPadding + 1) * this.cellSize;
+                let y2 = (stair.nextRow + this.mapPadding) * this.cellSize;
+
+                for (let y = y1; y > y2; y -= t_px) {
+                    let dx: number;
+                    if (stair.isDown) {
+                        dx = Math.floor(((y - y1) / (y2 - y1)) * s_px);
+                    } else {
+                        dx = s_px;
+                    }
+                    this._stairPath += `M${xc - dx},${y}L${xc + dx},${y}`;
+                }
+            } else if (stair.nextCol > stair.col) {
+                let x1 = (stair.col + this.mapPadding) * this.cellSize;
+                let x2 = (stair.nextCol + this.mapPadding + 1) * this.cellSize;
+                let yc = (stair.row + this.mapPadding + 0.5) * this.cellSize;
+                
+                for (let x = x1; x < x2; x += t_px) {
+                    let dy: number;
+                    if (stair.isDown) {
+                        dy = Math.floor(((x - x1) / (x2 - x1)) * s_px);
+                    } else {
+                        dy = s_px;
+                    }
+                    this._stairPath += `M${x},${yc - dy}L${x},${yc + dy}`;
+                }
+            } else if (stair.nextCol < stair.col) {
+                let x1 = (stair.col + this.mapPadding + 1) * this.cellSize;
+                let x2 = (stair.nextCol + this.mapPadding) * this.cellSize;
+                let yc = (stair.row + this.mapPadding + 0.5) * this.cellSize;
+                
+                for (let x = x1; x > x2; x -= t_px) {
+                    let dy: number;
+                    if (stair.isDown) {
+                        dy = Math.floor(((x - x1) / (x2 - x1)) * s_px);
+                    } else {
+                        dy = s_px;
+                    }
+                    this._stairPath += `M${x},${yc - dy}L${x},${yc + dy}`;
+                }
+            }
+        }
+    }
+
     public draw(): string {
         return this.svgHead + "\n"
             + this.svgStyle + "\n"
@@ -132,6 +205,7 @@ export class DungeonCanvas {
             + this.svgDoors + "\n"
             + this.svgSecrets + "\n"
             + this.svgLabels + "\n"
+            + this.svgStairs + "\n"
             + this.svgFoot;
     }
 
@@ -150,6 +224,7 @@ export class DungeonCanvas {
             + `\n    #dungeonDoors { stroke: ${this._config.colors.foregroundStroke}; fill: ${this._config.colors.backgroundFill}; }`
             + `\n    #dungeonSecrets { stroke: ${this._config.colors.foregroundStroke}; fill: transparent; }`
             + `\n    .dungeonLabels { stroke: ${this._config.colors.foregroundStroke}; text-anchor: middle; font-size: ${this.labelFontSize}px; }`
+            + `\n    #dungeonStairs { stroke: ${this._config.colors.foregroundStroke}; fill: transparent; }`
             + "]]></style></defs>";
     }
 
@@ -173,6 +248,10 @@ export class DungeonCanvas {
         return this._labels
             .map((label) => `<text x="${label.x + (this.cellSize / 2)}" y="${label.y + this.labelFontSize}" class="${label.cssClass || ''}">${label.text}</text>`)
             .join("\n");
+    }
+
+    private get svgStairs(): string {
+        return `<path id="dungeonStairs" d="${this._stairPath}"/>`;
     }
 
     private get labelFontSize(): number {
@@ -217,10 +296,6 @@ export class DungeonCanvas {
 
     private get trapThickness(): number {
         return this.cellSize / 3;
-    }
-
-    private svgNewLine(row: number): string {
-        return `M${this.cellSize * this.mapPadding},${row * this.cellSize + (this.cellSize * this.mapPadding)}`;
     }
 
     private dedupeDoors(doors: DungeonDoor[]): DungeonDoor[] {
@@ -377,6 +452,10 @@ export class DungeonCanvas {
                 + `s${this.doorWidth / 2},-${this.trapThickness},${this.doorWidth / 2},${this.doorThickness / 2}`
                 + `v${this.jambThickness}`;
         }
+    }
+
+    private svgNewLine(row: number): string {
+        return `M${this.cellSize * this.mapPadding},${row * this.cellSize + (this.cellSize * this.mapPadding)}`;
     }
 
     private getTileCoords(tileId: number): Coordinates {

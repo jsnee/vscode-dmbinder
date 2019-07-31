@@ -1,6 +1,6 @@
 import { DungeonGeneratorConfig, DungeonLayout, RoomLayout } from "./DungeonGeneratorConfig";
 import seedrandom = require("seedrandom");
-import { DungeonCanvasConfig, DungeonCanvas, DungeonCanvasColors, DungeonDoor, DungeonDoorType, DungeonLabel } from "./DungeonCanvas";
+import { DungeonCanvasConfig, DungeonCanvas, DungeonCanvasColors, DungeonDoor, DungeonDoorType, DungeonLabel, DungeonStair } from "./DungeonCanvas";
 
 enum DungeonCellType {
     Nothing = 0 << 0,
@@ -404,6 +404,7 @@ class DungeonGeneratorRaster {
         canvas.fillSpaces(foregroundTiles);
         canvas.fillDoors(this.getDoors());
         canvas.populateLabels(this.getLabels());
+        canvas.fillStairs(this.getStairs());
         return canvas.draw();
     }
 
@@ -464,6 +465,20 @@ class DungeonGeneratorRaster {
                     }
                 }
             }
+        }
+        return results;
+    }
+
+    private getStairs(): DungeonStair[] {
+        let results: DungeonStair[] = [];
+        for (let stair of this.stairs) {
+            results.push({
+                row: stair.row,
+                col: stair.col,
+                nextRow: stair.nextRow,
+                nextCol: stair.nextCol,
+                isDown: stair.key && stair.key === "down" ? true : false
+            });
         }
         return results;
     }
