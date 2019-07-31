@@ -1,6 +1,6 @@
 import { DungeonGeneratorConfig, DungeonLayout, RoomLayout } from "./DungeonGeneratorConfig";
 import seedrandom = require("seedrandom");
-import { DungeonCanvasConfig, DungeonCanvas, DungeonCanvasColors, DungeonDoor, DungeonDoorType } from "./DungeonCanvas";
+import { DungeonCanvasConfig, DungeonCanvas, DungeonCanvasColors, DungeonDoor, DungeonDoorType, DungeonLabel } from "./DungeonCanvas";
 
 enum DungeonCellType {
     Nothing = 0 << 0,
@@ -382,7 +382,7 @@ class DungeonGeneratorRaster {
         this.emptyBlocks();
     }
 
-    public drawMap(colors: DungeonCanvasColors, scale: number = 1.0, mapPadding: number = 1): string {
+    public drawMap(colors: DungeonCanvasColors, mapPadding: number, scale: number = 1.0): string {
         let config: DungeonCanvasConfig = {
             width: this._numCols,
             height: this._numRows,
@@ -403,6 +403,7 @@ class DungeonGeneratorRaster {
         }
         canvas.fillSpaces(foregroundTiles);
         canvas.fillDoors(this.getDoors());
+        canvas.populateLabels(this.getLabels());
         return canvas.draw();
     }
 
@@ -439,6 +440,30 @@ class DungeonGeneratorRaster {
                 doorType: doorType,
                 isHorizontal: isHorizontal
             });
+        }
+        return results;
+    }
+
+    private getLabels(): DungeonLabel[] {
+        let results: DungeonLabel[] = [];
+        for (let row = 0; row <= this._numRows; row++) {
+            for (let col = 0; col <= this._numCols; col++) {
+                if (this.cells[row][col] & DungeonCellType.OpenSpace) {
+                    let tileId = (row * this._numCols) + col;
+                    if (this.cells[row][col] & DungeonCellType.OpenSpace) {
+                        let charCode = (this.cells[row][col] >> 24) & (DungeonCellType.Label >> 24);//255
+                        if (charCode) {
+                            let char = String.fromCharCode(charCode);
+                            if (/^\d/.test(char)) {
+                                results.push({
+                                    tileId: tileId,
+                                    text: char
+                                });
+                            }
+                        }
+                    }
+                }
+            }
         }
         return results;
     }
@@ -981,12 +1006,14 @@ export class DungeonGenerator {
         raster.emplaceStairs(this._config.addStairCount);
         raster.cleanDungeon(this._config.removeDeadendsRatio);
 
-        return raster.drawMap({
-            backgroundFill: "black",
-            foregroundFill: "white",
-            foregroundStroke: "black",
-            textStroke: "black"
-        });
+        return raster.drawMap(
+            {
+                backgroundFill: "black",
+                foregroundFill: "white",
+                foregroundStroke: "black",
+                textStroke: "black"
+            },
+            this._config.mapPadding);
     }
 
     private validateConfig(): void {

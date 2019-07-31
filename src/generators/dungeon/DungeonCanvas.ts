@@ -20,6 +20,11 @@ export interface DungeonDoor {
     isHorizontal: boolean;
 }
 
+export interface DungeonLabel {
+    tileId: number;
+    text: string;
+}
+
 export enum DungeonDoorType {
     Arch,
     Regular,
@@ -29,10 +34,23 @@ export enum DungeonDoorType {
     Portcullis
 }
 
+interface SvgText {
+    x: number;
+    y: number;
+    text: string;
+    cssClass?: string;
+}
+
+interface Coordinates {
+    x: number;
+    y: number;
+}
+
 export class DungeonCanvas {
     private _foregroundPath: string = "";
     private _doorPath: string = "";
     private _secretPath: string = "";
+    private _labels: SvgText[] = [];
     private _config: DungeonCanvasConfig;
 
     public constructor(config: DungeonCanvasConfig) {
@@ -94,6 +112,18 @@ export class DungeonCanvas {
         }
     }
 
+    public populateLabels(labels: DungeonLabel[]): void {
+        for (let label of labels) {
+            let pixelCoords = this.getPixelCoords(label.tileId);
+            this._labels.push({
+                x: pixelCoords.x,
+                y: pixelCoords.y,
+                cssClass: "dungeonLabels",
+                text: label.text
+            });
+        }
+    }
+
     public draw(): string {
         return this.svgHead + "\n"
             + this.svgStyle + "\n"
@@ -101,11 +131,12 @@ export class DungeonCanvas {
             + this.svgForeground + "\n"
             + this.svgDoors + "\n"
             + this.svgSecrets + "\n"
+            + this.svgLabels + "\n"
             + this.svgFoot;
     }
 
     private get svgHead(): string {
-        return `<svg width="${(this.width + (2 * this.MapPadding)) * this.cellSize}" height="${(this.height + (2 * this.MapPadding)) * this.cellSize}">`;
+        return `<svg width="${(this.width + (2 * this.mapPadding)) * this.cellSize}" height="${(this.height + (2 * this.mapPadding)) * this.cellSize}">`;
     }
 
     private get svgFoot(): string {
@@ -118,15 +149,12 @@ export class DungeonCanvas {
             + `\n    #dungeonForeground { stroke: ${this._config.colors.foregroundStroke}; fill: ${this._config.colors.foregroundFill}; }`
             + `\n    #dungeonDoors { stroke: ${this._config.colors.foregroundStroke}; fill: ${this._config.colors.backgroundFill}; }`
             + `\n    #dungeonSecrets { stroke: ${this._config.colors.foregroundStroke}; fill: transparent; }`
+            + `\n    .dungeonLabels { stroke: ${this._config.colors.foregroundStroke}; text-anchor: middle; font-size: ${this.labelFontSize}px; }`
             + "]]></style></defs>";
     }
 
-    private get MapPadding(): number {
-        return this._config.mapPadding;
-    }
-
     private get svgBackground(): string {
-        return `<rect id="dungeonBackground" width="${(this.width + (2 * this.MapPadding))  * this.cellSize}" height="${(this.height + (2 * this.MapPadding)) * this.cellSize}"/>`;
+        return `<rect id="dungeonBackground" width="${(this.width + (2 * this.mapPadding))  * this.cellSize}" height="${(this.height + (2 * this.mapPadding)) * this.cellSize}"/>`;
     }
 
     private get svgForeground(): string {
@@ -139,6 +167,20 @@ export class DungeonCanvas {
 
     private get svgSecrets(): string {
         return `<path id="dungeonSecrets" d="${this._secretPath}"/>`;
+    }
+
+    private get svgLabels(): string {
+        return this._labels
+            .map((label) => `<text x="${label.x + (this.cellSize / 2)}" y="${label.y + this.labelFontSize}" class="${label.cssClass || ''}">${label.text}</text>`)
+            .join("\n");
+    }
+
+    private get labelFontSize(): number {
+        return this.cellSize * 2 / 3;
+    }
+
+    private get mapPadding(): number {
+        return this._config.mapPadding;
     }
 
     private get cellSize(): number {
@@ -178,7 +220,7 @@ export class DungeonCanvas {
     }
 
     private svgNewLine(row: number): string {
-        return `M${this.cellSize},${row * this.cellSize + (this.cellSize * this.MapPadding)}`;
+        return `M${this.cellSize * this.mapPadding},${row * this.cellSize + (this.cellSize * this.mapPadding)}`;
     }
 
     private dedupeDoors(doors: DungeonDoor[]): DungeonDoor[] {
@@ -320,9 +362,8 @@ export class DungeonCanvas {
     }
 
     private drawSecret(door: DungeonDoor): void {
-        let col = door.tileId % this.width;
-        let row = (door.tileId - col) / this.width;
-        this._secretPath += `M${this.cellSize * (col + this.MapPadding)},${this.cellSize * (row + this.MapPadding)}`;
+        let pixelCoords = this.getPixelCoords(door.tileId);
+        this._secretPath += `M${pixelCoords.x},${pixelCoords.y}`;
         if (door.isHorizontal) {
             this._secretPath += `m${this.cellMidpoint + (this.doorThickness / 2) + this.jambThickness},${this.jambWidth + 1}`
                 + `h-${this.jambThickness}`
@@ -336,5 +377,22 @@ export class DungeonCanvas {
                 + `s${this.doorWidth / 2},-${this.trapThickness},${this.doorWidth / 2},${this.doorThickness / 2}`
                 + `v${this.jambThickness}`;
         }
+    }
+
+    private getTileCoords(tileId: number): Coordinates {
+        let col = tileId % this.width;
+        let row = (tileId - col) / this.width;
+        return {
+            x: col + this.mapPadding,
+            y: row + this.mapPadding
+        };
+    }
+
+    private getPixelCoords(tileId: number): Coordinates {
+        let tileCoords = this.getTileCoords(tileId);
+        return {
+            x: this.cellSize * tileCoords.x,
+            y: this.cellSize * tileCoords.y
+        };
     }
 }
