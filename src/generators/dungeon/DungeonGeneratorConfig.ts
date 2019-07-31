@@ -11,6 +11,7 @@ export interface DungeonGeneratorConfig {
     addStairCount: number;
     mapStyle: MapStyle;
     cellSize: number;
+    mapPadding: number;
 }
 
 export function getDungeonGeneratorConfig(
@@ -25,7 +26,8 @@ export function getDungeonGeneratorConfig(
     removeDeadendsRatio: number = 50,
     addStairCount: number = 2,
     mapStyle: MapStyle = MapStyle.Standard,
-    cellSize: number = 18
+    cellSize: number = 18,
+    mapPadding: number = 1
 ): DungeonGeneratorConfig {
     return {
         seed: seed,
@@ -39,7 +41,8 @@ export function getDungeonGeneratorConfig(
         removeDeadendsRatio: removeDeadendsRatio,
         addStairCount: addStairCount,
         mapStyle: mapStyle,
-        cellSize: cellSize
+        cellSize: cellSize,
+        mapPadding: mapPadding
     };
 }
 
@@ -55,66 +58,58 @@ export function parseDungeonGeneratorConfig(
     removeDeadendsRatio?: string,
     addStairCount?: string,
     mapStyle?: string,
-    cellSize?: string
+    cellSize?: string,
+    mapPadding?: string
 ): DungeonGeneratorConfig {
     return getDungeonGeneratorConfig(
         seed,
-        !rowCount || isNaN(parseInt(rowCount)) ? undefined : parseInt(rowCount),
-        !columnCount || isNaN(parseInt(columnCount)) ? undefined : parseInt(columnCount),
+        parseIntOrUndefined(rowCount),
+        parseIntOrUndefined(columnCount),
         parseDungeonLayout(dungeonLayout),
-        !minimumRoomSize || isNaN(parseInt(minimumRoomSize)) ? undefined : parseInt(minimumRoomSize),
-        !maximumRoomSize || isNaN(parseInt(maximumRoomSize)) ? undefined : parseInt(maximumRoomSize),
+        parseIntOrUndefined(minimumRoomSize),
+        parseIntOrUndefined(maximumRoomSize),
         parseRoomLayout(roomLayout),
         parseCorridorLayout(corridorLayout),
-        !removeDeadendsRatio || isNaN(parseInt(removeDeadendsRatio)) ? undefined : parseInt(removeDeadendsRatio),
-        !addStairCount || isNaN(parseInt(addStairCount)) ? undefined : parseInt(addStairCount),
+        parseIntOrUndefined(removeDeadendsRatio),
+        parseIntOrUndefined(addStairCount),
         parseMapStyle(mapStyle),
-        !cellSize || isNaN(parseInt(cellSize)) ? undefined : parseInt(cellSize),
+        parseIntOrUndefined(cellSize),
+        parseIntOrUndefined(mapPadding),
     );
 }
 
+function parseIntOrUndefined(value?: string): number | undefined {
+    return !value || isNaN(parseInt(value)) ? undefined : parseInt(value);
+}
+
 function parseDungeonLayout(value?: string): DungeonLayout | undefined {
-    if (value === "None") {
-        return DungeonLayout.None;
-    }
-    if (value === "Box") {
-        return DungeonLayout.Box;
-    }
-    if (value === "Cross") {
-        return DungeonLayout.Cross;
-    }
-    if (value === "Round") {
-        return DungeonLayout.Round;
+    if (value) {
+        let key = value as keyof typeof DungeonLayout;
+        return DungeonLayout[key];
     }
     return;
 }
 
 function parseRoomLayout(value?: string): RoomLayout | undefined {
-    if (value === "Scattered") {
-        return RoomLayout.Scattered;
-    }
-    if (value === "Packed") {
-        return RoomLayout.Packed;
+    if (value) {
+        let key = value as keyof typeof RoomLayout;
+        return RoomLayout[key];
     }
     return;
 }
 
 function parseCorridorLayout(value?: string): CorridorLayout | undefined {
-    if (value === "Bent") {
-        return CorridorLayout.Bent;
-    }
-    if (value === "Labyrinth") {
-        return CorridorLayout.Labyrinth;
-    }
-    if (value === "Straight") {
-        return CorridorLayout.Straight;
+    if (value) {
+        let key = value as keyof typeof CorridorLayout;
+        return CorridorLayout[key];
     }
     return;
 }
 
 function parseMapStyle(value?: string): MapStyle | undefined {
-    if (value === "Standard") {
-        return MapStyle.Standard;
+    if (value) {
+        let key = value as keyof typeof MapStyle;
+        return MapStyle[key];
     }
     return;
 }
@@ -138,5 +133,5 @@ export enum CorridorLayout {
 }
 
 export enum MapStyle {
-    Standard
+    Standard = "None"
 }

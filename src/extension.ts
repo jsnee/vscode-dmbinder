@@ -3,7 +3,7 @@ import { renderHomebrew } from './renderer';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
 import { Utils } from './Utils';
-// import { PandocConverter, PandocFormat } from './PandocConverter';
+import { ExtensionCommands } from './ExtensionCommands';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -48,40 +48,40 @@ export async function activate(context: ExtensionContext) {
     let brewTreeItemDisposable = commands.registerCommand('dmbinder.item.brew', renderHomebrew);
     context.subscriptions.push(brewTreeItemDisposable);
 
-    let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', Utils.renderCampaignSources);
+    let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', ExtensionCommands.renderCampaignSources);
     context.subscriptions.push(brewCampaignDisposable);
 
-    let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', Utils.editTreeItem);
+    let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', ExtensionCommands.editTreeItem);
     context.subscriptions.push(editTreeItemDisposable);
 
-    let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', Utils.promptInitCampaign);
+    let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', ExtensionCommands.promptInitCampaign);
     context.subscriptions.push(initCampaignDisposable);
 
-    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', Utils.promptBuildComponent);
+    let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', ExtensionCommands.promptBuildComponent);
     context.subscriptions.push(buildComponentDisposable);
 
-    let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', Utils.promptInsertComponent);
+    let insertComponentDisposable = commands.registerCommand('dmbinder.component.insert', ExtensionCommands.promptInsertComponent);
     context.subscriptions.push(insertComponentDisposable);
 
-    let generateDungeon = commands.registerCommand('dmbinder.dungeon.generate', Utils.generateDungeonMap);
+    let generateDungeon = commands.registerCommand('dmbinder.dungeon.generate', ExtensionCommands.generateDungeonMap);
     context.subscriptions.push(generateDungeon);
 
-    let generateElementDisposable = commands.registerCommand('dmbinder.generator.generateElement', Utils.generateElementFromConfig);
+    let generateElementDisposable = commands.registerCommand('dmbinder.generator.generateElement', ExtensionCommands.generateElementFromConfig);
     context.subscriptions.push(generateElementDisposable);
 
-    let generateElementWithPromptDisposable = commands.registerCommand('dmbinder.generator.generateElementWithPrompt', Utils.generateElementFromConfigPromptArgs);
+    let generateElementWithPromptDisposable = commands.registerCommand('dmbinder.generator.generateElementWithPrompt', ExtensionCommands.generateElementFromConfigPromptArgs);
     context.subscriptions.push(generateElementWithPromptDisposable);
 
-    let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', Utils.promptChooseChromeExecutable);
+    let chooseChromeExecDisposable = commands.registerCommand('dmbinder.config.chooseChromePath', ExtensionCommands.promptChooseChromeExecutable);
     context.subscriptions.push(chooseChromeExecDisposable);
 
-    let downloadChromiumDisposable = commands.registerCommand('dmbinder.config.downloadChromiumRevision', Utils.promptDownloadChromiumRevision);
+    let downloadChromiumDisposable = commands.registerCommand('dmbinder.config.downloadChromiumRevision', ExtensionCommands.promptDownloadChromiumRevision);
     context.subscriptions.push(downloadChromiumDisposable);
 
-    let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', Utils.toggleTreeViewStyle);
+    let toggleViewStyleDisposable = commands.registerCommand('dmbinder.config.toggleViewStyle', ExtensionCommands.toggleTreeViewStyle);
     context.subscriptions.push(toggleViewStyleDisposable);
 
-    let toggleHomebreweryEnabledDisposable = commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', Utils.toggleHomebreweryEnabled);
+    let toggleHomebreweryEnabledDisposable = commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', ExtensionCommands.toggleHomebreweryEnabled);
     context.subscriptions.push(toggleHomebreweryEnabledDisposable);
 
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
