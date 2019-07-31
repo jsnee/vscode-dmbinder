@@ -95,7 +95,7 @@ export async function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(onEnabledChangeListener);
 
-    campaignStatus.updateStatusBar();
+    await campaignStatus.updateStatusBar();
 
     return {
         extendMarkdownIt(md: markdownit) {
