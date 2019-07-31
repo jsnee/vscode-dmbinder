@@ -274,6 +274,10 @@
         "snippets": [
             {
                 "language": "markdown",
+                "path": "./snippets/configMetadata.markdown.json"
+            },
+            {
+                "language": "markdown",
                 "path": "./snippets/homebrewery.markdown.json"
             },
             {

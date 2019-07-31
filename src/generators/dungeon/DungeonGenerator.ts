@@ -382,13 +382,14 @@ class DungeonGeneratorRaster {
         this.emptyBlocks();
     }
 
-    public drawMap(colors: DungeonCanvasColors, scale: number = 1.0): string {
+    public drawMap(colors: DungeonCanvasColors, scale: number = 1.0, mapPadding: number = 1): string {
         let config: DungeonCanvasConfig = {
             width: this._numCols,
             height: this._numRows,
             cellSize: this._cellSize,
             colors: colors,
-            scale: scale
+            scale: scale,
+            mapPadding: mapPadding
         };
         let canvas = new DungeonCanvas(config);
         let foregroundTiles: number[] = [];

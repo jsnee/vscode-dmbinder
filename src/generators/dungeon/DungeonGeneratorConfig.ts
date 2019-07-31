@@ -133,5 +133,5 @@ export enum CorridorLayout {
 }
 
 export enum MapStyle {
-    Standard = "None"
+    Standard
 }

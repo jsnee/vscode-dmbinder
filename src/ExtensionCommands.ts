@@ -20,19 +20,6 @@ export namespace ExtensionCommands {
             openLabel: "Use Selected Chrome",
             canSelectMany: false
         });
-        if (!execPath && DMBSettings.chromeExecutablePath) {
-            // let items: QuickPickItem[] = [
-            //     {
-            //         label: "Keep Existing",
-            //         description: DMBSettings.chromeExecutablePath
-            //     },
-            //     {
-            //         label: "Clear Existing",
-            //         description: "Use Default Instead"
-            //     }
-            // ];
-            // const keepExistingChoice = await window.showQuickPick(items, { })
-        }
         if (execPath && execPath.length === 1 && await fse.pathExists(execPath[0].fsPath)) {
             await DMBSettings.updateChromeExecutablePath(execPath[0].fsPath);
         }
@@ -239,7 +226,8 @@ export namespace ExtensionCommands {
                     data.removeDeadendsRatio !== undefined ||
                     data.addStairCount !== undefined ||
                     data.mapStyle !== undefined ||
-                    data.cellSize !== undefined) {
+                    data.cellSize !== undefined ||
+                    data.mapPadding !== undefined) {
                     config = parseDungeonGeneratorConfig(
                         data.seed,
                         data.rowCount,
@@ -252,7 +240,8 @@ export namespace ExtensionCommands {
                         data.removeDeadendsRatio,
                         data.addStairCount,
                         data.mapStyle,
-                        data.cellSize);
+                        data.cellSize,
+                        data.mapPadding);
                     }
             }
         }

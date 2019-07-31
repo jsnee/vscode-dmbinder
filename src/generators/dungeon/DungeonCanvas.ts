@@ -4,6 +4,7 @@ export interface DungeonCanvasConfig {
     colors: DungeonCanvasColors;
     cellSize: number;
     scale: number;
+    mapPadding: number;
 }
 
 export interface DungeonCanvasColors {
@@ -91,7 +92,6 @@ export class DungeonCanvas {
                 }
             }
         }
-        console.log(`Doors missed: ${doors.length}`);
     }
 
     public draw(): string {
@@ -122,7 +122,7 @@ export class DungeonCanvas {
     }
 
     private get MapPadding(): number {
-        return 1;
+        return this._config.mapPadding;
     }
 
     private get svgBackground(): string {

@@ -1,0 +1,23 @@
+{
+    "Dungeon Generator Config": {
+        "prefix": "dmbinder-dungenerator-config",
+        "description": "YAML-based configuration for the DMBinder dungeon generator",
+        "body": [
+            "---",
+            "seed: ${1:$CURRENT_YEAR$CURRENT_MONTH$CURRENT_DATE$CURRENT_HOUR$CURRENT_MINUTE$CURRENT_SECOND}",
+            "rowCount: ${2:39}",
+            "columnCount: ${3:39}",
+            "dungeonLayout: ${4|None,Box,Cross,Round|}",
+            "minimumRoomSize: ${5:3}",
+            "maximumRoomSize: ${6:9}",
+            "roomLayout: ${7|Packed,Scattered|}",
+            "corridorLayout: ${8|Bent,Labyrinth,Straight|}",
+            "removeDeadendsRatio: ${9:50}",
+            "addStairCount: ${10:2}",
+            "mapStyle: ${11|Standard|}",
+            "cellSize: ${12:18}",
+            "mapPadding: ${13:1}",
+            "..."
+        ]
+    }
+}

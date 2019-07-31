@@ -7,7 +7,6 @@ import * as path from 'path';
 
 class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: Event<ITreeItem>;
-
     private _onDidChangeTreeData: EventEmitter<ITreeItem>;
 
     constructor() {

@@ -4,6 +4,7 @@ import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
 import { Utils } from './Utils';
 import { ExtensionCommands } from './ExtensionCommands';
+import { campaignStatus } from './CampaignStatus';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -35,9 +36,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider));
     context.subscriptions.push(window.registerTreeDataProvider('dmbinder.generators', tv.generatorsExplorerProvider));
 
+    context.subscriptions.push(campaignStatus.statusBarItem);
+
     let configWatcherDisposable = workspace.createFileSystemWatcher("**/.dmbinder/*.json", true, false, true);
-    let onConfigChangeDisposable = configWatcherDisposable.onDidChange(() => {
+    let onConfigChangeDisposable = configWatcherDisposable.onDidChange(async () => {
         tv.refresh();
+        await campaignStatus.updateStatusBar();
     });
     context.subscriptions.push(onConfigChangeDisposable);
     context.subscriptions.push(configWatcherDisposable);
@@ -90,6 +94,8 @@ export async function activate(context: ExtensionContext) {
         }
     });
     context.subscriptions.push(onEnabledChangeListener);
+
+    campaignStatus.updateStatusBar();
 
     return {
         extendMarkdownIt(md: markdownit) {
