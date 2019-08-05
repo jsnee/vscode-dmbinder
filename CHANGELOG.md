@@ -1,6 +1,6 @@
 # Change Log
 ## 0.3.1
-- Added a dungeon generator, based on the one from donjon.bin.sh written in Perl
+- Added a dungeon generator, based on the one from donjon.bin.sh originally written in Perl
 
 ## 0.3.0
 - Removed abandoned "conditionalValues" feature from content generator code and dmbgen.json schema definition

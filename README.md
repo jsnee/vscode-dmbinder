@@ -12,6 +12,7 @@ Visual Studio Code extension for managing campaign documents.
 - DMBinder view that helps organize campaign documents
 - Randomly generate dungeon maps
 - Generation of content (like names, titles, locations, etc.) using randomized lists or Markov chains
+- Random generation of basic dungeon maps
 
 <details>
 <summary>DMBinder Explorer screenshot</summary>
@@ -445,7 +446,11 @@ In the DMBinder Explorer, you can click on the "Render Markdown to PDF with Home
 Additionally, you can render all sources for a single campaign by using the `dmbinder.campaign.brew` command. If there is more than one campaign in the current workspace, it will list all of them and prompt you to select which campaign.
 
 ### Content Generation
-Coming Soon!
+Documentation coming soon.
+
+## Dungeon Generator
+Based on the logic behind [donjon.bin.sh dungeon generator](https://donjon.bin.sh/code/dungeon/)
+More documentation coming soon.
 
 ### Included Snippets
 Coming Soon!
@@ -473,9 +478,6 @@ Below is an example Campaign configuration file:
     "outDirectory": "./out/"
 }
 ```
-
-## Dungeon Generator
-Based on the logic behind [donjon.bin.sh dungeon generator](https://donjon.bin.sh/code/dungeon/)
 
 See [generator-dmbinder](https://github.com/jsnee/generator-dmbinder) for a yeoman generator to help bootstrap a campaign binder.
 
