@@ -1,4 +1,7 @@
 # Change Log
+## 0.3.2
+- Added a bunch of Homebrewery snippets
+
 ## 0.3.1
 - Added a dungeon generator, based on the one from donjon.bin.sh originally written in Perl
 

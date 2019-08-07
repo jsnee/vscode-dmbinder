@@ -57,5 +57,59 @@
             "",
             "</div>"
         ]
+    },
+    "Homebrewery Page Footer": {
+        "prefix": "phb-page-footer",
+        "description": "Homebrewery page footer and auto page numbering",
+        "body": [
+            "<div class='pageNumber auto'></div>",
+            "<div class='footnote'>$0</div>"
+        ]
+    },
+    "Homebrewery Print Styles": {
+        "prefix": "phb-print",
+        "description": "Homebrewery print styling (to save color ink)",
+        "body": [
+            "<style>",
+            " .phb#p1{ text-align:center; }",
+            " .phb#p1:after{ display:none; }",
+            "</style>"
+        ]
+    },
+    "Homebrewery Wide Block": {
+        "prefix": "phb-wide-block",
+        "description": "Homebrewery 'wide' block that spans the whole page",
+        "body": [
+            "<div class='wide'>",
+            "",
+            "$0",
+            "</div>"
+        ]
+    },
+    "Homebrewery Class Table": {
+        "prefix": "phb-class-table",
+        "description": "Homebrewery class table",
+        "body": [
+            "<div class='classTable'>",
+            "",
+            "##### ${className}",
+            "| Level | Proficiency Bonus | Features |",
+            "|:-----:|:-----------------:|:--------:|",
+            "| 1st   | +1                |          |",
+            "</div>"
+        ]
+    },
+    "Homebrewery Wide Class Table": {
+        "prefix": "phb-class-table-wide",
+        "description": "Homebrewery page wide class table",
+        "body": [
+            "<div class='classTable wide'>",
+            "",
+            "##### ${className}",
+            "| Level | Proficiency Bonus | Features |",
+            "|:-----:|:-----------------:|:--------:|",
+            "| 1st   | +1                |          |",
+            "</div>"
+        ]
     }
 }
