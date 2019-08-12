@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -36,6 +36,7 @@
         "onCommand:dmbinder.campaign.init",
         "onCommand:dmbinder.campaign.brew",
         "onCommand:dmbinder.campaign.refresh",
+        "onCommand:dmbinder.component.autogenerate",
         "onCommand:dmbinder.component.build",
         "onCommand:dmbinder.component.insert",
         "onCommand:dmbinder.config.chooseChromePath",
@@ -46,7 +47,6 @@
         "onCommand:dmbinder.item.edit",
         "onCommand:dmbinder.generator.generateElement",
         "onCommand:dmbinder.generator.generateElementWithPrompt",
-        "onCommand:dmbinder.foo.bar",
         "onView:dmbinder"
     ],
     "main": "./out/extension.js",
@@ -69,6 +69,25 @@
                 "icon": {
                     "light": "img/light/refresh.svg",
                     "dark": "img/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "dmbinder.component.autogenerate",
+                "title": "Automatically generate component blocks in the current document",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.component.build",
+                "title": "Build component",
+                "category": "DM Binder"
+            },
+            {
+                "command": "dmbinder.component.insert",
+                "title": "Insert component",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/insertComponent.svg",
+                    "dark": "img/dark/insertComponent.svg"
                 }
             },
             {
@@ -110,20 +129,6 @@
                 }
             },
             {
-                "command": "dmbinder.component.build",
-                "title": "Build component",
-                "category": "DM Binder"
-            },
-            {
-                "command": "dmbinder.component.insert",
-                "title": "Insert component",
-                "category": "DM Binder",
-                "icon": {
-                    "light": "img/light/insertComponent.svg",
-                    "dark": "img/dark/insertComponent.svg"
-                }
-            },
-            {
                 "command": "dmbinder.dungeon.generate",
                 "title": "Generate Dungeon",
                 "category": "DM Binder"
@@ -155,6 +160,10 @@
                 "dmbinder.homebrewPreviewEnabled": {
                     "type": "boolean",
                     "description": "Flag to render Markdown files using PHB styles."
+                },
+                "dmbinder.autogenerateOnRender": {
+                    "type": "boolean",
+                    "description": "Automatically regenerate any autogen blocks when rendering source files"
                 },
                 "dmbinder.treeViewStyle": {
                     "type": "string",
@@ -346,6 +355,7 @@
         "fs-extra": "^7.0.1",
         "gray-matter": "^4.0.2",
         "markdown-it": "^8.4.2",
+        "node-html-parser": "^1.1.16",
         "puppeteer": "^1.12.2",
         "seedrandom": "^3.0.1"
     }

@@ -252,7 +252,7 @@ export namespace ExtensionCommands {
         if (config) {
             try {
                 let generator = new DungeonGenerator(config);
-                let result = "<html>\n<body>\n" + generator.generate() + "\n</body>\n</html>";
+                let result = generator.generate();
                 const doc = await workspace.openTextDocument({
                     content: result,
                     language: "markdown"
@@ -261,6 +261,15 @@ export namespace ExtensionCommands {
             } catch (e) {
                 console.log(e);
             }
+        }
+    }
+
+    export async function autogenerateComponents(): Promise<void> {
+        let editor = window.activeTextEditor;
+        if (editor) {
+            await ComponentHelpers.autogenerateOpenDocumentComponents(editor.document);
+        } else {
+            window.showWarningMessage("No opened document found.");
         }
     }
 }

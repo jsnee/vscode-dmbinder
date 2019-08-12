@@ -61,6 +61,9 @@ export async function activate(context: ExtensionContext) {
     let initCampaignDisposable = commands.registerCommand('dmbinder.campaign.init', ExtensionCommands.promptInitCampaign);
     context.subscriptions.push(initCampaignDisposable);
 
+    let autogenComponentDisposable = commands.registerCommand('dmbinder.component.autogenerate', ExtensionCommands.autogenerateComponents);
+    context.subscriptions.push(autogenComponentDisposable);
+
     let buildComponentDisposable = commands.registerCommand('dmbinder.component.build', ExtensionCommands.promptBuildComponent);
     context.subscriptions.push(buildComponentDisposable);
 

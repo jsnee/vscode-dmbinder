@@ -1,4 +1,7 @@
 # Change Log
+## 0.3.3
+- Added autogeneration of components
+
 ## 0.3.2
 - Added a bunch of Homebrewery snippets
 
