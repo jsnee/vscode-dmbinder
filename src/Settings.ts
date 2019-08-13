@@ -44,6 +44,18 @@ class Settings {
     public async updateGenerateGettingStartedEnabled(val: boolean | undefined): Promise<void> {
         return await workspace.getConfiguration('dmbinder').update('generateGettingStartedEnabled', val);
     }
+
+    public get autogenerateOnRender(): boolean | undefined {
+        return workspace.getConfiguration('dmbinder').get('autogenerateOnRender');
+    }
+
+    public set autogenerateOnRender(val: boolean | undefined) {
+        workspace.getConfiguration('dmbinder').update('autogenerateOnRender', val);
+    }
+
+    public async updateAutogenerateOnRender(val: boolean | undefined): Promise<void> {
+        return await workspace.getConfiguration('dmbinder').update('autogenerateOnRender', val);
+    }
 }
 
 export const DMBSettings: Settings = new Settings();

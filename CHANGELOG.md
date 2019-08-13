@@ -1,4 +1,7 @@
 # Change Log
+## 0.3.3
+- Make sure the dmbinder.autogenerateOnRender setting actually does something (whoops)
+
 ## 0.3.2
 - Added a bunch of Homebrewery snippets
 - Added autogeneration of components
