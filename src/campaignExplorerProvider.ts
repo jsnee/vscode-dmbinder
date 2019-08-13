@@ -22,6 +22,10 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
 
+    public async getParent(element: ITreeItem): Promise<ITreeItem | null | undefined> {
+        throw Error("CampaignExplorerProvider.getParent() not implemented yet!");
+    }
+
     public async getChildren(element?: ITreeItem, itemType?: CampaignItemType): Promise<ITreeItem[] | null | undefined> {
         if (element === undefined) {
             if (!workspace.workspaceFolders) {

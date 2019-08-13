@@ -138,7 +138,6 @@ export class CampaignTreeItem implements ITreeItem {
     }
 
     private async _listFilteredNodeChildren(contextValue: string, parentUri: Uri, contextPath: string): Promise<ITreeItem[]> {
-        //Promise.all((await fse.readdir(uri.fsPath)).map(async childPath => this._getChildren(contextValue, path.join(uri.fsPath, childPath), ctxPath)))
         let children = await fse.readdir(parentUri.fsPath);
         let result: ITreeItem[] = [];
         for (let childFragment of children) {

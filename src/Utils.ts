@@ -1,8 +1,13 @@
 import { DMBSettings } from './Settings';
 import * as fse from 'fs-extra';
+import * as path from 'path';
 import { BrowserFetcher } from './BrowserFetcher';
-import { window, extensions, MessageItem } from 'vscode';
+import { window, extensions, MessageItem, TreeView, QuickPickItem, QuickPickOptions } from 'vscode';
 import { ExtensionCommands } from './ExtensionCommands';
+import { ITreeItem } from './models/ITreeItem';
+import { CampaignHelpers } from './helpers/CampaignHelpers';
+import { campaignExplorerProvider } from './campaignExplorerProvider';
+import { CampaignItemType } from './models/CampaignTreeItem';
 
 export namespace Utils {
     export function alertError(error: Error): Thenable<void> {
@@ -61,5 +66,106 @@ export namespace Utils {
                     return Promise.resolve();
             }
         });
+    }
+
+    async function _addNewTreeItem(iTreeItem: ITreeItem, addFolder: boolean): Promise<void> {
+        const treeItem = await iTreeItem.getTreeItem();
+        if (!treeItem.resourceUri) {
+            let parentTreeItem = await campaignExplorerProvider.getParent(iTreeItem);
+            if (parentTreeItem) {
+                return await _addNewTreeItem(parentTreeItem, addFolder);
+            }
+            throw Error("Can't create file/folder here!");
+        }
+        let contextFolder = treeItem.resourceUri.fsPath;
+        if (iTreeItem.getContextValue().endsWith("Item")) {
+            contextFolder = path.dirname(contextFolder);
+        }
+        if (addFolder) {
+            await CampaignHelpers.promptCreateFolder(contextFolder);
+        } else {
+            await CampaignHelpers.promptCreateFolder(contextFolder);
+        }
+    }
+
+    async function promptChooseCampaignItemType(isFolder: boolean): Promise<CampaignItemType | undefined> {
+        //TODO: Add human readable descriptions to these options
+        const qpItemTypes: QuickPickItem[] = [
+            { label: "Source" },
+            { label: "Template" },
+            { label: "Component" },
+            { label: "Generator" }
+        ];
+        const qpOpts: QuickPickOptions = {
+            canPickMany: false,
+            placeHolder: `Which Type of Item${isFolder ? " Folder" : ""} Are You Trying to Add?`
+        };
+        let itemType = await window.showQuickPick(qpItemTypes, qpOpts);
+        if (itemType) {
+            return parseCampaignItemType(itemType.label);
+        }
+        return;
+    }
+
+    export function addNewTreeItem(treeView: TreeView<ITreeItem>, treeType?: CampaignItemType, addFolder: boolean = false): () => Promise<void> {
+        return async () => {
+            if (treeView.selection.length) {
+                let iTreeItem = treeView.selection[0];
+                await _addNewTreeItem(iTreeItem, addFolder);
+            } else {
+                let campaign = await CampaignHelpers.promptSelectCampaign(undefined, true);
+                if (campaign) {
+                    if (!treeType) {
+                        treeType = await promptChooseCampaignItemType(addFolder);
+                    }
+                    let createdPath: string | undefined;
+                    if (addFolder) {
+                        createdPath = await CampaignHelpers.promptCreateFolder(campaign.campaignPath);
+                    } else {
+                        // Make file
+                    }
+                    if (createdPath) {
+                        if (treeType) {
+                            let relativePath = path.relative(campaign.campaignPath, createdPath);
+                            relativePath = `./${relativePath}`;
+                            let paths: string[] = [];
+                            switch (treeType) {
+                                case CampaignItemType.Source:
+                                    paths = campaign.sourcePaths;
+                                    paths.push(relativePath);
+                                    campaign.sourcePaths = paths;
+                                    break;
+                                case CampaignItemType.Template:
+                                    paths = campaign.templatePaths;
+                                    paths.push(relativePath);
+                                    campaign.templatePaths = paths;
+                                    break;
+                                case CampaignItemType.Component:
+                                    paths = campaign.componentPaths;
+                                    paths.push(relativePath);
+                                    campaign.componentPaths = paths;
+                                    break;
+                                case CampaignItemType.Generator:
+                                    paths = campaign.generatorPaths;
+                                    paths.push(relativePath);
+                                    campaign.generatorPaths = paths;
+                                    break;
+                                default:
+                                    return;
+                            }
+                            await campaign.saveConfig();
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    export function parseCampaignItemType(value?: string): CampaignItemType | undefined {
+        if (value) {
+            let key = value as keyof typeof CampaignItemType;
+            return CampaignItemType[key];
+        }
+        return;
     }
 }

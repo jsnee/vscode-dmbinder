@@ -1,7 +1,9 @@
 
 import { campaignExplorerProvider } from '../campaignExplorerProvider';
 import { Campaign } from '../models/Campaign';
-import { Uri, window, QuickPickItem, QuickPickOptions } from 'vscode';
+import { Uri, window, QuickPickItem, QuickPickOptions, InputBoxOptions } from 'vscode';
+import * as fse from 'fs-extra';
+import * as path from 'path';
 
 export namespace CampaignHelpers {
     export async function initCampaign(path: Uri): Promise<Campaign | undefined> {
@@ -51,5 +53,24 @@ export namespace CampaignHelpers {
             }
         }
         return;
+    }
+
+    export async function promptCreateFolder(parentDirectory: string): Promise<string | undefined> {
+        const inputOptions: InputBoxOptions = {
+            prompt: `New Folder In "${path.basename(parentDirectory)}"`,
+            placeHolder: parentDirectory
+        };
+        let folderName = await window.showInputBox(inputOptions);
+        if (!folderName) {
+            return;
+        }
+        let folderPath = path.join(parentDirectory, folderName);
+        await fse.mkdirp(folderPath);
+        campaignExplorerProvider.refresh();
+        return folderPath;
+    }
+
+    export async function promptCreateFile(parentDirectory: string, defaultExtension: string, ...allowedExtensions: string[]): Promise<string | undefined> {
+        throw Error("CampaignHelpers.promptCreateFile() is not implemented!");
     }
 }

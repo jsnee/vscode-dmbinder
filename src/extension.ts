@@ -1,17 +1,29 @@
-import { commands, ExtensionContext, window, workspace } from 'vscode';
+import { commands, ExtensionContext, window, workspace, TreeView } from 'vscode';
 import { renderHomebrew } from './renderer';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
 import { registerHomebrewRenderer } from './markdownHomebrewery';
 import { Utils } from './Utils';
 import { ExtensionCommands } from './ExtensionCommands';
 import { campaignStatus } from './CampaignStatus';
+import { ITreeItem } from './models/ITreeItem';
+import { CampaignTreeItem, CampaignItemType } from './models/CampaignTreeItem';
 
 interface ContextProperties {
     localStoragePath: string;
+    compositeTreeView: TreeView<ITreeItem> | undefined;
+    sourcesTreeView: TreeView<ITreeItem> | undefined;
+    templatesTreeView: TreeView<ITreeItem> | undefined;
+    componentsTreeView: TreeView<ITreeItem> | undefined;
+    generatorsTreeView: TreeView<ITreeItem> | undefined;
 }
 
 export const contextProps: ContextProperties = {
-    localStoragePath: ''
+    localStoragePath: '',
+    compositeTreeView: undefined,
+    sourcesTreeView: undefined,
+    templatesTreeView: undefined,
+    componentsTreeView: undefined,
+    generatorsTreeView: undefined
 };
 
 // this method is called when your extension is activated
@@ -30,11 +42,11 @@ export async function activate(context: ExtensionContext) {
     }
 
     const tv = campaignExplorerProvider;
-    context.subscriptions.push(window.registerTreeDataProvider('dmbinder', tv));
-    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.sources', tv.sourcesExplorerProvider));
-    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.templates', tv.templatesExplorerProvider));
-    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.components', tv.componentsExplorerProvider));
-    context.subscriptions.push(window.registerTreeDataProvider('dmbinder.generators', tv.generatorsExplorerProvider));
+    contextProps.compositeTreeView = window.createTreeView('dmbinder', { treeDataProvider: tv });
+    contextProps.sourcesTreeView = window.createTreeView('dmbinder.sources', { treeDataProvider: tv.sourcesExplorerProvider });
+    contextProps.templatesTreeView = window.createTreeView('dmbinder.templates', { treeDataProvider: tv.templatesExplorerProvider });
+    contextProps.componentsTreeView = window.createTreeView('dmbinder.components', { treeDataProvider: tv.componentsExplorerProvider });
+    contextProps.generatorsTreeView = window.createTreeView('dmbinder.generators', { treeDataProvider: tv.generatorsExplorerProvider });
 
     context.subscriptions.push(campaignStatus.statusBarItem);
 
@@ -99,6 +111,13 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(onEnabledChangeListener);
 
     await campaignStatus.updateStatusBar();
+
+    // AddFolder commands
+    context.subscriptions.push(commands.registerCommand('dmbinder.addFolder', Utils.addNewTreeItem(contextProps.compositeTreeView, undefined, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFolder', Utils.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFolder', Utils.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFolder', Utils.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFolder', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator, true)));
 
     return {
         extendMarkdownIt(md: markdownit) {

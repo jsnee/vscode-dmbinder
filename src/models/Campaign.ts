@@ -111,16 +111,36 @@ export class Campaign {
         return this._config.sourcePaths;
     }
 
+    public set sourcePaths(paths: string[]) {
+        this._config.sourcePaths = paths;
+        this._isConfigMutated = true;
+    }
+
     public get templatePaths(): string[] {
         return this._config.templatePaths;
+    }
+
+    public set templatePaths(paths: string[]) {
+        this._config.templatePaths = paths;
+        this._isConfigMutated = true;
     }
 
     public get componentPaths(): string[] {
         return this._config.componentPaths;
     }
 
+    public set componentPaths(paths: string[]) {
+        this._config.componentPaths = paths;
+        this._isConfigMutated = true;
+    }
+
     public get generatorPaths(): string[] {
         return this._config.generatorPaths;
+    }
+
+    public set generatorPaths(paths: string[]) {
+        this._config.generatorPaths = paths;
+        this._isConfigMutated = true;
     }
 
     public set outDirectory(path: string | undefined) {
