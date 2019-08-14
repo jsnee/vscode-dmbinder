@@ -3,13 +3,7 @@ import { ITreeItem } from "./ITreeItem";
 import { TreeItem, TreeItemCollapsibleState, Uri, TextDocumentShowOptions } from "vscode";
 import * as fse from "fs-extra";
 import * as path from "path";
-
-export enum CampaignItemType {
-    Source = "SourceItem",
-    Template = "TemplateItem",
-    Component = "ComponentItem",
-    Generator = "GeneratorItem"
-}
+import { CampaignItemType } from "../CampaignItemType";
 
 export class CampaignTreeItem implements ITreeItem {
     private _campaign: Campaign;
@@ -18,6 +12,10 @@ export class CampaignTreeItem implements ITreeItem {
     constructor(campaign: Campaign, campaignItemType?: CampaignItemType) {
         this._campaign = campaign;
         this._campaignItemType = campaignItemType;
+    }
+
+    public get campaignItemType(): CampaignItemType | undefined {
+        return this._campaignItemType;
     }
 
     public getContextValue(): string {
@@ -64,9 +62,10 @@ export class CampaignTreeItem implements ITreeItem {
     private async _getSourcesChild(): Promise<ITreeItem> {
         if (this._campaign.sourcePaths && this._campaign.sourcePaths.length > 0) {
             return {
+                campaignItemType: CampaignItemType.Source,
                 getContextValue: () => "Sources",
                 getTreeItem: () => new TreeItem("Sources", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.sourcePaths.map(async srcPath => this._getChildren("SourceItem", srcPath))),
+                getChildren: () => Promise.all(this._campaign.sourcePaths.map(async srcPath => this._getChildren(CampaignItemType.Source, srcPath))),
                 getCampaignPath: () => this._campaign.campaignPath
             };
         }
@@ -76,9 +75,10 @@ export class CampaignTreeItem implements ITreeItem {
     private async _getTemplatesChild(): Promise<ITreeItem> {
         if (this._campaign.templatePaths && this._campaign.templatePaths.length > 0) {
             return {
+                campaignItemType: CampaignItemType.Template,
                 getContextValue: () => "Templates",
                 getTreeItem: () => new TreeItem("Templates", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.templatePaths.map(async templatePath => this._getChildren("TemplateItem", templatePath))),
+                getChildren: () => Promise.all(this._campaign.templatePaths.map(async templatePath => this._getChildren(CampaignItemType.Template, templatePath))),
                 getCampaignPath: () => this._campaign.campaignPath
             };
         }
@@ -88,9 +88,10 @@ export class CampaignTreeItem implements ITreeItem {
     private async _getComponentsChild(): Promise<ITreeItem> {
         if (this._campaign.componentPaths && this._campaign.componentPaths.length > 0) {
             return {
+                campaignItemType: CampaignItemType.Component,
                 getContextValue: () => "Components",
                 getTreeItem: () => new TreeItem("Components", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.componentPaths.map(async componentPath => this._getChildren("ComponentItem", componentPath))),
+                getChildren: () => Promise.all(this._campaign.componentPaths.map(async componentPath => this._getChildren(CampaignItemType.Component, componentPath))),
                 getCampaignPath: () => this._campaign.campaignPath
             };
         }
@@ -100,16 +101,17 @@ export class CampaignTreeItem implements ITreeItem {
     private async _getGeneratorsChild(): Promise<ITreeItem> {
         if (this._campaign.generatorPaths && this._campaign.generatorPaths.length > 0) {
             return {
+                campaignItemType: CampaignItemType.Generator,
                 getContextValue: () => "Generators",
                 getTreeItem: () => new TreeItem("Generators", TreeItemCollapsibleState.Expanded),
-                getChildren: () => Promise.all(this._campaign.generatorPaths.map(async generatorPath => this._getChildren("GeneratorItem", generatorPath))),
+                getChildren: () => Promise.all(this._campaign.generatorPaths.map(async generatorPath => this._getChildren(CampaignItemType.Generator, generatorPath))),
                 getCampaignPath: () => this._campaign.campaignPath
             };
         }
         return this._getEmptyChild("Generators");
     }
 
-    private async _getChildren(contextValue: string, itemPath: string, contextPath?: string): Promise<ITreeItem> {
+    private async _getChildren(contextValue: CampaignItemType, itemPath: string, contextPath?: string): Promise<ITreeItem> {
         let uri = Uri.file(itemPath.startsWith("./") ? path.join(this._campaign.campaignPath, itemPath) : itemPath);
         let stats = await fse.stat(uri.fsPath);
         let getContextPath = undefined;
@@ -122,6 +124,7 @@ export class CampaignTreeItem implements ITreeItem {
                 ctxPath = path.join(contextPath, ctxPath);
             }
             return {
+                campaignItemType: contextValue,
                 getContextValue: () => contextValue + "Folder",
                 getTreeItem: () => getChildTreeItem(uri, contextValue + "Folder"),
                 getChildren: async () => await this._listFilteredNodeChildren(contextValue, uri, ctxPath),
@@ -130,6 +133,7 @@ export class CampaignTreeItem implements ITreeItem {
             };
         }
         return {
+            campaignItemType: contextValue,
             getContextValue: () => contextValue,
             getTreeItem: () => getChildTreeItem(uri, contextValue),
             getCampaignPath: () => this._campaign.campaignPath,
@@ -137,7 +141,7 @@ export class CampaignTreeItem implements ITreeItem {
         };
     }
 
-    private async _listFilteredNodeChildren(contextValue: string, parentUri: Uri, contextPath: string): Promise<ITreeItem[]> {
+    private async _listFilteredNodeChildren(contextValue: CampaignItemType, parentUri: Uri, contextPath: string): Promise<ITreeItem[]> {
         let children = await fse.readdir(parentUri.fsPath);
         let result: ITreeItem[] = [];
         for (let childFragment of children) {
@@ -145,26 +149,26 @@ export class CampaignTreeItem implements ITreeItem {
             let child = await this._getChildren(contextValue, childPath, contextPath);
             if (!child.getChildren) {
                 switch (contextValue) {
-                    case "SourceItem":
+                    case CampaignItemType.Source:
                         if (childPath.endsWith(".md")) {
                             result.push(child);
                         }
                         continue;
-                    case "TemplateItem":
+                    case CampaignItemType.Template:
                         if (childPath.endsWith(".md")) {
                             result.push(child);
                         }
                         continue;
-                        case "ComponentItem":
-                            if (childPath.endsWith(".yaml") || childPath.endsWith(".json")) {
-                                result.push(child);
-                            }
-                            continue;
-                        case "GeneratorItem":
-                            if (childPath.endsWith(".dmbgen.json")) {
-                                result.push(child);
-                            }
-                            continue;
+                    case CampaignItemType.Component:
+                        if (childPath.endsWith(".yaml") || childPath.endsWith(".json")) {
+                            result.push(child);
+                        }
+                        continue;
+                    case CampaignItemType.Generator:
+                        if (childPath.endsWith(".dmbgen.json")) {
+                            result.push(child);
+                        }
+                        continue;
                     default:
                         continue;
                 }
@@ -187,10 +191,10 @@ function getChildTreeItem(uri: Uri, contextValue: string): TreeItem {
         case "GeneratorItemFolder":
             result.collapsibleState = TreeItemCollapsibleState.Expanded;
             break;
-        case "SourceItem":
-        case "TemplateItem":
-        case "ComponentItem":
-        case "GeneratorItem":
+        case CampaignItemType.Source:
+        case CampaignItemType.Template:
+        case CampaignItemType.Component:
+        case CampaignItemType.Generator:
             let opts: TextDocumentShowOptions = {
                 preview: true,
                 preserveFocus: true

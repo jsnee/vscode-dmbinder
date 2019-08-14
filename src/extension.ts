@@ -6,7 +6,7 @@ import { Utils } from './Utils';
 import { ExtensionCommands } from './ExtensionCommands';
 import { campaignStatus } from './CampaignStatus';
 import { ITreeItem } from './models/ITreeItem';
-import { CampaignTreeItem, CampaignItemType } from './models/CampaignTreeItem';
+import { CampaignItemType } from './CampaignItemType';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -118,6 +118,12 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('dmbinder.template.addFolder', Utils.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template, true)));
     context.subscriptions.push(commands.registerCommand('dmbinder.component.addFolder', Utils.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component, true)));
     context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFolder', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator, true)));
+    // AddFile commands
+    context.subscriptions.push(commands.registerCommand('dmbinder.addFile', Utils.addNewTreeItem(contextProps.compositeTreeView, undefined)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFile', Utils.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFile', Utils.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFile', Utils.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
 
     return {
         extendMarkdownIt(md: markdownit) {

@@ -1,9 +1,10 @@
 import { Event, EventEmitter, TreeDataProvider, TreeItem, workspace, WorkspaceFolder, QuickPickItem } from "vscode";
 import { Campaign } from "./models/Campaign";
 import { ITreeItem } from "./models/ITreeItem";
-import { CampaignTreeItem, CampaignItemType } from "./models/CampaignTreeItem";
+import { CampaignTreeItem } from "./models/CampaignTreeItem";
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { CampaignItemType } from "./CampaignItemType";
 
 class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: Event<ITreeItem>;

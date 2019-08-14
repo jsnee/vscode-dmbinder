@@ -70,7 +70,35 @@ export namespace CampaignHelpers {
         return folderPath;
     }
 
-    export async function promptCreateFile(parentDirectory: string, defaultExtension: string, ...allowedExtensions: string[]): Promise<string | undefined> {
-        throw Error("CampaignHelpers.promptCreateFile() is not implemented!");
+    export async function promptCreateFile(parentDirectory: string, allowedExtensions: QuickPickItem[]): Promise<string | undefined> {
+        if (allowedExtensions.length === 0) {
+            throw Error("Allowed extensions not specified!");
+        }
+        let fileExtension: QuickPickItem | undefined;
+        if (allowedExtensions.length === 1) {
+            fileExtension = allowedExtensions[0];
+        } else {
+            const qpOpts: QuickPickOptions = {
+                canPickMany: false,
+                placeHolder: `Which File Type Would You Like to Use?`
+            };
+            fileExtension = await window.showQuickPick(allowedExtensions, qpOpts);
+        }
+        if (!fileExtension) {
+            return;
+        }
+        const inputOptions: InputBoxOptions = {
+            prompt: `New File In "${path.basename(parentDirectory)}"`,
+            placeHolder: parentDirectory
+        };
+        let fileName = await window.showInputBox(inputOptions);
+        if (!fileName) {
+            return;
+        }
+        fileName = path.basename(fileName, fileExtension.description) + fileExtension.description;
+        let filePath = path.join(parentDirectory, fileName);
+        await fse.createFile(filePath);
+        campaignExplorerProvider.refresh();
+        return filePath;
     }
 }

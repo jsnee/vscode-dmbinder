@@ -2,8 +2,13 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { CampaignItemType } from "../CampaignItemType";
 
 export interface ITreeItem {
+    /**
+     * If implemented, it will return the CampaignItemType of the tree item.
+     */
+    readonly campaignItemType?: CampaignItemType | undefined;
     isEmpty?: boolean;
     getContextValue(): string;
     getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem>;

@@ -191,6 +191,51 @@
                     "light": "img/light/addFolder.svg",
                     "dark": "img/dark/addFolder.svg"
                 }
+            },
+            {
+                "command": "dmbinder.addFile",
+                "title": "Add File to Campaign",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/add.svg",
+                    "dark": "img/dark/add.svg"
+                }
+            },
+            {
+                "command": "dmbinder.source.addFile",
+                "title": "Add Source File",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/add.svg",
+                    "dark": "img/dark/add.svg"
+                }
+            },
+            {
+                "command": "dmbinder.template.addFile",
+                "title": "Add Template File",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/add.svg",
+                    "dark": "img/dark/add.svg"
+                }
+            },
+            {
+                "command": "dmbinder.component.addFile",
+                "title": "Add Component File",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/add.svg",
+                    "dark": "img/dark/add.svg"
+                }
+            },
+            {
+                "command": "dmbinder.generator.addFile",
+                "title": "Add Generator File",
+                "category": "DM Binder",
+                "icon": {
+                    "light": "img/light/add.svg",
+                    "dark": "img/dark/add.svg"
+                }
             }
         ],
         "configuration": {
@@ -275,6 +320,22 @@
                 {
                     "command": "dmbinder.generator.addFolder",
                     "when": "false"
+                },
+                {
+                    "command": "dmbinder.source.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "dmbinder.template.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "dmbinder.component.addFile",
+                    "when": "false"
+                },
+                {
+                    "command": "dmbinder.generator.addFile",
+                    "when": "false"
                 }
             ],
             "view/title": [
@@ -289,12 +350,22 @@
                     "when": "view == dmbinder"
                 },
                 {
+                    "command": "dmbinder.addFile",
+                    "group": "navigation",
+                    "when": "view == dmbinder"
+                },
+                {
                     "command": "dmbinder.campaign.refresh",
                     "group": "navigation",
                     "when": "view == dmbinder.sources"
                 },
                 {
                     "command": "dmbinder.source.addFolder",
+                    "group": "navigation",
+                    "when": "view == dmbinder.sources"
+                },
+                {
+                    "command": "dmbinder.source.addFile",
                     "group": "navigation",
                     "when": "view == dmbinder.sources"
                 },
@@ -309,6 +380,11 @@
                     "when": "view == dmbinder.components"
                 },
                 {
+                    "command": "dmbinder.component.addFile",
+                    "group": "navigation",
+                    "when": "view == dmbinder.components"
+                },
+                {
                     "command": "dmbinder.campaign.refresh",
                     "group": "navigation",
                     "when": "view == dmbinder.templates"
@@ -319,12 +395,22 @@
                     "when": "view == dmbinder.templates"
                 },
                 {
+                    "command": "dmbinder.template.addFile",
+                    "group": "navigation",
+                    "when": "view == dmbinder.templates"
+                },
+                {
                     "command": "dmbinder.campaign.refresh",
                     "group": "navigation",
                     "when": "view == dmbinder.generators"
                 },
                 {
                     "command": "dmbinder.generator.addFolder",
+                    "group": "navigation",
+                    "when": "view == dmbinder.generators"
+                },
+                {
+                    "command": "dmbinder.generator.addFile",
                     "group": "navigation",
                     "when": "view == dmbinder.generators"
                 }

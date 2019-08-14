@@ -7,7 +7,7 @@ import { ExtensionCommands } from './ExtensionCommands';
 import { ITreeItem } from './models/ITreeItem';
 import { CampaignHelpers } from './helpers/CampaignHelpers';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
-import { CampaignItemType } from './models/CampaignTreeItem';
+import { CampaignItemTypeUtils, CampaignItemType } from './CampaignItemType';
 
 export namespace Utils {
     export function alertError(error: Error): Thenable<void> {
@@ -68,45 +68,6 @@ export namespace Utils {
         });
     }
 
-    async function _addNewTreeItem(iTreeItem: ITreeItem, addFolder: boolean): Promise<void> {
-        const treeItem = await iTreeItem.getTreeItem();
-        if (!treeItem.resourceUri) {
-            let parentTreeItem = await campaignExplorerProvider.getParent(iTreeItem);
-            if (parentTreeItem) {
-                return await _addNewTreeItem(parentTreeItem, addFolder);
-            }
-            throw Error("Can't create file/folder here!");
-        }
-        let contextFolder = treeItem.resourceUri.fsPath;
-        if (iTreeItem.getContextValue().endsWith("Item")) {
-            contextFolder = path.dirname(contextFolder);
-        }
-        if (addFolder) {
-            await CampaignHelpers.promptCreateFolder(contextFolder);
-        } else {
-            await CampaignHelpers.promptCreateFolder(contextFolder);
-        }
-    }
-
-    async function promptChooseCampaignItemType(isFolder: boolean): Promise<CampaignItemType | undefined> {
-        //TODO: Add human readable descriptions to these options
-        const qpItemTypes: QuickPickItem[] = [
-            { label: "Source" },
-            { label: "Template" },
-            { label: "Component" },
-            { label: "Generator" }
-        ];
-        const qpOpts: QuickPickOptions = {
-            canPickMany: false,
-            placeHolder: `Which Type of Item${isFolder ? " Folder" : ""} Are You Trying to Add?`
-        };
-        let itemType = await window.showQuickPick(qpItemTypes, qpOpts);
-        if (itemType) {
-            return parseCampaignItemType(itemType.label);
-        }
-        return;
-    }
-
     export function addNewTreeItem(treeView: TreeView<ITreeItem>, treeType?: CampaignItemType, addFolder: boolean = false): () => Promise<void> {
         return async () => {
             if (treeView.selection.length) {
@@ -116,13 +77,16 @@ export namespace Utils {
                 let campaign = await CampaignHelpers.promptSelectCampaign(undefined, true);
                 if (campaign) {
                     if (!treeType) {
-                        treeType = await promptChooseCampaignItemType(addFolder);
+                        treeType = await _promptChooseCampaignItemType(addFolder);
+                    }
+                    if (!treeType) {
+                        return;
                     }
                     let createdPath: string | undefined;
                     if (addFolder) {
                         createdPath = await CampaignHelpers.promptCreateFolder(campaign.campaignPath);
                     } else {
-                        // Make file
+                        createdPath = await _addNewTreeFile(campaign.campaignPath, treeType);
                     }
                     if (createdPath) {
                         if (treeType) {
@@ -167,5 +131,74 @@ export namespace Utils {
             return CampaignItemType[key];
         }
         return;
+    }
+
+    async function _addNewTreeItem(iTreeItem: ITreeItem, addFolder: boolean): Promise<void> {
+        const treeItem = await iTreeItem.getTreeItem();
+        if (!treeItem.resourceUri) {
+            let parentTreeItem = await campaignExplorerProvider.getParent(iTreeItem);
+            if (parentTreeItem) {
+                return await _addNewTreeItem(parentTreeItem, addFolder);
+            }
+            throw Error("Can't create file/folder here!");
+        }
+        let contextFolder = treeItem.resourceUri.fsPath;
+        if (iTreeItem.getContextValue().endsWith("Item")) {
+            contextFolder = path.dirname(contextFolder);
+        }
+        if (addFolder) {
+            await CampaignHelpers.promptCreateFolder(contextFolder);
+        } else {
+            let itemType = iTreeItem.campaignItemType;
+            if (!itemType) {
+                itemType = await _promptChooseCampaignItemType(false);
+                if (!itemType) {
+                    return;
+                }
+            }
+            await _addNewTreeFile(contextFolder, itemType);
+        }
+    }
+
+    async function _promptChooseCampaignItemType(isFolder: boolean): Promise<CampaignItemType | undefined> {
+        const qpItemTypes: QuickPickItem[] = [
+            {
+                label: "Source",
+                detail: "Documents written in Markdown that are used to generate the output PDF files."
+            },
+            {
+                label: "Template",
+                detail: "Used to format 'components' when inserting into source documents."
+            },
+            {
+                label: "Component",
+                detail: "Data files that can be reused to insert into source documents."
+            },
+            {
+                label: "Generator",
+                detail: "Files that specify how to generate content (like names)"
+            }
+        ];
+        const qpOpts: QuickPickOptions = {
+            canPickMany: false,
+            placeHolder: `Which Type of Item${isFolder ? " Folder" : ""} Are You Trying to Add?`
+        };
+        let itemType = await window.showQuickPick(qpItemTypes, qpOpts);
+        if (itemType) {
+            return parseCampaignItemType(itemType.label);
+        }
+        return;
+    }
+
+    async function _addNewTreeFile(parentDirectory: string, treeType: CampaignItemType): Promise<string | undefined> {
+        let extensions = CampaignItemTypeUtils.getFileExtensions(treeType);
+        let allowedExtensions: QuickPickItem[] = [];
+        for (let ext of extensions) {
+            allowedExtensions.push({
+                label: ext.description,
+                description: ext.extension
+            });
+        }
+        return await CampaignHelpers.promptCreateFile(parentDirectory, allowedExtensions);
     }
 }
