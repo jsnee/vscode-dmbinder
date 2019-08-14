@@ -4,6 +4,7 @@ import { TreeItem, TreeItemCollapsibleState, Uri, TextDocumentShowOptions } from
 import * as fse from "fs-extra";
 import * as path from "path";
 import { CampaignItemType } from "../CampaignItemType";
+import { Utils } from "../Utils";
 
 export class CampaignTreeItem implements ITreeItem {
     private _campaign: Campaign;
@@ -113,6 +114,13 @@ export class CampaignTreeItem implements ITreeItem {
 
     private async _getChildren(contextValue: CampaignItemType, itemPath: string, contextPath?: string): Promise<ITreeItem> {
         let uri = Uri.file(itemPath.startsWith("./") ? path.join(this._campaign.campaignPath, itemPath) : itemPath);
+        if (!(await Utils.fileExists(uri))) {
+            return {
+                campaignItemType: contextValue,
+                getContextValue: () => `Missing${contextValue}`,
+                getTreeItem: () => new TreeItem(`${path.basename(uri.fsPath)} (Missing)`)
+            };
+        }
         let stats = await fse.stat(uri.fsPath);
         let getContextPath = undefined;
         if (contextPath) {

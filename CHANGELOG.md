@@ -2,6 +2,7 @@
 ## 0.3.4
 - Allow adding folders from the DM Binder view
 - Allow adding files from the DM Binder view
+- Fix missing files listed in campaign config breaking the extension
 
 ## 0.3.3
 - Make sure the dmbinder.autogenerateOnRender setting actually does something (whoops)

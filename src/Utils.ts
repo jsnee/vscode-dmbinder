@@ -2,7 +2,7 @@ import { DMBSettings } from './Settings';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { BrowserFetcher } from './BrowserFetcher';
-import { window, extensions, MessageItem, TreeView, QuickPickItem, QuickPickOptions } from 'vscode';
+import { window, extensions, MessageItem, TreeView, QuickPickItem, QuickPickOptions, Uri } from 'vscode';
 import { ExtensionCommands } from './ExtensionCommands';
 import { ITreeItem } from './models/ITreeItem';
 import { CampaignHelpers } from './helpers/CampaignHelpers';
@@ -131,6 +131,13 @@ export namespace Utils {
             return CampaignItemType[key];
         }
         return;
+    }
+
+    export async function fileExists(path: Uri): Promise<boolean> {
+        let response = new Promise<boolean>((resolve, reject) => {
+            fse.exists(path.fsPath, resolve);
+        });
+        return response;
     }
 
     async function _addNewTreeItem(iTreeItem: ITreeItem, addFolder: boolean): Promise<void> {
