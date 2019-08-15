@@ -155,7 +155,6 @@ export namespace ExtensionCommands {
                 }
             }
         }
-        console.log(context);
         let generatorUri: Uri | undefined;
         if (!item || !item.getTreeItem) {
             const qpItemList = await campaignExplorerProvider.getGeneratorItems();
@@ -274,8 +273,8 @@ export namespace ExtensionCommands {
                     language: "markdown"
                 });
                 await window.showTextDocument(doc, ViewColumn.Active);
-            } catch (e) {
-                console.log(e);
+            } catch (ex) {
+                console.log(ex);
             }
         }
     }

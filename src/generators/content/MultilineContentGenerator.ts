@@ -6,7 +6,7 @@ export class MultilineContentGenerator extends BaseContentGenerator {
         super(generatorSource);
     }
 
-    public generate(vars: GeneratorVars): string {
+    public generate(vars: GeneratorVars = {}): string {
         if (this._source.values && this._source.values instanceof Array && this._source.values.length) {
             return this._source.values.join("\n");
         }

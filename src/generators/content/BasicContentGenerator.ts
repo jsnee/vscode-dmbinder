@@ -6,7 +6,7 @@ export class BasicContentGenerator extends BaseContentGenerator {
         super(generatorSource);
     }
 
-    public generate(vars: GeneratorVars): string {
+    public generate(vars: GeneratorVars = {}): string {
         return this.getRandomValue() || "";
     }
 }

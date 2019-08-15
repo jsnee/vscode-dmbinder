@@ -5,6 +5,7 @@
 ## 0.3.5
 - Allow content generator configs to specify weighted random list of values (like rolling on a table)
 - Allow specification of certain parameters for content generation (like specifying a gender or race when generating an NPC name)
+- Allow conditional content generation
 
 ## 0.3.4
 - Allow adding folders from the DM Binder view

@@ -6,6 +6,7 @@ import { MarkovContentGenerator } from './MarkovContentGenerator';
 import { window } from 'vscode';
 import { GeneratorSourceConfig, GeneratorSourceCollection, GeneratorSourceType } from './GeneratorSourceConfig';
 import { MultilineContentGenerator } from './MultilineContentGenerator';
+import { SwitchContentGenerator } from './SwitchContentGenerator';
 
 enum TemplateMatch {
     Whole = 0,
@@ -18,13 +19,17 @@ interface LoadedGeneratorSourceConfig {
     generatorType?: string;
     sourceFile?: string;
     values?: string[] | { [roll: string]: string };
+    condition?: string;
+    switchValues?: { [name: string]: string | string[] };
     sources?: { [generatorName: string]: LoadedGeneratorSourceConfig };
 }
 
 function getGeneratorSourceConfig(loadedConfig: LoadedGeneratorSourceConfig): GeneratorSourceConfig {
     let result: GeneratorSourceConfig = {
         generatorType: loadedConfig.generatorType,
-        sourceFile: loadedConfig.sourceFile
+        sourceFile: loadedConfig.sourceFile,
+        condition: loadedConfig.condition,
+        switchValues: loadedConfig.switchValues
     };
 
     if (loadedConfig.values && !(loadedConfig.values instanceof Array)) {
@@ -128,7 +133,7 @@ export class GeneratorSource {
     public async generateContent(vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate(), vars, paramCallback);
+            return await this.generateFromTemplate(generator.generate(vars), vars, paramCallback);
         }
         return "";
     }
@@ -167,7 +172,7 @@ export class GeneratorSource {
                 valueOverride = vars[setVarName];
             }
             if (valueOverride === undefined) {
-                value = await this.generateBySourceName(tokenName);
+                value = await this.generateBySourceName(tokenName, vars);
             } else {
                 value = valueOverride;
             }
@@ -201,6 +206,8 @@ export function getContentGenerator(generatorConfig: GeneratorSourceConfig): Bas
         case GeneratorSourceType.Import:
             window.showErrorMessage("Encountered unexpected issue when attempting to process imported content generator");
             return;
+        case GeneratorSourceType.Switch:
+            return new SwitchContentGenerator(generatorConfig);
         default:
             window.showErrorMessage(`Unexpected value for generatorType encountered: ${generatorConfig.generatorType}`);
             return;

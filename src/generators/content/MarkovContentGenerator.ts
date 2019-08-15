@@ -13,7 +13,7 @@ export class MarkovContentGenerator extends BaseContentGenerator {
         }
     }
 
-    public generate(vars: GeneratorVars): string {
+    public generate(vars: GeneratorVars = {}): string {
         var wordCount = this._chainCache.selectWordCount();
         var results: string[] = [];
 
