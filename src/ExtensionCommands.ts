@@ -7,7 +7,7 @@ import { renderCampaign } from './renderer';
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
 import { BrowserFetcher } from './BrowserFetcher';
-import { GeneratorSource } from './models/GeneratorSource';
+import { GeneratorSource } from './generators/content/GeneratorSource';
 import { DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
 import { CampaignHelpers } from './helpers/CampaignHelpers';

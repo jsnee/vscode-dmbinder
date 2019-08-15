@@ -10,33 +10,14 @@
                 "basic",
                 "import",
                 "markov",
-                "multiline"
+                "multiline",
+                "switch"
             ],
             "default": "basic"
         },
         "sourceFile": {
             "description": "URI to other generator source file",
             "type": "string"
-        },
-        "values": {
-            "description": "A list of templates or values to use when generating strings",
-            "anyOf": [
-                {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                {
-                    "type": "object",
-                    "patternProperties": {
-                        "^\\d+(-\\d+)?$": { "type": "string" }
-                    },
-                    "additionalProperties": false
-                }
-            ],
-            "default": []
         },
         "sources": {
             "description": "A list of dependent sources required by this generator",
@@ -45,5 +26,103 @@
                 "$ref": "#"
             }
         }
-    }
+    },
+    "oneOf": [
+        {
+            "properties": {
+                "generatorType": {
+                    "enum": [
+                        "basic",
+                        "markov"
+                    ]
+                },
+                "values": {
+                    "description": "A list of templates or values to use when generating strings",
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "patternProperties": {
+                                "^\\d+(-\\d+)?$": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }
+                    ],
+                    "default": []
+                }
+            },
+            "required": ["values"]
+        },
+        {
+            "properties": {
+                "generatorType": {
+                    "enum": [
+                        "import"
+                    ]
+                }
+            },
+            "required": ["sourceFile"]
+        },
+        {
+            "properties": {
+                "generatorType": {
+                    "enum": [
+                        "multiline"
+                    ]
+                },
+                "values": {
+                    "description": "A list of templates to combine",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "required": ["values"]
+        },
+        {
+            "properties": {
+                "generatorType": {
+                    "enum": [
+                        "switch"
+                    ]
+                },
+                "condition": {
+                    "description": "The name of the generator variable that will be compared to the values.",
+                    "type": "string"
+                },
+                "values": {
+                    "description": "A list of cases and their value(s)",
+                    "type": "object",
+                    "patternProperties": {
+                        "^[A-Za-z][A-Za-z0-9]*$": {
+                            "oneOf": [
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": [
+                "values",
+                "condition"
+            ]
+        }
+    ]
 }

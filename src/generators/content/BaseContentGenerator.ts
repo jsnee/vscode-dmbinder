@@ -1,4 +1,4 @@
-import { GeneratorSourceConfig } from "../../models/GeneratorSourceConfig";
+import { GeneratorSourceConfig } from "./GeneratorSourceConfig";
 
 export interface GeneratorVars {
     [varName: string]: string;
