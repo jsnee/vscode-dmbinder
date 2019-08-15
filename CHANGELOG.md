@@ -1,6 +1,9 @@
 # Change Log
 ### Planned Features
 - When generating a dungeon map, save settings to a Markdown comment before the map
+
+## 0.3.5
+- Allow content generator configs to specify weighted random list of values (like rolling on a table)
 - Allow specification of certain parameters for content generation (like specifying a gender or race when generating an NPC name)
 
 ## 0.3.4

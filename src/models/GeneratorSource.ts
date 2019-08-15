@@ -128,7 +128,7 @@ export class GeneratorSource {
     public async generateContent(vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate(vars), {}, paramCallback);
+            return await this.generateFromTemplate(generator.generate(), vars, paramCallback);
         }
         return "";
     }
@@ -162,6 +162,9 @@ export class GeneratorSource {
                 if (valueTemplate) {
                     valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
                 }
+            }
+            if (setVarName !== undefined && vars[setVarName]) {
+                valueOverride = vars[setVarName];
             }
             if (valueOverride === undefined) {
                 value = await this.generateBySourceName(tokenName);

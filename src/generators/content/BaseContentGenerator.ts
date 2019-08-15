@@ -11,7 +11,7 @@ export abstract class BaseContentGenerator {
         this._source = generatorSource;
     }
 
-    abstract generate(vars: GeneratorVars): string;
+    abstract generate(vars?: GeneratorVars): string;
 
     protected getRandomValue(): string | undefined {
         if (!this._source.values || (this._source.values instanceof Array && this._source.values.length === 0)) {

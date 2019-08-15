@@ -13,6 +13,7 @@ import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
 import { CampaignHelpers } from './helpers/CampaignHelpers';
 import { ComponentHelpers } from './helpers/ComponentHelpers';
 import { GeneratorHelpers } from './helpers/GeneratorHelpers';
+import { GeneratorVars } from './generators/content/BaseContentGenerator';
 
 export namespace ExtensionCommands {
     export async function promptChooseChromeExecutable(): Promise<void> {
@@ -140,6 +141,21 @@ export namespace ExtensionCommands {
     }
 
     export async function generateElementFromConfig(item?: ITreeItem): Promise<void> {
+        let activeTextEditor = window.activeTextEditor;
+        let context: GeneratorVars = {};
+        if (activeTextEditor && activeTextEditor.selection && !activeTextEditor.selection.isEmpty) {
+            let selection = activeTextEditor.selection;
+            // Try to grab config from selection
+            let selectedText = activeTextEditor.document.getText(new Range(selection.start, selection.end));
+            if (matter.test(selectedText, { delimiters: ['---', '...'] })) {
+                try {
+                    context = matter(selectedText, { delimiters: ['---', '...'] }).data as GeneratorVars;
+                } catch (ex) {
+                    throw Error("Failed to parse selected content as generator context!");
+                }
+            }
+        }
+        console.log(context);
         let generatorUri: Uri | undefined;
         if (!item || !item.getTreeItem) {
             const qpItemList = await campaignExplorerProvider.getGeneratorItems();
@@ -162,7 +178,7 @@ export namespace ExtensionCommands {
         if (generatorUri) {
             let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
             let editor = window.activeTextEditor;
-            let res = await generator.generateContent();
+            let res = await generator.generateContent(context);
             if (editor) {
                 let selection = editor.selection;
                 await editor.edit((editBuilder) => {
