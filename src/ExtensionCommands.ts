@@ -12,7 +12,7 @@ import { DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generator
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
 import { CampaignHelpers } from './helpers/CampaignHelpers';
 import { ComponentHelpers } from './helpers/ComponentHelpers';
-import { GeneratorHelpers } from './helpers/GeneratorHelpers';
+import { DungeonGeneratorHelpers } from './helpers/DungeonGeneratorHelpers';
 import { GeneratorVars } from './generators/content/BaseContentGenerator';
 
 export namespace ExtensionCommands {
@@ -211,7 +211,7 @@ export namespace ExtensionCommands {
         if (generatorUri) {
             let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
             let editor = window.activeTextEditor;
-            let res = await generator.generateContent({}, GeneratorHelpers.promptGeneratorInput);
+            let res = await generator.generateContent({}, DungeonGeneratorHelpers.promptGeneratorInput);
             if (editor) {
                 let selection = editor.selection;
                 await editor.edit((editBuilder) => {
@@ -263,7 +263,7 @@ export namespace ExtensionCommands {
         }
         if (!config) {
             // Prompt for the config
-            config = await GeneratorHelpers.promptGenerateDungeonMapSettings();
+            config = await DungeonGeneratorHelpers.promptGenerateDungeonMapSettings();
         }
         if (config) {
             try {
