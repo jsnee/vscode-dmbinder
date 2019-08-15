@@ -14,9 +14,12 @@ export abstract class BaseContentGenerator {
     abstract generate(vars: GeneratorVars): string;
 
     protected getRandomValue(): string | undefined {
-        if (!this._source.values || this._source.values.length === 0) {
+        if (!this._source.values || (this._source.values instanceof Array && this._source.values.length === 0)) {
             return undefined;
         }
-        return this._source.values[Math.floor(Math.random() * this._source.values.length)];
+        if (this._source.values instanceof Array) {
+            return this._source.values[Math.floor(Math.random() * this._source.values.length)];
+        }
+        throw Error("There was a problem while trying to generate content...");
     }
 }

@@ -15,8 +15,3 @@ export enum GeneratorSourceType {
     Markov = "markov",
     Multiline = "multiline"
 }
-
-export interface ConditionalValue {
-    condition: string;
-    values: string[];
-}

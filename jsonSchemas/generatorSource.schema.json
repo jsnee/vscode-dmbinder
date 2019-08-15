@@ -20,10 +20,22 @@
         },
         "values": {
             "description": "A list of templates or values to use when generating strings",
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
+            "anyOf": [
+                {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "object",
+                    "patternProperties": {
+                        "^\\d+(-\\d+)?$": { "type": "string" }
+                    },
+                    "additionalProperties": false
+                }
+            ],
             "default": []
         },
         "sources": {

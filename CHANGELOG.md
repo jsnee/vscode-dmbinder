@@ -1,4 +1,8 @@
 # Change Log
+### Planned Features
+- When generating a dungeon map, save settings to a Markdown comment before the map
+- Allow specification of certain parameters for content generation (like specifying a gender or race when generating an NPC name)
+
 ## 0.3.4
 - Allow adding folders from the DM Binder view
 - Allow adding files from the DM Binder view

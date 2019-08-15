@@ -14,6 +14,64 @@ enum TemplateMatch {
     GetVariableName = 3
 }
 
+interface LoadedGeneratorSourceConfig {
+    generatorType?: string;
+    sourceFile?: string;
+    values?: string[] | { [roll: string]: string };
+    sources?: { [generatorName: string]: LoadedGeneratorSourceConfig };
+}
+
+function getGeneratorSourceConfig(loadedConfig: LoadedGeneratorSourceConfig): GeneratorSourceConfig {
+    let result: GeneratorSourceConfig = {
+        generatorType: loadedConfig.generatorType,
+        sourceFile: loadedConfig.sourceFile
+    };
+
+    if (loadedConfig.values && !(loadedConfig.values instanceof Array)) {
+        result.values = [];
+        for (let roll in loadedConfig.values) {
+            let range = roll.split("-");
+            if (range.length === 1) {
+                range.push(range[0]);
+            }
+            if (range.length === 2) {
+                let rangeFrom: number;
+                let rangeTo: number;
+                if (rangeFrom = parseInt(range[0])) {
+                    if (rangeTo = parseInt(range[1])) {
+                        if (rangeFrom > rangeTo) {
+                            let tempRange = [rangeFrom, rangeTo];
+                            rangeFrom = Math.min(...tempRange);
+                            rangeTo = Math.max(...tempRange);
+                        }
+                        for (let ndx = rangeFrom; ndx <= rangeTo; ndx++) {
+                            if (result.values[ndx]) {
+                                throw Error("Content generator has an overlapping roll table!");
+                            }
+                            result.values[ndx] = loadedConfig.values[roll];
+                        }
+                        continue;
+                    }
+                }
+            }
+            throw Error("Invalid range encountered in content generator source!");
+        }
+        // Remove the first one (since dice start at 1, the 0th element is probably empty)
+        if (result.values && result.values.length && result.values[0] === undefined) {
+            result.values.shift();
+        }
+    } else {
+        result.values = loadedConfig.values;
+    }
+    if (loadedConfig.sources) {
+        result.sources = {};
+        for (let configName in loadedConfig.sources) {
+            result.sources[configName] = getGeneratorSourceConfig(loadedConfig.sources[configName]);
+        }
+    }
+    return result;
+}
+
 export class GeneratorSource {
     private _sourceConfig: GeneratorSourceConfig;
 
@@ -21,8 +79,36 @@ export class GeneratorSource {
         this._sourceConfig = generatorConfig;
     }
 
+    public static async loadGeneratorSource(generatorPath: string): Promise<GeneratorSource> {
+        return new GeneratorSource(await this.loadGeneratorSourceConfig(generatorPath));
+    }
+
+    private async loadGenerator(generatorName: string): Promise<GeneratorSourceConfig | undefined> {
+        let source = this.sources[generatorName];
+        if (source) {
+            if (source.sourceFile) {
+                source = await GeneratorSource.loadGeneratorSourceConfig(source.sourceFile);
+                this.sources[generatorName] = source;
+            }
+            if (source.sources) {
+                for (let childSourceName in source.sources) {
+                    if (!this.sources[childSourceName]) {
+                        this.sources[childSourceName] = source.sources[childSourceName];
+                    }
+                }
+            }
+            return source;
+        }
+        return;
+    }
+
+    public get sources(): GeneratorSourceCollection {
+        return !this._sourceConfig.sources ? {} : this._sourceConfig.sources;
+    }
+
     private static async loadGeneratorSourceConfig(generatorPath: string): Promise<GeneratorSourceConfig> {
-        let config: GeneratorSourceConfig = await fse.readJson(generatorPath);
+        const loadedConfig: LoadedGeneratorSourceConfig = await fse.readJson(generatorPath);
+        let config = getGeneratorSourceConfig(loadedConfig);
         if (config.sources) {
             for (let sourceName in config.sources) {
                 if (config.sources[sourceName].generatorType && config.sources[sourceName].generatorType === GeneratorSourceType.Import)
@@ -37,10 +123,6 @@ export class GeneratorSource {
             }
         }
         return config;
-    }
-
-    public static async loadGeneratorSource(generatorPath: string): Promise<GeneratorSource> {
-        return new GeneratorSource(await this.loadGeneratorSourceConfig(generatorPath));
     }
 
     public async generateContent(vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
@@ -102,33 +184,6 @@ export class GeneratorSource {
             }
         }
         return "";
-    }
-
-    public async loadGenerator(generatorName: string): Promise<GeneratorSourceConfig | undefined> {
-        let source = this.sources[generatorName];
-        if (source) {
-            if (source.sourceFile) {
-                source = await GeneratorSource.loadGeneratorSourceConfig(source.sourceFile);
-                this.sources[generatorName] = source;
-            }
-            if (source.sources) {
-                for (let childSourceName in source.sources) {
-                    if (!this.sources[childSourceName]) {
-                        this.sources[childSourceName] = source.sources[childSourceName];
-                    }
-                }
-            }
-            return source;
-        }
-        return;
-    }
-
-    public get sources(): GeneratorSourceCollection {
-        return !this._sourceConfig.sources ? {} : this._sourceConfig.sources;
-    }
-
-    public get values(): string[] {
-        return !this._sourceConfig.values ? [] : this._sourceConfig.values;
     }
 }
 
