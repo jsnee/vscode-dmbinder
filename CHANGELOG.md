@@ -1,5 +1,5 @@
 # Change Log
-### Planned Features
+### Planned Changes
 - When generating a dungeon map, save settings to a Markdown comment before the map
 - Bundle extension package to reduce extension size
 - Add unit testing
