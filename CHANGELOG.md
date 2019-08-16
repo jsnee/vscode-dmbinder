@@ -6,6 +6,9 @@
 - Cleanup package.json
   - Sort and remove unused commands
   - Hide commands from command palette (where appropriate)
+
+## 0.3.6
+- Cleanup package.json
   - Revisit extension activations
 
 ## 0.3.5
