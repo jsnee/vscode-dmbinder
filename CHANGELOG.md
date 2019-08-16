@@ -1,6 +1,12 @@
 # Change Log
 ### Planned Features
 - When generating a dungeon map, save settings to a Markdown comment before the map
+- Bundle extension package to reduce extension size
+- Add unit testing
+- Cleanup package.json
+  - Sort and remove unused commands
+  - Hide commands from command palette (where appropriate)
+  - Revisit extension activations
 
 ## 0.3.5
 - Allow content generator configs to specify weighted random list of values (like rolling on a table)
