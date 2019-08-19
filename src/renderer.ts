@@ -9,6 +9,7 @@ import * as path from "path";
 import * as Puppeteer from 'puppeteer-core';
 import { Utils } from "./Utils";
 import { ComponentHelpers } from "./helpers/ComponentHelpers";
+import * as nhp from "node-html-parser";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
@@ -95,6 +96,26 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
     }
 }
 
+function fixImagePaths(html: string, sourcePath: string, brewPath: string): string {
+    const root = nhp.parse(html);
+    if (root instanceof nhp.HTMLElement) {
+        const targets = root.querySelectorAll("img");
+        for (let ndx = 0; ndx < targets.length; ndx++) {
+            let img = targets[ndx] as nhp.HTMLElement;
+            let src = img.attributes["src"];
+            try {
+                let uri = Uri.parse(src);
+                if (uri.scheme === "file") {
+                    // This doesn't work
+                    img.attributes["src"] = path.join(path.relative(path.dirname(brewPath), path.dirname(sourcePath)), src);
+                }
+            } catch (e) { }
+        }
+        return root.outerHTML;
+    }
+    return html;
+}
+
 async function renderHtmlFile(filePath: string, outPath?: string): Promise<string> {
     let basename = path.basename(filePath, '.md');
     let brewPath = path.join(getBrewPath(), basename + '.html');
@@ -103,7 +124,8 @@ async function renderHtmlFile(filePath: string, outPath?: string): Promise<strin
         await fse.ensureDir(path.join(getBrewPath(), outPath));
     }
 
-    const html = await renderFileContents(Uri.file(filePath));
+    let html = await renderFileContents(Uri.file(filePath));
+    html = fixImagePaths(html, filePath, brewPath);
 
     fse.writeFile(brewPath, html, 'utf-8', function (err) {
         if (err) { console.log(err); }
