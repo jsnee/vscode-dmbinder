@@ -50,7 +50,7 @@ export class BrowserFetcher {
                 platform: platform
             };
         }
-        this._fetcher = require('puppeteer').createBrowserFetcher(opts);
+        this._fetcher = require('puppeteer-core').createBrowserFetcher(opts);
     }
     
     public async canDownload(revision: string): Promise<boolean> {

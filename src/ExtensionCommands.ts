@@ -1,4 +1,4 @@
-import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, ProgressLocation, ProgressOptions, Range } from 'vscode';
+import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, Range } from 'vscode';
 import { Campaign } from './models/Campaign';
 import { ITreeItem } from './models/ITreeItem';
 import { campaignExplorerProvider } from './campaignExplorerProvider';
@@ -6,7 +6,6 @@ import { DMBSettings } from './Settings';
 import { renderCampaign } from './renderer';
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
-import { BrowserFetcher } from './BrowserFetcher';
 import { GeneratorSource } from './generators/content/GeneratorSource';
 import { DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
@@ -14,6 +13,7 @@ import { CampaignHelpers } from './helpers/CampaignHelpers';
 import { ComponentHelpers } from './helpers/ComponentHelpers';
 import { DungeonGeneratorHelpers } from './helpers/DungeonGeneratorHelpers';
 import { GeneratorVars } from './generators/content/BaseContentGenerator';
+import { Utils } from './Utils';
 
 export namespace ExtensionCommands {
     export async function promptChooseChromeExecutable(): Promise<void> {
@@ -33,28 +33,7 @@ export namespace ExtensionCommands {
             value: suggestedRevision,
             placeHolder: "Chromium Revision Number"
         });
-        if (chromeRev) {
-            let fetcher = new BrowserFetcher();
-            if (await fetcher.canDownload(chromeRev)) {
-                let progOpts: ProgressOptions = {
-                    location: ProgressLocation.Notification,
-                    title: `Downloading Chromium Revision`
-                };
-                return window.withProgress(progOpts, async (progress, token) => {
-                    progress.report({
-                        message: chromeRev
-                    });
-                    let revInfo = await fetcher.download(chromeRev);
-                    if (revInfo) {
-                        DMBSettings.chromeExecutablePath = revInfo.executablePath;
-                    } else {
-                        window.showErrorMessage(`Failed to download Chromium revision ${chromeRev}`);
-                    }
-                });
-            } else {
-                window.showErrorMessage(`"${chromeRev}" is not a valid Chromium revision number for the given platform (${await fetcher.platform()})`);
-            }
-        }
+        await Utils.downloadChromiumRevision(chromeRev);
     }
 
     export async function promptInitCampaign(): Promise<void> {

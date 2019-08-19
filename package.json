@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -14,7 +14,7 @@
         "vscode": "^1.30.0"
     },
     "puppeteer": {
-        "chromium_revision": "630727"
+        "chromium_revision": "674921"
     },
     "categories": [
         "Other"
@@ -508,7 +508,7 @@
         "@types/markdown-it": "0.0.7",
         "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
-        "@types/puppeteer": "^1.12.1",
+        "@types/puppeteer-core": "^1.9.0",
         "@types/seedrandom": "^2.4.28",
         "tslint": "^5.8.0",
         "typescript": "^3.1.4",
@@ -519,7 +519,7 @@
         "gray-matter": "^4.0.2",
         "markdown-it": "^8.4.2",
         "node-html-parser": "^1.1.16",
-        "puppeteer": "^1.12.2",
+        "puppeteer-core": "^1.19.0",
         "seedrandom": "^3.0.1"
     }
 }

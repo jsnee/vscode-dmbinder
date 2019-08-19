@@ -6,7 +6,7 @@ import { getMd } from "./markdownHomebrewery";
 import { DMBSettings } from "./Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
-import * as Puppeteer from 'puppeteer';
+import * as Puppeteer from 'puppeteer-core';
 import { Utils } from "./Utils";
 import { ComponentHelpers } from "./helpers/ComponentHelpers";
 
@@ -70,9 +70,15 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
             console.error(err);
         }
     });
+    let opts: Puppeteer.LaunchOptions | undefined = undefined;
+    if (DMBSettings.chromeExecutablePath) {
+        opts = {
+            executablePath: DMBSettings.chromeExecutablePath
+        };
+    }
 
     try {
-        const browser = await Puppeteer.launch();
+        const browser = await Puppeteer.launch(opts);
         const page = await browser.newPage();
         await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
 
@@ -82,10 +88,11 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
     } catch (ex) {
         console.error(ex);
         if (ex instanceof Error) {
-            Utils.alertError(ex as Error);
+            throw Error(`Puppeteer Error: ${(ex as Error).message}`);
         }
+    } finally {
+        await cleanupBrewDirectory();
     }
-    await cleanupBrewDirectory();
 }
 
 async function renderHtmlFile(filePath: string, outPath?: string): Promise<string> {
@@ -123,7 +130,7 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
     } catch (ex) {
         console.error(ex);
         if (ex instanceof Error) {
-            Utils.alertError(ex as Error);
+            throw Error(`Puppeteer Error: ${(ex as Error).message}`);
         }
     }
 }
@@ -240,14 +247,25 @@ export async function renderCampaign(campaign: Campaign): Promise<void> {
                 break;
             }
             let sourcePath = path.join(campaign.campaignPath, source);
-            await renderCampaignSourceItem(campaign, sourcePath, undefined, (message) => {
-                progress.report({
-                    message: message,
-                    increment: 100 / fileCount
-                });
-            }, token);
+            try {
+                await renderCampaignSourceItem(campaign, sourcePath, undefined, (message) => {
+                    progress.report({
+                        message: message,
+                        increment: 100 / fileCount
+                    });
+                }, token);
+            } catch (ex) {
+                console.error(ex);
+                if (ex instanceof Error) {
+                    const err = ex as Error;
+                    if (err.message.startsWith("Puppeteer Error: ")) {
+                        isCancelled = true;
+                        // tslint:disable-next-line: no-floating-promises
+                        Utils.puppeteerError(err);
+                    }
+                }
+            }
         }
-
         progress.report({
             message: "Cleaning Up..."
         });
@@ -272,9 +290,33 @@ export async function renderHomebrew(item?: ITreeItem): Promise<void> {
                 if (treeItem.resourceUri) {
                     if (item.getCampaignPath && await Campaign.hasCampaignConfig(item.getCampaignPath())) {
                         let campaign = new Campaign(item.getCampaignPath());
-                        return renderSingleCampaignSource(campaign, treeItem.resourceUri.fsPath, item.getContextPath ? item.getContextPath() : undefined);
+                        try {
+                            await renderSingleCampaignSource(campaign, treeItem.resourceUri.fsPath, item.getContextPath ? item.getContextPath() : undefined);
+                        } catch (ex) {
+                            console.error(ex);
+                            if (ex instanceof Error) {
+                                const err = ex as Error;
+                                if (err.message.startsWith("Puppeteer Error: ")) {
+                                    // tslint:disable-next-line: no-floating-promises
+                                    Utils.puppeteerError(err);
+                                }
+                            }
+                        }
+                        return;
                     }
-                    return renderHomebrewStandalone(treeItem.resourceUri);
+                    try {
+                        await renderHomebrewStandalone(treeItem.resourceUri);
+                    } catch (ex) {
+                        console.error(ex);
+                        if (ex instanceof Error) {
+                            const err = ex as Error;
+                            if (err.message.startsWith("Puppeteer Error: ")) {
+                                // tslint:disable-next-line: no-floating-promises
+                                Utils.puppeteerError(err);
+                            }
+                        }
+                    }
+                    return;
                 }
                 break;
             default:

@@ -6,10 +6,12 @@
 - Cleanup package.json
   - Sort and remove unused commands
   - Hide commands from command palette (where appropriate)
+- Allow images to be rendered to PDF (right now source files are copied to a temp folder to render to PDF which breaks all image links)
 
 ## 0.3.6
 - Cleanup package.json
   - Revisit extension activations
+- Catch Puppeteer errors (incompatible Chrome/Puppeteer versions can cause strange errors) and suggest use of recommended revision of Chromium
 
 ## 0.3.5
 - Allow content generator configs to specify weighted random list of values (like rolling on a table)

@@ -2,7 +2,7 @@ import { DMBSettings } from './Settings';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { BrowserFetcher } from './BrowserFetcher';
-import { window, extensions, MessageItem, TreeView, QuickPickItem, QuickPickOptions, Uri } from 'vscode';
+import { window, extensions, MessageItem, TreeView, QuickPickItem, QuickPickOptions, Uri, ProgressOptions, ProgressLocation } from 'vscode';
 import { ExtensionCommands } from './ExtensionCommands';
 import { ITreeItem } from './models/ITreeItem';
 import { CampaignHelpers } from './helpers/CampaignHelpers';
@@ -20,6 +20,42 @@ export namespace Utils {
             return '';
         }
         return result.extensionPath;
+    }
+
+    export async function puppeteerError(ex?: Error): Promise<void> {
+        const changeResponse = "Change Chromium Version";
+        const downloadRecommendedResponse = "Download Recommended Chromium";
+        const switchToRecommendedResponse = "Switch to Recommended Chromium";
+        const suggestedRevision = require('../package.json').puppeteer.chromium_revision;
+
+        let infoMessageItems = [changeResponse];
+
+        let fetcher = new BrowserFetcher();
+        let suggestedRevInfo = fetcher.revisionInfo(suggestedRevision);
+        if (suggestedRevInfo) {
+            if (suggestedRevInfo.local) {
+                let chromeExecPath = DMBSettings.chromeExecutablePath;
+                if (chromeExecPath === undefined || chromeExecPath !== suggestedRevInfo.executablePath) {
+                    infoMessageItems.push(switchToRecommendedResponse);
+                }
+            } else {
+                infoMessageItems.push(downloadRecommendedResponse);
+            }
+        }
+        
+        if (ex) {
+            window.showErrorMessage(`Problem encountered while trying to render document to PDF: ${ex.message}`);
+        }
+        let response = await window.showInformationMessage("Problems rendering PDFs may be caused by a version of Chrome that is incompatible with the version of Puppeteer DM Binder uses.", ...infoMessageItems);
+        if (response) {
+            if (response === changeResponse) {
+                await ExtensionCommands.promptDownloadChromiumRevision();
+            } else if (response === downloadRecommendedResponse) {
+                await downloadChromiumRevision(suggestedRevision);
+            } else if (response === switchToRecommendedResponse && suggestedRevInfo) {
+                DMBSettings.chromeExecutablePath = suggestedRevInfo.executablePath;
+            }
+        }
     }
 
     export async function puppeteerHasBrowserInstance(): Promise<boolean> {
@@ -66,6 +102,31 @@ export namespace Utils {
                     return Promise.resolve();
             }
         });
+    }
+
+    export async function downloadChromiumRevision(chromeRev: string | undefined): Promise<void> {
+        if (chromeRev) {
+            let fetcher = new BrowserFetcher();
+            if (await fetcher.canDownload(chromeRev)) {
+                let progOpts: ProgressOptions = {
+                    location: ProgressLocation.Notification,
+                    title: `Downloading Chromium Revision`
+                };
+                return window.withProgress(progOpts, async (progress, token) => {
+                    progress.report({
+                        message: chromeRev
+                    });
+                    let revInfo = await fetcher.download(chromeRev);
+                    if (revInfo) {
+                        DMBSettings.chromeExecutablePath = revInfo.executablePath;
+                    } else {
+                        window.showErrorMessage(`Failed to download Chromium revision ${chromeRev}`);
+                    }
+                });
+            } else {
+                window.showErrorMessage(`"${chromeRev}" is not a valid Chromium revision number for the given platform (${await fetcher.platform()})`);
+            }
+        }
     }
 
     export function addNewTreeItem(treeView: TreeView<ITreeItem>, treeType?: CampaignItemType, addFolder: boolean = false): () => Promise<void> {
