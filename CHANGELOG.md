@@ -11,6 +11,7 @@
 
 ## 0.4.0
 - Allow images to be rendered to PDF
+- Autogenerate ids for headers (to be used for linking within a document)
 
 ## 0.3.6
 - Cleanup package.json

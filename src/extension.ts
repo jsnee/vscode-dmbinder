@@ -7,6 +7,7 @@ import { ExtensionCommands } from './ExtensionCommands';
 import { campaignStatus } from './CampaignStatus';
 import { ITreeItem } from './models/ITreeItem';
 import { CampaignItemType } from './CampaignItemType';
+import { MarkdownIt } from 'markdown-it';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -126,7 +127,7 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
 
     return {
-        extendMarkdownIt(md: markdownit) {
+        extendMarkdownIt(md: MarkdownIt) {
             return registerHomebrewRenderer(md);
         }
     };

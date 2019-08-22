@@ -1,16 +1,7 @@
 import { DMBSettings } from "./Settings";
-const MarkdownIt = require('markdown-it');
+import { MarkdownIt } from 'markdown-it';
 
-let md: markdownit | undefined;
-
-export function getMd(): markdownit | undefined {
-    if (!md) {
-        md = registerHomebrewRenderer(new MarkdownIt({ html: true }));
-    }
-    return md;
-}
-
-export function registerHomebrewRenderer(ogMd: markdownit): markdownit {
+export function registerHomebrewRenderer(ogMd: MarkdownIt): MarkdownIt {
     ogMd.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
     ogMd.core.ruler.after('homebrewery_wrapper', 'homebrewery_pages', homebrewReplacePages);
     return ogMd;
