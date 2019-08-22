@@ -9,7 +9,6 @@ import * as path from "path";
 import * as Puppeteer from 'puppeteer-core';
 import { Utils } from "./Utils";
 import { ComponentHelpers } from "./helpers/ComponentHelpers";
-import * as nhp from "node-html-parser";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
@@ -97,23 +96,23 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
 }
 
 function fixImagePaths(html: string, sourcePath: string, brewPath: string): string {
-    const root = nhp.parse(html);
-    if (root instanceof nhp.HTMLElement) {
-        const targets = root.querySelectorAll("img");
-        for (let ndx = 0; ndx < targets.length; ndx++) {
-            let img = targets[ndx] as nhp.HTMLElement;
-            let src = img.attributes["src"];
+
+    const imageRegex = /<img([^>]+)src=(?:"([^">]+)"|'([^'>]+)')/g;
+
+    return html.replace(imageRegex, (match: string, other: string | undefined, imgPathDoubleQuote: string | undefined, imgPathSingleQuote: string | undefined): string => {
+        let imgPath = imgPathDoubleQuote ? imgPathDoubleQuote : imgPathSingleQuote;
+        let quoteChar = imgPathSingleQuote ? "'" : '"';
+        if (imgPath) {
             try {
-                let uri = Uri.parse(src);
+                const uri = Uri.parse(imgPath);
                 if (uri.scheme === "file") {
-                    // This doesn't work
-                    img.attributes["src"] = path.join(path.relative(path.dirname(brewPath), path.dirname(sourcePath)), src);
+                    let relativePath = path.join(path.relative(path.dirname(brewPath), path.dirname(sourcePath)), imgPath);
+                    return `<img${other}src=${quoteChar}${relativePath}${quoteChar}`;
                 }
-            } catch (e) { }
+            } catch (e) {}
         }
-        return root.outerHTML;
-    }
-    return html;
+        return match;
+    });
 }
 
 async function renderHtmlFile(filePath: string, outPath?: string): Promise<string> {
