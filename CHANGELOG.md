@@ -3,11 +3,13 @@
 - When generating a dungeon map, save settings to a Markdown comment before the map
 - Bundle extension package to reduce extension size
 - Add unit testing
-- Bugfixes
-  - DMB Autogen removes comments (probably a bug in 'node-html-parser')
 - Cleanup package.json
   - Sort and remove unused commands
   - Hide commands from command palette (where appropriate)
+
+## 0.4.1
+- Bugfixes
+  - DMB Autogenerate removes comments
 
 ## 0.4.0
 - Allow images to be rendered to PDF

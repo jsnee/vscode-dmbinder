@@ -445,10 +445,49 @@ In the DMBinder Explorer, you can click on the "Render Markdown to PDF with Home
 
 Additionally, you can render all sources for a single campaign by using the `dmbinder.campaign.brew` command. If there is more than one campaign in the current workspace, it will list all of them and prompt you to select which campaign.
 
+### Component Auto-Generation
+You can add a placeholder element into your documents that can be used to (re)generate your component items. If the setting `dmbinder.autogenerateOnRender` is enabled, the components will be regenerated when rendering any document to PDF (this will not actually update the source files, only the PDF files that are generated). To generate the component in the source, use the `dmbinder.component.autogenerate` command with the source you want processed opened and in the active/focused text editor.
+
+<details>
+<summary>Example:</summary>
+
+Component (Cool-Dude.yaml):
+``` yaml
+name: Cool Dude
+inventory:
+  - a Bag of Holding
+  - a bedroll
+  - rations (x7)
+  - 7 gp
+```
+
+Template (cool-dude-template.md):
+``` markdown
+**Name:** $name$
+$name$ is holding $for(inventory)$$inventory$$sep$, $endfor$.
+```
+
+Source
+``` markdown
+<dmb-autogen data-dmb-component="Cool-Dude" data-dmb-template="cool-dude-template"></dmb-autogen>
+```
+
+Output:
+``` markdown
+<dmb-autogen data-dmb-component="Cool-Dude" data-dmb-template="cool-dude-template">
+
+**Name:** Cool Dude
+Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
+</dmb-autogen>
+```
+
+</details>
+
+
 ### Content Generation
 Documentation coming soon.
 
-## Dungeon Generator
+### Dungeon Generator
 Based on the logic behind [donjon.bin.sh dungeon generator](https://donjon.bin.sh/code/dungeon/)
 More documentation coming soon.
 
