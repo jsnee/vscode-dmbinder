@@ -9,7 +9,7 @@ export namespace PuppeteerHelper {
         const changeResponse = "Change Chromium Version";
         const downloadRecommendedResponse = "Download Recommended Chromium";
         const switchToRecommendedResponse = "Switch to Recommended Chromium";
-        const suggestedRevision = require('../package.json').puppeteer.chromium_revision;
+        const suggestedRevision = require('../../package.json').puppeteer.chromium_revision;
 
         let infoMessageItems = [changeResponse];
 
