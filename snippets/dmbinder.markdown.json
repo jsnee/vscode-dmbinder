@@ -1,5 +1,5 @@
 {
-    "Dungeon Generator Config": {
+    "DMBinder Dungeon Generator Config": {
         "prefix": "dmbinder-dungenerator-config",
         "description": "YAML-based configuration for the DMBinder dungeon generator",
         "body": [
@@ -18,6 +18,13 @@
             "cellSize: ${12:18}",
             "mapPadding: ${13:1}",
             "..."
+        ]
+    },
+    "DMBinder Component Autogen": {
+        "prefix": "dmbinder-component-autogen",
+        "description": "DMBinder element for autogenerating campaign components",
+        "body": [
+            "<dmb-autogen data-dmb-component=\"${component}\" data-dmb-template=\"${template}\"></dmb-autogen>"
         ]
     }
 }

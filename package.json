@@ -443,7 +443,7 @@
         "snippets": [
             {
                 "language": "markdown",
-                "path": "./snippets/configMetadata.markdown.json"
+                "path": "./snippets/dmbinder.markdown.json"
             },
             {
                 "language": "markdown",
