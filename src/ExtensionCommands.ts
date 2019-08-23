@@ -27,7 +27,7 @@ export namespace ExtensionCommands {
     }
 
     export async function promptDownloadChromiumRevision(): Promise<void> {
-        let suggestedRevision = require('../package.json').puppeteer.chromium_revision;
+        let suggestedRevision = PuppeteerHelper.recommendedChromiumVersion();
         const chromeRev = await window.showInputBox({
             prompt: `Recommended revision: ${suggestedRevision}`,
             value: suggestedRevision,

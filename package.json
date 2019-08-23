@@ -13,9 +13,6 @@
     "engines": {
         "vscode": "^1.30.0"
     },
-    "puppeteer": {
-        "chromium_revision": "674921"
-    },
     "categories": [
         "Other"
     ],

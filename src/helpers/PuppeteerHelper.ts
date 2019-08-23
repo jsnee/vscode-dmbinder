@@ -4,12 +4,21 @@ import { window, ProgressOptions, ProgressLocation, MessageItem } from "vscode";
 import { ExtensionCommands } from "../ExtensionCommands";
 import { pathExists } from "fs-extra";
 
+interface PuppeteerConfig {
+    puppeteer: { chromium_revision: string };
+}
+
 export namespace PuppeteerHelper {
+    export function recommendedChromiumVersion(): string {
+        let config: PuppeteerConfig = require('puppeteer-core/package.json');
+        return config.puppeteer.chromium_revision;
+    }
+
     export async function puppeteerError(ex?: Error): Promise<void> {
         const changeResponse = "Change Chromium Version";
         const downloadRecommendedResponse = "Download Recommended Chromium";
         const switchToRecommendedResponse = "Switch to Recommended Chromium";
-        const suggestedRevision = require('../../package.json').puppeteer.chromium_revision;
+        const suggestedRevision = recommendedChromiumVersion();
 
         let infoMessageItems = [changeResponse];
 

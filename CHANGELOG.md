@@ -8,6 +8,7 @@
 
 ## 0.4.4
 - Webpack for real this time
+- Automatically determine which version of Chromium the installed version of puppeteer-core prefers
 
 ## 0.4.3
 - Webpack broke extension, rolling back to fix
