@@ -1,21 +1,22 @@
-import { ITreeItem } from "./models/ITreeItem";
+import { ITreeItem } from "../ui/ITreeItem";
 import { Uri, window, ProgressLocation, CancellationToken } from "vscode";
-import { contextProps } from "./extension";
-import { Campaign } from "./models/Campaign";
-import { DMBSettings } from "./Settings";
+import { contextProps } from "../extension";
+import { Campaign } from "../Campaign";
+import { DMBSettings } from "../Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
 import * as Puppeteer from 'puppeteer-core';
-import { Utils } from "./Utils";
-import { ComponentHelpers } from "./helpers/ComponentHelpers";
+import { ComponentHelper } from "../helpers/ComponentHelper";
 import { HombreweryEngine } from "./HomebreweryEngine";
+import { FileUtility } from "../utils/FileUtility";
+import { PuppeteerHelper } from "../helpers/PuppeteerHelper";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
 }
 
 function getAssetPath(): string {
-    return path.join(Utils.getExtensionPath(), 'assets');
+    return path.join(FileUtility.getExtensionPath(), 'assets');
 }
 
 async function cleanupBrewDirectory(): Promise<void> {
@@ -34,7 +35,7 @@ async function renderFileContents(uri: Uri): Promise<string> {
     let data = await fse.readFile(uri.fsPath, 'utf-8');
     const engine = new HombreweryEngine();
     if (DMBSettings.autogenerateOnRender === true) {
-        data = await ComponentHelpers.autogenerateFileComponents(data, path.basename(uri.path, ".md"));
+        data = await ComponentHelper.autogenerateFileComponents(data, path.basename(uri.path, ".md"));
     }
     const body = await engine.render(data);
     return `<!DOCTYPE html>
@@ -234,8 +235,8 @@ function hasFileExtension(filename: string, ...exts: string[]): boolean {
 }
 
 export async function renderCampaign(campaign: Campaign): Promise<void> {
-    if (!(await Utils.puppeteerHasBrowserInstance())) {
-        if (!(await Utils.modalNoPuppeteerBrowser())) {
+    if (!(await PuppeteerHelper.puppeteerHasBrowserInstance())) {
+        if (!(await PuppeteerHelper.modalNoPuppeteerBrowser())) {
             window.showErrorMessage("No Chrome/Chromium instance found or specified");
             return;
         }
@@ -278,7 +279,7 @@ export async function renderCampaign(campaign: Campaign): Promise<void> {
                     if (err.message.startsWith("Puppeteer Error: ")) {
                         isCancelled = true;
                         // tslint:disable-next-line: no-floating-promises
-                        Utils.puppeteerError(err);
+                        PuppeteerHelper.puppeteerError(err);
                     }
                 }
             }
@@ -294,8 +295,8 @@ export async function renderCampaign(campaign: Campaign): Promise<void> {
 }
 
 export async function renderHomebrew(item?: ITreeItem): Promise<void> {
-    if (!(await Utils.puppeteerHasBrowserInstance())) {
-        if (!(await Utils.modalNoPuppeteerBrowser())) {
+    if (!(await PuppeteerHelper.puppeteerHasBrowserInstance())) {
+        if (!(await PuppeteerHelper.modalNoPuppeteerBrowser())) {
             window.showErrorMessage("No Chrome/Chromium instance found or specified");
             return;
         }
@@ -315,7 +316,7 @@ export async function renderHomebrew(item?: ITreeItem): Promise<void> {
                                 const err = ex as Error;
                                 if (err.message.startsWith("Puppeteer Error: ")) {
                                     // tslint:disable-next-line: no-floating-promises
-                                    Utils.puppeteerError(err);
+                                    PuppeteerHelper.puppeteerError(err);
                                 }
                             }
                         }
@@ -329,7 +330,7 @@ export async function renderHomebrew(item?: ITreeItem): Promise<void> {
                             const err = ex as Error;
                             if (err.message.startsWith("Puppeteer Error: ")) {
                                 // tslint:disable-next-line: no-floating-promises
-                                Utils.puppeteerError(err);
+                                PuppeteerHelper.puppeteerError(err);
                             }
                         }
                     }

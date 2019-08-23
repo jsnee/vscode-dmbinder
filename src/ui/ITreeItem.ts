@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { CampaignItemType } from "../CampaignItemType";
+import { CampaignItemType } from "./CampaignItemType";
 
 export interface ITreeItem {
     /**

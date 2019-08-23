@@ -2,12 +2,12 @@ import { exec } from "child_process";
 import { QuickPickItem, Uri, QuickPickOptions, window, TextDocument, ProgressOptions, ProgressLocation, Range } from "vscode";
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
-import { ITreeItem } from "../models/ITreeItem";
-import { campaignExplorerProvider } from "../campaignExplorerProvider";
+import { ITreeItem } from "../ui/ITreeItem";
+import { campaignExplorerProvider } from "../ui/campaignExplorerProvider";
 import * as path from 'path';
-import { htmlParse, HTMLElement, TextNode } from "../HtmlParser";
+import { htmlParse, HTMLElement, TextNode } from "../homebrewery/HtmlParser";
 
-export namespace ComponentHelpers {
+export namespace ComponentHelper {
     export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             exec(`echo '' | pandoc --template="${templatePath}" --metadata-file="${metadataPath}" --metadata pagetitle=" "`, (error, stdout, stderr) => {

@@ -1,5 +1,5 @@
 import { StatusBarItem, window, StatusBarAlignment, workspace } from "vscode";
-import { Campaign } from "./models/Campaign";
+import { Campaign } from "../Campaign";
 
 class CampaignStatusBarItem {
     private _statusBarItem: StatusBarItem;

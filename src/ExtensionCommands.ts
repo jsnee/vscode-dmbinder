@@ -1,19 +1,19 @@
 import { Uri, window, workspace, ViewColumn, commands, QuickPickOptions, TextDocumentShowOptions, Range } from 'vscode';
-import { Campaign } from './models/Campaign';
-import { ITreeItem } from './models/ITreeItem';
-import { campaignExplorerProvider } from './campaignExplorerProvider';
+import { Campaign } from './Campaign';
+import { ITreeItem } from './ui/ITreeItem';
+import { campaignExplorerProvider } from './ui/campaignExplorerProvider';
 import { DMBSettings } from './Settings';
-import { renderCampaign } from './renderer';
+import { renderCampaign } from './homebrewery/renderer';
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
 import { GeneratorSource } from './generators/content/GeneratorSource';
 import { DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
-import { CampaignHelpers } from './helpers/CampaignHelpers';
-import { ComponentHelpers } from './helpers/ComponentHelpers';
-import { DungeonGeneratorHelpers } from './helpers/DungeonGeneratorHelpers';
+import { CampaignHelper } from './helpers/CampaignHelper';
+import { ComponentHelper } from './helpers/ComponentHelper';
+import { DungeonGeneratorHelper } from './helpers/DungeonGeneratorHelper';
 import { GeneratorVars } from './generators/content/BaseContentGenerator';
-import { Utils } from './Utils';
+import { PuppeteerHelper } from './helpers/PuppeteerHelper';
 
 export namespace ExtensionCommands {
     export async function promptChooseChromeExecutable(): Promise<void> {
@@ -33,7 +33,7 @@ export namespace ExtensionCommands {
             value: suggestedRevision,
             placeHolder: "Chromium Revision Number"
         });
-        await Utils.downloadChromiumRevision(chromeRev);
+        await PuppeteerHelper.downloadChromiumRevision(chromeRev);
     }
 
     export async function promptInitCampaign(): Promise<void> {
@@ -47,7 +47,7 @@ export namespace ExtensionCommands {
             const confirmInit = await window.showQuickPick(['Yes', 'No'], qpOpts);
             if (confirmInit && confirmInit === 'Yes') {
                 // TODO: status bar tricks
-                await CampaignHelpers.initCampaign(currFolder.uri);
+                await CampaignHelper.initCampaign(currFolder.uri);
             }
         } else {
             window.showErrorMessage('You need to open up a folder in VS Code before you can initialize a DMBinder campaign.');
@@ -59,7 +59,7 @@ export namespace ExtensionCommands {
         if (campaignPath && await Campaign.hasCampaignConfig(campaignPath)) {
             await renderCampaign(new Campaign(campaignPath));
         } else {
-            let campaign = await CampaignHelpers.promptSelectCampaign(undefined, true);
+            let campaign = await CampaignHelper.promptSelectCampaign(undefined, true);
             if (campaign) {
                 await renderCampaign(campaign);
             }
@@ -80,7 +80,7 @@ export namespace ExtensionCommands {
     }
 
     export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
-        let result = await ComponentHelpers.promptGenerateComponent(item);
+        let result = await ComponentHelper.promptGenerateComponent(item);
         if (result) {
             const doc = await workspace.openTextDocument({
                 content: result
@@ -90,7 +90,7 @@ export namespace ExtensionCommands {
     }
 
     export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
-        let result = await ComponentHelpers.promptGenerateComponent(item);
+        let result = await ComponentHelper.promptGenerateComponent(item);
         if (result) {
             let editor = window.activeTextEditor;
             let res = result;
@@ -189,7 +189,7 @@ export namespace ExtensionCommands {
         if (generatorUri) {
             let generator = await GeneratorSource.loadGeneratorSource(generatorUri.fsPath);
             let editor = window.activeTextEditor;
-            let res = await generator.generateContent({}, DungeonGeneratorHelpers.promptGeneratorInput);
+            let res = await generator.generateContent({}, DungeonGeneratorHelper.promptGeneratorInput);
             if (editor) {
                 let selection = editor.selection;
                 await editor.edit((editBuilder) => {
@@ -241,7 +241,7 @@ export namespace ExtensionCommands {
         }
         if (!config) {
             // Prompt for the config
-            config = await DungeonGeneratorHelpers.promptGenerateDungeonMapSettings();
+            config = await DungeonGeneratorHelper.promptGenerateDungeonMapSettings();
         }
         if (config) {
             try {
@@ -261,7 +261,7 @@ export namespace ExtensionCommands {
     export async function autogenerateComponents(): Promise<void> {
         let editor = window.activeTextEditor;
         if (editor) {
-            await ComponentHelpers.autogenerateDocumentComponents(editor.document);
+            await ComponentHelper.autogenerateDocumentComponents(editor.document);
         } else {
             window.showWarningMessage("No opened document found.");
         }
