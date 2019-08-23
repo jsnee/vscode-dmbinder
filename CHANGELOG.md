@@ -1,11 +1,17 @@
 # Change Log
 ### Planned Changes
 - When generating a dungeon map, save settings to a Markdown comment before the map
-- Bundle extension package to reduce extension size
 - Add unit testing
 - Cleanup package.json
   - Sort and remove unused commands
   - Hide commands from command palette (where appropriate)
+
+## 0.4.3
+- Webpack broke extension, rolling back to fix
+
+## 0.4.2
+- Bundle extension package to reduce extension size and load time
+
 
 ## 0.4.1
 - Bugfixes
