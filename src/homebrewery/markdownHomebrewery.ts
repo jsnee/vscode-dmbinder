@@ -1,4 +1,4 @@
-import { DMBSettings } from "./Settings";
+import { DMBSettings } from "../Settings";
 import { MarkdownIt } from 'markdown-it';
 
 export function registerHomebrewRenderer(ogMd: MarkdownIt): MarkdownIt {

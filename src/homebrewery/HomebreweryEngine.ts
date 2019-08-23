@@ -1,5 +1,5 @@
 import { MarkdownIt } from 'markdown-it';
-import { DMBSettings } from './Settings';
+import { DMBSettings } from '../Settings';
 
 export class HombreweryEngine {
     private md?: Promise<MarkdownIt>;

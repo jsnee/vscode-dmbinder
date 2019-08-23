@@ -1,13 +1,14 @@
 import { commands, ExtensionContext, window, workspace, TreeView } from 'vscode';
-import { renderHomebrew } from './renderer';
-import { campaignExplorerProvider } from './campaignExplorerProvider';
-import { registerHomebrewRenderer } from './markdownHomebrewery';
-import { Utils } from './Utils';
+import { renderHomebrew } from './homebrewery/renderer';
+import { campaignExplorerProvider } from './ui/campaignExplorerProvider';
+import { registerHomebrewRenderer } from './homebrewery/markdownHomebrewery';
 import { ExtensionCommands } from './ExtensionCommands';
-import { campaignStatus } from './CampaignStatus';
-import { ITreeItem } from './models/ITreeItem';
-import { CampaignItemType } from './CampaignItemType';
+import { campaignStatus } from './ui/CampaignStatus';
+import { ITreeItem } from './ui/ITreeItem';
+import { CampaignItemType } from './ui/CampaignItemType';
 import { MarkdownIt } from 'markdown-it';
+import { PuppeteerHelper } from './helpers/PuppeteerHelper';
+import { ExplorerHelper } from './helpers/ExplorerHelper';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -34,8 +35,8 @@ export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-dmbinder" is now active!');
-    if (!(await Utils.puppeteerHasBrowserInstance())) {
-        Utils.alertNoPuppeteerBrowser();
+    if (!(await PuppeteerHelper.puppeteerHasBrowserInstance())) {
+        PuppeteerHelper.alertNoPuppeteerBrowser();
     }
 
     if (context.storagePath) {
@@ -114,17 +115,17 @@ export async function activate(context: ExtensionContext) {
     await campaignStatus.updateStatusBar();
 
     // AddFolder commands
-    context.subscriptions.push(commands.registerCommand('dmbinder.addFolder', Utils.addNewTreeItem(contextProps.compositeTreeView, undefined, true)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFolder', Utils.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source, true)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFolder', Utils.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template, true)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFolder', Utils.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component, true)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFolder', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.addFolder', ExplorerHelper.addNewTreeItem(contextProps.compositeTreeView, undefined, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFolder', ExplorerHelper.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFolder', ExplorerHelper.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFolder', ExplorerHelper.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component, true)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFolder', ExplorerHelper.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator, true)));
     // AddFile commands
-    context.subscriptions.push(commands.registerCommand('dmbinder.addFile', Utils.addNewTreeItem(contextProps.compositeTreeView, undefined)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFile', Utils.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFile', Utils.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFile', Utils.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component)));
-    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', Utils.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.addFile', ExplorerHelper.addNewTreeItem(contextProps.compositeTreeView, undefined)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.source.addFile', ExplorerHelper.addNewTreeItem(contextProps.sourcesTreeView, CampaignItemType.Source)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.template.addFile', ExplorerHelper.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.component.addFile', ExplorerHelper.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component)));
+    context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', ExplorerHelper.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
 
     return {
         extendMarkdownIt(md: MarkdownIt) {

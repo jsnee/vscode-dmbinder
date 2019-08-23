@@ -1,7 +1,7 @@
 import { InputBoxOptions, window, QuickPickItem } from "vscode";
 import { CorridorLayout, RoomLayout, DungeonLayout, getDungeonGeneratorConfig, DungeonGeneratorConfig } from "../generators/dungeon/DungeonGeneratorConfig";
 
-export namespace DungeonGeneratorHelpers {
+export namespace DungeonGeneratorHelper {
     export async function promptGeneratorInput(source: string): Promise<string | undefined> {
         const inputOptions: InputBoxOptions = {
             placeHolder: `{${source}}`,

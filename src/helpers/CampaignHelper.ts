@@ -1,11 +1,12 @@
 
-import { campaignExplorerProvider } from '../campaignExplorerProvider';
-import { Campaign } from '../models/Campaign';
+import { campaignExplorerProvider } from '../ui/campaignExplorerProvider';
+import { Campaign } from '../Campaign';
 import { Uri, window, QuickPickItem, QuickPickOptions, InputBoxOptions } from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { CampaignItemType } from '../ui/CampaignItemType';
 
-export namespace CampaignHelpers {
+export namespace CampaignHelper {
     export async function initCampaign(path: Uri): Promise<Campaign | undefined> {
         if (path) {
             window.showInformationMessage('Creating new campaign in: ' + path.fsPath);
@@ -100,5 +101,13 @@ export namespace CampaignHelpers {
         await fse.createFile(filePath);
         campaignExplorerProvider.refresh();
         return filePath;
+    }
+
+    export function parseCampaignItemType(value?: string): CampaignItemType | undefined {
+        if (value) {
+            let key = value as keyof typeof CampaignItemType;
+            return CampaignItemType[key];
+        }
+        return;
     }
 }

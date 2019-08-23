@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import { Uri } from 'vscode';
-import { DMBSettings } from '../Settings';
+import { DMBSettings } from './Settings';
 
 interface CampaignConfig {
     campaignName: string;
