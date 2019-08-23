@@ -90,7 +90,7 @@ export namespace ExtensionCommands {
     }
 
     export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
-        let result = await ComponentHelper.promptGenerateComponent(item);
+        let result = await ComponentHelper.promptGenerateComponent(item, true);
         if (result) {
             let editor = window.activeTextEditor;
             let res = result;

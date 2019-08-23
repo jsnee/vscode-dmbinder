@@ -5,6 +5,7 @@ import { CampaignTreeItem } from "./CampaignTreeItem";
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CampaignItemType } from "./CampaignItemType";
+import { CampaignHelper } from "../helpers/CampaignHelper";
 
 class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: Event<ITreeItem>;
@@ -62,7 +63,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
         return templates.map(item => {
             let result: QuickPickItem = {
-                label: path.basename(item, '.md'),
+                label: CampaignHelper.getTemplateIdentifier(item),
                 detail: item
             };
             return result;
@@ -88,7 +89,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
         return components.map(item => {
             let result: QuickPickItem = {
-                label: path.basename(path.basename(item, '.json'), '.yaml'),
+                label: CampaignHelper.getComponentIdentifier(item),
                 detail: item
             };
             return result;

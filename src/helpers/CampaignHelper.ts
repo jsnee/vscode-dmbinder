@@ -29,6 +29,26 @@ export namespace CampaignHelper {
         return;
     }
 
+    export function getComponentIdentifier(component: string | Uri): string {
+        let componentPath: string;
+        if (component instanceof Uri) {
+            componentPath = component.fsPath;
+        } else {
+            componentPath = component;
+        }
+        return path.basename(path.basename(componentPath, '.json'), '.yaml');
+    }
+
+    export function getTemplateIdentifier(template: string | Uri): string {
+        let templatePath: string;
+        if (template instanceof Uri) {
+            templatePath = template.fsPath;
+        } else {
+            templatePath = template;
+        }
+        return path.basename(templatePath, '.md');
+    }
+
     export async function promptSelectCampaign(promptText: string = "Select a campaign", noPromptIfOne: boolean = false): Promise<Campaign | undefined> {
         const campaignPaths = await campaignExplorerProvider.listCampaignPaths();
         if (campaignPaths) {

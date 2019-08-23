@@ -6,6 +6,13 @@ import { ITreeItem } from "../ui/ITreeItem";
 import { campaignExplorerProvider } from "../ui/campaignExplorerProvider";
 import * as path from 'path';
 import { htmlParse, HTMLElement, TextNode } from "../homebrewery/HtmlParser";
+import { CampaignHelper } from "./CampaignHelper";
+
+interface SelectedTemplateItem {
+    templateUri: Uri;
+    templateName: string;
+    isImplied: boolean;
+}
 
 export namespace ComponentHelper {
     export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
@@ -16,7 +23,7 @@ export namespace ComponentHelper {
         });
     }
 
-    export async function promptGenerateComponent(item?: ITreeItem): Promise<string | undefined> {
+    export async function promptGenerateComponent(item?: ITreeItem, includeAutogen: boolean = false): Promise<string | undefined> {
         let componentUri: Uri | undefined;
         if (!item || !item.getTreeItem) {
             const qpComponentList = await campaignExplorerProvider.getComponentItems();
@@ -36,41 +43,17 @@ export namespace ComponentHelper {
             componentUri = treeItem.resourceUri;
         }
         if (componentUri) {
-            let templateUri = await getOrPromptTemplateUri(componentUri);
-            if (templateUri) {
-                return await buildComponent(templateUri.fsPath, componentUri.fsPath);
-            }
-        }
-        return;
-    }
-
-    async function getOrPromptTemplateUri(componentUri: Uri, overrideTemplateName?: string): Promise<Uri | undefined> {
-        const qpItemList = await campaignExplorerProvider.getTemplateItems();
-        if (qpItemList) {
-            let templateItem: QuickPickItem | undefined;
-            if (overrideTemplateName) {
-                templateItem = qpItemList.find((each) => each.label === `${overrideTemplateName}`);
-            } else if (componentUri.fsPath.endsWith(".yaml")) {
-                let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
-                if (metadata && metadata.data && metadata.data.templateItem) {
-                    templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
+            let selectedTemplate = await _getOrPromptTemplateUri(componentUri);
+            if (selectedTemplate) {
+                let body = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
+                if (!includeAutogen) {
+                    return body;
                 }
-            } else if (componentUri.fsPath.endsWith(".json")) {
-                let metadata = await fse.readJSON(componentUri.fsPath);
-                if (metadata && metadata.templateItem) {
-                    templateItem = qpItemList.find((each) => each.label === `${metadata.templateItem}`);
+                let componentName = CampaignHelper.getComponentIdentifier(componentUri);
+                if (selectedTemplate.isImplied) {
+                    return `<dmb-autogen data-dmb-component="${componentName}">\n\n${body}\n</dmb-autogen>`;
                 }
-            }
-            if (!templateItem) {
-                const qpOpts: QuickPickOptions = {
-                    canPickMany: false,
-                    ignoreFocusOut: true,
-                    placeHolder: 'Select the template to use'
-                };
-                templateItem = await window.showQuickPick(qpItemList, qpOpts);
-            }
-            if (templateItem && templateItem.detail) {
-                return Uri.file(templateItem.detail);
+                return `<dmb-autogen data-dmb-component="${componentName}" data-dmb-template="${selectedTemplate.templateName}">\n\n${body}\n</dmb-autogen>`;
             }
         }
         return;
@@ -100,12 +83,12 @@ export namespace ComponentHelper {
                     continue;
                 }
                 const componentUri = Uri.file(matchedComponent.detail);
-                const templateUri = await getOrPromptTemplateUri(componentUri, templateName);
-                if (!templateUri) {
+                const selectedTemplate = await _getOrPromptTemplateUri(componentUri, templateName);
+                if (!selectedTemplate) {
                     window.showWarningMessage(`Failed to find a template for component "${componentName}".`);
                     continue;
                 }
-                const buildResult = await buildComponent(templateUri.fsPath, componentUri.fsPath);
+                const buildResult = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
                 const child = new TextNode("\n\n" + buildResult);
                 node.childNodes = [child];
             }
@@ -166,12 +149,12 @@ export namespace ComponentHelper {
                         continue;
                     }
                     const componentUri = Uri.file(matchedComponent.detail);
-                    const templateUri = await getOrPromptTemplateUri(componentUri, templateName);
-                    if (!templateUri) {
+                    const selectedTemplate = await _getOrPromptTemplateUri(componentUri, templateName);
+                    if (!selectedTemplate) {
                         window.showWarningMessage(`Failed to find a template for component "${componentName}".`);
                         continue;
                     }
-                    const buildResult = await buildComponent(templateUri.fsPath, componentUri.fsPath);
+                    const buildResult = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
                     const child = new TextNode("\n\n" + buildResult);
                     node.childNodes = [child];
                 }
@@ -191,5 +174,44 @@ export namespace ComponentHelper {
         } else {
             window.showWarningMessage("Failed to parse current document for component autogeneration elements.");
         }
+    }
+
+    async function _getOrPromptTemplateUri(componentUri: Uri, overrideTemplateName?: string): Promise<SelectedTemplateItem | undefined> {
+        const qpItemList = await campaignExplorerProvider.getTemplateItems();
+        if (qpItemList) {
+            let isImplied = false;
+            let templateItem: QuickPickItem | undefined;
+            if (overrideTemplateName) {
+                templateItem = qpItemList.find((each) => each.label === `${overrideTemplateName}`);
+            } else if (componentUri.fsPath.endsWith(".yaml")) {
+                let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
+                if (metadata && metadata.data && metadata.data.templateItem) {
+                    templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
+                    isImplied = templateItem !== undefined;
+                }
+            } else if (componentUri.fsPath.endsWith(".json")) {
+                let metadata = await fse.readJSON(componentUri.fsPath);
+                if (metadata && metadata.templateItem) {
+                    templateItem = qpItemList.find((each) => each.label === `${metadata.templateItem}`);
+                    isImplied = templateItem !== undefined;
+                }
+            }
+            if (!templateItem) {
+                const qpOpts: QuickPickOptions = {
+                    canPickMany: false,
+                    ignoreFocusOut: true,
+                    placeHolder: 'Select the template to use'
+                };
+                templateItem = await window.showQuickPick(qpItemList, qpOpts);
+            }
+            if (templateItem && templateItem.detail) {
+                return {
+                    templateUri: Uri.file(templateItem.detail),
+                    templateName: templateItem.label,
+                    isImplied: isImplied
+                };
+            }
+        }
+        return;
     }
 }
