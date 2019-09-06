@@ -1,26 +1,60 @@
-import { exec } from "child_process";
 import { QuickPickItem, Uri, QuickPickOptions, window, TextDocument, ProgressOptions, ProgressLocation, Range } from "vscode";
-import * as matter from 'gray-matter';
-import * as fse from 'fs-extra';
 import { ITreeItem } from "../ui/ITreeItem";
 import { campaignExplorerProvider } from "../ui/campaignExplorerProvider";
 import * as path from 'path';
 import { htmlParse, HTMLElement, TextNode } from "../homebrewery/HtmlParser";
 import { CampaignHelper } from "./CampaignHelper";
-
-interface SelectedTemplateItem {
-    templateUri: Uri;
-    templateName: string;
-    isImplied: boolean;
-}
+import { ITemplateEngine } from "../templating/ITemplateEngine";
+import { DMBSettings } from "../Settings";
+import { TemplateEngineType } from "../templating/TemplateEngineType";
+import { PandocEngine } from "../templating/PandocEngine";
+import { MustacheEngine } from "../templating/MustacheEngine";
+import { IComponentItem } from "../templating/IComponentItem";
+import { JsonComponentItem } from "../templating/JsonComponentItem";
+import { YamlComponentItem } from "../templating/YamlComponentItem";
+import { BasicTemplateItem } from "../templating/BasicTemplateItem";
+import { ITemplateItem } from "../templating/ITemplateItem";
 
 export namespace ComponentHelper {
-    export async function buildComponent(templatePath: string, metadataPath: string): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            exec(`echo '' | pandoc --template="${templatePath}" --metadata-file="${metadataPath}" --metadata pagetitle=" "`, (error, stdout, stderr) => {
-                resolve(stderr || stdout);
-            });
-        });
+    export async function buildComponent(templatePath: string, componentPath: string): Promise<string> {
+        let engine: ITemplateEngine;
+        let componentItem = getComponentItem(componentPath);
+        
+        let templateItem = new BasicTemplateItem(templatePath);
+        const templateMetadata = await templateItem.getMetadata();
+        let engineType = templateMetadata.templateEngine || DMBSettings.defaultTemplatingEngine;
+
+        if (engineType) {
+            switch (engineType) {
+                case TemplateEngineType.Pandoc:
+                    engine = new PandocEngine();
+                    break;
+                case TemplateEngineType.Mustache:
+                    engine = new MustacheEngine();
+                    break;
+                default:
+                    throw new Error("Unexpected templating engine type!");
+            }
+            return await engine.buildComponent(templateItem, componentItem);
+        }
+        throw new Error("Could not determine which templating engine to use.");
+    }
+
+    function getComponentItem(componentPath: string): IComponentItem {
+        switch (path.extname(componentPath)) {
+            case ".json":
+                return new JsonComponentItem(componentPath);
+            case ".yaml":
+                return new YamlComponentItem(componentPath);
+            default:
+                throw new Error("Unexpected component item file type!");
+        }
+    }
+
+    export async function alertPandocDetectedWhileMustacheRendering(): Promise<void> {
+        await window.showInformationMessage(
+            "It looks like you may be trying to render a 'Pandoc' template, but DMBinder was using the 'Mustache' rendering engine. "
+            + "You may want to either change the default rendering engine in VSCode's settings or explicitly specify the rendering engine in the template.");
     }
 
     export async function promptGenerateComponent(item?: ITreeItem, includeAutogen: boolean = false): Promise<string | undefined> {
@@ -50,7 +84,7 @@ export namespace ComponentHelper {
                     return body;
                 }
                 let componentName = CampaignHelper.getComponentIdentifier(componentUri);
-                if (selectedTemplate.isImplied) {
+                if (selectedTemplate.inferredFromComponent) {
                     return `<dmb-autogen data-dmb-component="${componentName}">\n\n${body}\n</dmb-autogen>`;
                 }
                 return `<dmb-autogen data-dmb-component="${componentName}" data-dmb-template="${selectedTemplate.templateName}">\n\n${body}\n</dmb-autogen>`;
@@ -176,23 +210,18 @@ export namespace ComponentHelper {
         }
     }
 
-    async function _getOrPromptTemplateUri(componentUri: Uri, overrideTemplateName?: string): Promise<SelectedTemplateItem | undefined> {
+    async function _getOrPromptTemplateUri(componentUri: Uri, overrideTemplateName?: string): Promise<ITemplateItem | undefined> {
         const qpItemList = await campaignExplorerProvider.getTemplateItems();
         if (qpItemList) {
             let isImplied = false;
             let templateItem: QuickPickItem | undefined;
             if (overrideTemplateName) {
                 templateItem = qpItemList.find((each) => each.label === `${overrideTemplateName}`);
-            } else if (componentUri.fsPath.endsWith(".yaml")) {
-                let metadata = matter.read(componentUri.fsPath, { delimiters: ['---', '...'] });
-                if (metadata && metadata.data && metadata.data.templateItem) {
-                    templateItem = qpItemList.find((each) => each.label === `${metadata.data.templateItem}`);
-                    isImplied = templateItem !== undefined;
-                }
-            } else if (componentUri.fsPath.endsWith(".json")) {
-                let metadata = await fse.readJSON(componentUri.fsPath);
-                if (metadata && metadata.templateItem) {
-                    templateItem = qpItemList.find((each) => each.label === `${metadata.templateItem}`);
+            } else {
+                const component = getComponentItem(componentUri.fsPath);
+                const componentMetadata = await component.getMetadata();
+                if (componentMetadata.templateItem) {
+                    templateItem = qpItemList.find((each) => each.label === `${componentMetadata.templateItem}`);
                     isImplied = templateItem !== undefined;
                 }
             }
@@ -205,11 +234,7 @@ export namespace ComponentHelper {
                 templateItem = await window.showQuickPick(qpItemList, qpOpts);
             }
             if (templateItem && templateItem.detail) {
-                return {
-                    templateUri: Uri.file(templateItem.detail),
-                    templateName: templateItem.label,
-                    isImplied: isImplied
-                };
+                return new BasicTemplateItem(Uri.file(templateItem.detail), templateItem.label, isImplied);
             }
         }
         return;

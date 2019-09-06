@@ -126,9 +126,9 @@ export namespace ExtensionCommands {
             let selection = activeTextEditor.selection;
             // Try to grab config from selection
             let selectedText = activeTextEditor.document.getText(new Range(selection.start, selection.end));
-            if (matter.test(selectedText, { delimiters: ['---', '...'] })) {
+            if (matter.test(selectedText, { delimiters: ['---', '---'] })) {
                 try {
-                    context = matter(selectedText, { delimiters: ['---', '...'] }).data as GeneratorVars;
+                    context = matter(selectedText, { delimiters: ['---', '---'] }).data as GeneratorVars;
                 } catch (ex) {
                     throw Error("Failed to parse selected content as generator context!");
                 }
@@ -206,8 +206,8 @@ export namespace ExtensionCommands {
             let selection = activeTextEditor.selection;
             // Try to grab config from selection
             let selectedText = activeTextEditor.document.getText(new Range(selection.start, selection.end));
-            if (matter.test(selectedText, { delimiters: ['---', '...'] })) {
-                let data = matter(selectedText, { delimiters: ['---', '...'] }).data;
+            if (matter.test(selectedText, { delimiters: ["---", "---"] })) {
+                let data = matter(selectedText, { delimiters: ["---", "---"] }).data;
                 
                 if (data.seed !== undefined ||
                     data.rowCount !== undefined ||

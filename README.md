@@ -1,23 +1,23 @@
 # vscode-dmbinder
 Visual Studio Code extension for managing campaign documents.
 
-## Requirements
-
-- [Pandoc](https://pandoc.org) >= 2.3
-
 ## Features
 
-- Generation of Hombrewery elements using snippets and Pandoc templating
-- Rendering of markdown files to PDF using Puppeteer
 - DMBinder view that helps organize campaign documents
+- Generation of Hombrewery elements using snippets and templating (Pandoc or Mustache)
+- Rendering of markdown files to PDF using Puppeteer
 - Randomly generate dungeon maps
 - Generation of content (like names, titles, locations, etc.) using randomized lists or Markov chains
 - Random generation of basic dungeon maps
 
+## Issues or Feature Requests
+Please submit any issues or new feature requests to [GitHub](https://github.com/jsnee/vscode-dmbinder/issues).
+
+## DMBinder Explorer
+The extension looks for `.dmbinder/campaign.json` in your workspace folders, and displays all DMBinder campaigns in the sidebar.
+
 <details>
 <summary>DMBinder Explorer screenshot</summary>
-
-The extension looks for `.dmbinder/campaign.json` in your workspace folders, and displays all DMBinder campaigns in the sidebar.
 
 ![DMBinder Explorer Screenshot](img/screenshots/explorer.png)
 
@@ -26,197 +26,40 @@ The extension looks for `.dmbinder/campaign.json` in your workspace folders, and
 ## Templates and Components
 You can create **component** files that contain data that can be easily inserted into your campaign documents.
 Component files can be either `.json` or `.yaml` files. (Both `.yaml` and `.json` examples are pictured in the "Template/Component Example" section, [below](#template-component-example))
+
+<details>
+<summary>Pandoc Templating</summary>
+
+### Pandoc Templating
+Using Pandoc as a templating engine is deprecated, but still supported. In order to use Pandoc as your templating engine, you'll first need to install [Pandoc](https://pandoc.org) version 2.3 or greater.
+While it is officially supported, features introduced in the future may cause templating with Pandoc to break occasionally. If this happens, please log a bug through [GitHub](https://github.com/jsnee/vscode-dmbinder/issues).
+
+#### Pandoc Components
 More information on how to format the data used in component files can be found in Pandoc's [Metadata Block](https://pandoc.org/MANUAL.html#extension-yaml_metadata_block) documentation.
 (Despite only having examples for `.yaml` metadata, Pandoc's [documentation](https://pandoc.org/MANUAL.html#option--metadata-file) does mention it supports `.json` data, as well)
 
-**Template** files are used to specify how to insert the component data into your campaign document.
-(Template files should be markdown, `.md`, files and should use [Pandoc](https://pandoc.org/MANUAL.html#using-variables-in-templates)'s variable syntax)
+#### NOTE:
+While there will continue to be support for templating using Pandoc, DMBinder is switching to [Mustache](https://mustache.github.io) as the primary means of templating. This can be changed in the extension settings by changing `dmbinder.defaultTemplatingEngine`. This switch is for ease of use (no outside installations necessary) and due to some shortcomings of Pandoc's templating system.
 
-##### Template Component Example
-
-Below are pictured an example template and component for the Pathfinder spell *Acid Splash*.
-
-#### Spell Block Template
+#### Spell Block Template (Pandoc)
 Example:
 ``` markdown
 #### $name$
 **Source** $source$
 **School** $school$; **Level** $for(classes)$$classes.name$ $classes.level$$sep$, $endfor$
 ___
-- **Casting Time** $casttime$
+- **Casting Time** $castTime$
 - **Components** $for(components)$$components$$sep$, $endfor$
 - **Range** $range$ $if(area)$($area$)$endif$
 - **Effect** $effect$
 - **Duration** $duration$
-$if(savingthrow)$- **Saving Throw** $savingthrow$$endif$
+$if(savingThrow)$- **Saving Throw** $savingThrow$$endif$
 $if(resistance)$- **Spell Resistance** $resistance$$endif$
 
 $description$
 
 ```
 
-#### *Acid Splash* Component
-`.yaml` Example:
-``` yaml
----
-templateItem: spell-block
-name: Acid Splash
-source: PRPG Core Rulebook pg. 239
-school: conjuration (creation) [acid]
-classes:
-  - name: arcanist
-    level: 0
-  - name: inquisitor
-    level: 0
-  - name: magus
-    level: 0
-  - name: sorcerer
-    level: 0
-  - name: summoner
-    level: 0
-  - name: summoner (unchained)
-    level: 0
-  - name: wizard
-    level: 0
-casttime: 1 standard action
-components:
-  - V
-  - S
-range: close
-area: 25 ft. + 5 ft./2 levels
-effect: one missile of acid
-duration: instantaneous
-description: You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round.
-...
-```
-
-`.json` Example:
-``` json
-{
-    "name": "Acid Splash",
-    "source": "PRPG Core Rulebook pg. 239",
-    "school": "conjuration (creation) [acid]",
-    "classes": [
-        {
-            "name": "arcanist",
-            "level": 0
-        },
-        {
-            "name": "inquisitor",
-            "level": 0
-        },
-        {
-            "name": "magus",
-            "level": 0
-        },
-        {
-            "name": "sorcerer",
-            "level": 0
-        },
-        {
-            "name": "summoner",
-            "level": 0
-        },
-        {
-            "name": "summoner (unchained)",
-            "level": 0
-        },
-        {
-            "name": "wizard",
-            "level": 0
-        }
-    ],
-    "casttime": "1 standard action",
-    "components": [
-        "V",
-        "S"
-    ],
-    "range": "close",
-    "area": "25 ft. + 5 ft./2 levels",
-    "effect": "one missile of acid",
-    "duration": "instantaneous",
-    "description": "You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round."
-}
-```
-
-#### Example Output
-![Build Component Example Screenshot](img/screenshots/example-output.png)
-
-## Usage
-In order to render files to PDF, you'll need to do one of the following:
-- Point to a local Chrome installation by using `dmbinder.config.chooseChromePath`
-- Set `dmbinder.chromeExecutablePath` to point an existing Chrome executable
-- Download a version of Chromium by using `dmbinder.config.downloadChromiumRevision`
-
-
-For best results when using `dmbinder.config.downloadChromiumRevision` to download Chromium instance for PDF rendering,
-it is recommended to use the suggested revision or later.
-
-### Component Basics
-
-Component files are fairly simple. They simply contain named data attributes that can be used and reused to insert prebuilt snippets into your markdown formatted campaign documents.
-
-`.yaml` example:
-``` yaml
----
-# This is a comment
-singleAttribute: Single Value
-parentAttribute:
-  childAttribute: Nested Value
-  otherChild:
-    nestedAgain: Turtles all the way down
-listAttribute:
-  - Item 1
-  - Item 2
-  - Item 3
-complexList:
-  - itemTitle: Title 1
-    itemBody: Body 1
-    itemCoolAttribute: Cool Attribute 1
-    coolnessFactor: 1
-  - itemTitle: Title 2
-    itemBody: Body 2
-    itemCoolAttribute: Cool Attribute 2
-    coolnessFactor: 10
-...
-```
-
-`.json` example:
-``` json
-{
-    "singleAttribute": "Single Value",
-    "parentAttribute": {
-        "childAttribute": "Nested Value",
-        "otherChild": {
-            "nestedAgain": "Turtles all the way down"
-        }
-    },
-    "listAttribute": [
-        "Item 1",
-        "Item 2",
-        "Item 3"
-    ],
-    "complexList": [
-        {
-            "itemTitle": "Title 1",
-            "itemBody": "Body 1",
-            "itemCoolAttribute": "Cool Attribute 1",
-            "coolnessFactor": 1
-        },
-        {
-            "itemTitle": "Title 2",
-            "itemBody": "Body 2",
-            "itemCoolAttribute": "Cool Attribute 2",
-            "coolnessFactor": 10
-        }
-    ]
-}
-```
-
-##### Note:
-If using `.yaml` components, the metadata needs to be preceeded with `---` and proceeded with `...` so that Pandoc will recognize the data
-
-### Template Basics
 
 Despite looking somewhat messy, Pandoc's templating system was implemented over using VS Code or TextMate "snippets", due to their benefits, particularly regarding the handling of lists and conditional logic. Template files should look just like regular Markdown (`.md`) files, but with specially formatted placeholders that will be replaced with the data from a component. This allows, for example, all the descriptive blocks (spells, items, monsters, NPCs, magic shops, cities, etc) in your campaign documents to have a similar and consistent layout. Gone are the days where the order of monster stats changed from monster to monster!
 
@@ -235,12 +78,10 @@ Variables are accessed based on the names defined in the component files and nes
 ##### Component
 
 ``` yaml
----
 name: Cool Dude
 equipment:
   weapon: Greatsword
   armor: Plate Mail
-...
 ```
 
 ##### Template
@@ -267,12 +108,10 @@ Conditions can control if content listed between the opening statement and the c
 
 ##### Component
 ``` yaml
----
 name: Cool Dude
 equipment:
   meleeWeapon: Greatsword
   armor: Plate Mail
-...
 ```
 
 ##### Template
@@ -311,7 +150,6 @@ Loops are a great way to format a list of data!
 ##### Component
 
 ``` yaml
----
 name: Cool Dude
 equipment:
   weapon: Greatsword
@@ -326,7 +164,6 @@ saleItems:
     cost: 2,000 gp
   - name: Masterwork Crossbow
     cost: 100 gp
-...
 ```
 
 ##### Template
@@ -397,6 +234,202 @@ Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
 ```
 
 </details>
+</details>
+
+### Template Component Example
+
+Below are pictured an example template and component for the Pathfinder spell *Acid Splash*.
+
+#### Spell Block Template (Mustache)
+Example:
+``` markdown
+#### {{name}}
+**Source** {{source}}
+**School** {{school}}; **Level** {{#classes}}{{name}} {{level}}{{^last}}, {{/last}}{{/classes}}
+___
+- **Casting Time** {{castTime}}
+- **Components** {{components}}
+- **Range** {{range}}{{area}} {{.}}{{/area}}
+- **Effect** {{effect}}
+- **Duration** {{duration}}
+{{#savingThrow}}
+- **Saving Throw** {{.}}
+{{/savingThrow}}
+{{#resistance}}
+- **Spell Resistance** {{.}}
+{{/resistance}}
+
+{{! Description is handled this way in case description is a list or a single value}}
+{{#description}}
+{{.}}
+{{/description}}
+```
+
+#### *Acid Splash* Component
+`.yaml` Example:
+``` yaml
+---
+templateItem: spell-block
+---
+name: Acid Splash
+source: PRPG Core Rulebook pg. 239
+school: conjuration (creation) [acid]
+levels:
+  - name: arcanist
+    level: 0
+  - name: inquisitor
+    level: 0
+  - name: magus
+    level: 0
+  - name: sorcerer
+    level: 0
+  - name: summoner
+    level: 0
+  - name: summoner (unchained)
+    level: 0
+  - name: wizard
+    level: 0
+    last: true
+castTime: 1 standard action
+components:
+  - V
+  - S
+range: close
+area: 25 ft. + 5 ft./2 levels
+effect: one missile of acid
+duration: instantaneous
+description: You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round.
+```
+
+`.json` Example:
+``` json
+{
+    "name": "Acid Splash",
+    "source": "PRPG Core Rulebook pg. 239",
+    "school": "conjuration (creation) [acid]",
+    "classes": [
+        {
+            "name": "arcanist",
+            "level": 0
+        },
+        {
+            "name": "inquisitor",
+            "level": 0
+        },
+        {
+            "name": "magus",
+            "level": 0
+        },
+        {
+            "name": "sorcerer",
+            "level": 0
+        },
+        {
+            "name": "summoner",
+            "level": 0
+        },
+        {
+            "name": "summoner (unchained)",
+            "level": 0
+        },
+        {
+            "name": "wizard",
+            "level": 0
+        }
+    ],
+    "casttime": "1 standard action",
+    "components": [
+        "V",
+        "S"
+    ],
+    "range": "close",
+    "area": "25 ft. + 5 ft./2 levels",
+    "effect": "one missile of acid",
+    "duration": "instantaneous",
+    "description": "You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round."
+}
+```
+
+#### Example Output
+![Build Component Example Screenshot](img/screenshots/example-output.png)
+### Component Basics
+
+Component files are fairly simple. They simply contain named data attributes that can be used and reused to insert prebuilt snippets into your markdown formatted campaign documents.
+
+`.yaml` example:
+``` yaml
+# This is a comment
+singleAttribute: Single Value
+parentAttribute:
+  childAttribute: Nested Value
+  otherChild:
+    nestedAgain: Turtles all the way down
+listAttribute:
+  - Item 1
+  - Item 2
+  - Item 3
+complexList:
+  - itemTitle: Title 1
+    itemBody: Body 1
+    itemCoolAttribute: Cool Attribute 1
+    coolnessFactor: 1
+  - itemTitle: Title 2
+    itemBody: Body 2
+    itemCoolAttribute: Cool Attribute 2
+    coolnessFactor: 10
+```
+
+`.json` example:
+``` json
+{
+    "singleAttribute": "Single Value",
+    "parentAttribute": {
+        "childAttribute": "Nested Value",
+        "otherChild": {
+            "nestedAgain": "Turtles all the way down"
+        }
+    },
+    "listAttribute": [
+        "Item 1",
+        "Item 2",
+        "Item 3"
+    ],
+    "complexList": [
+        {
+            "itemTitle": "Title 1",
+            "itemBody": "Body 1",
+            "itemCoolAttribute": "Cool Attribute 1",
+            "coolnessFactor": 1
+        },
+        {
+            "itemTitle": "Title 2",
+            "itemBody": "Body 2",
+            "itemCoolAttribute": "Cool Attribute 2",
+            "coolnessFactor": 10
+        }
+    ]
+}
+```
+
+##### Note:
+It is possible to specify the name of the template file (leave off the `.md` extension) to use by specifying it in the component file like below:
+
+`.yaml` example:
+``` yaml
+---
+templateItem: name-of-template-file
+---
+name: dummyComponent
+```
+It is important to note that in the `YAML` file, the `templateItem` attribute is preceeded and proceeded by `---`, this is to separate this attribute from the actual component attributes. Unfortunately this syntax (sometimes called "front matter") isn't possible to separate from the rest of the data when using the `JSON` format, at least in any meaningful way.
+
+`.json` example:
+``` json
+{
+    "templateItem": "name-of-template-file",
+    "name": "dummyComponent"
+}
+```
 
 ### Inserting A Component
 
@@ -463,8 +496,8 @@ inventory:
 
 Template (cool-dude-template.md):
 ``` markdown
-**Name:** $name$
-$name$ is holding $for(inventory)$$inventory$$sep$, $endfor$.
+**Name:** {{name}}
+{{name}} is holding {{inventory}}.
 ```
 
 Source
@@ -482,6 +515,16 @@ Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
 ```
 
 </details>
+
+## PDF Rendering
+In order to render files to PDF, you'll need to do one of the following:
+- Point to a local Chrome installation by using `dmbinder.config.chooseChromePath`
+- Set `dmbinder.chromeExecutablePath` to point an existing Chrome executable
+- Download a version of Chromium by using `dmbinder.config.downloadChromiumRevision`
+
+
+For best results when using `dmbinder.config.downloadChromiumRevision` to download Chromium instance for PDF rendering,
+it is recommended to use the suggested revision or later.
 
 
 ### Content Generation
@@ -532,4 +575,3 @@ See [Changelog](CHANGELOG.md) for release notes.
 ## Related Projects
 - [Homebrewery](https://github.com/naturalcrit/homebrewery)
 - [homebrewery-vscode](https://github.com/OfficerHalf/homebrewery-vscode)
-- [simple-pandoc](https://www.npmjs.com/package/simple-pandoc)

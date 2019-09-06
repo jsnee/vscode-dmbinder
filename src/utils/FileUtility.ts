@@ -16,4 +16,16 @@ export namespace FileUtility {
         });
         return response;
     }
+
+    export async function readFileAsync(path: Uri): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            fse.readFile(path.fsPath, (err: NodeJS.ErrnoException, data: Buffer) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data.toString());
+                }
+            });
+        });
+    }
 }
