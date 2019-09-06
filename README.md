@@ -274,7 +274,7 @@ templateItem: spell-block
 name: Acid Splash
 source: PRPG Core Rulebook pg. 239
 school: conjuration (creation) [acid]
-levels:
+classes:
   - name: arcanist
     level: 0
   - name: inquisitor
@@ -334,7 +334,8 @@ description: You fire a small orb of acid at the target. You must succeed on a r
         },
         {
             "name": "wizard",
-            "level": 0
+            "level": 0,
+            "last": true
         }
     ],
     "casttime": "1 standard action",
@@ -510,7 +511,7 @@ Output:
 <dmb-autogen data-dmb-component="Cool-Dude" data-dmb-template="cool-dude-template">
 
 **Name:** Cool Dude
-Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
+Cool Dude is holding a Bag of Holding,a bedroll,rations (x7),7 gp.
 </dmb-autogen>
 ```
 
