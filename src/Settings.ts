@@ -56,6 +56,18 @@ class Settings {
     public async updateAutogenerateOnRender(val: boolean | undefined): Promise<void> {
         return await workspace.getConfiguration('dmbinder').update('autogenerateOnRender', val);
     }
+
+    public get defaultTemplatingEngine(): string | undefined {
+        return workspace.getConfiguration('dmbinder').get('defaultTemplatingEngine');
+    }
+
+    public set defaultTemplatingEngine(val: string | undefined) {
+        workspace.getConfiguration('dmbinder').update('defaultTemplatingEngine', val);
+    }
+
+    public async updateDefaultTemplatingEngine(val: string | undefined): Promise<void> {
+        return await workspace.getConfiguration('dmbinder').update('defaultTemplatingEngine', val);
+    }
 }
 
 export const DMBSettings: Settings = new Settings();

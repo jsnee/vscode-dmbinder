@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.4.4",
+    "version": "0.4.5",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -260,6 +260,15 @@
                     "type": "string",
                     "default": null,
                     "description": "Path to Chrome executable used to render PDFs (if left empty, will use puppeteer's default)"
+                },
+                "dmbinder.defaultTemplatingEngine": {
+                    "type": "string",
+                    "description": "The default templating engine to use",
+                    "enum": [
+                        "mustache",
+                        "pandoc"
+                    ],
+                    "default": "mustache"
                 }
             }
         },
@@ -506,8 +515,10 @@
     "devDependencies": {
         "@types/fs-extra": "^5.0.4",
         "@types/he": "^1.1.0",
+        "@types/js-yaml": "^3.12.1",
         "@types/markdown-it": "0.0.2",
         "@types/mocha": "^2.2.42",
+        "@types/mustache": "^0.8.32",
         "@types/node": "^8.10.25",
         "@types/puppeteer-core": "^1.9.0",
         "@types/seedrandom": "^2.4.28",
@@ -522,7 +533,9 @@
         "fs-extra": "^7.0.1",
         "gray-matter": "^4.0.2",
         "he": "^1.2.0",
+        "js-yaml": "^3.13.1",
         "markdown-it": "^9.1.0",
+        "mustache": "^3.0.3",
         "puppeteer-core": "^1.19.0",
         "seedrandom": "^3.0.1"
     }

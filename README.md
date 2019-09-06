@@ -1,13 +1,13 @@
 # vscode-dmbinder
 Visual Studio Code extension for managing campaign documents.
 
-## Requirements
+## Optional Dependencies
 
 - [Pandoc](https://pandoc.org) >= 2.3
 
 ## Features
 
-- Generation of Hombrewery elements using snippets and Pandoc templating
+- Generation of Hombrewery elements using snippets and templating (Pandoc or Mustache)
 - Rendering of markdown files to PDF using Puppeteer
 - DMBinder view that helps organize campaign documents
 - Randomly generate dungeon maps
@@ -26,11 +26,16 @@ The extension looks for `.dmbinder/campaign.json` in your workspace folders, and
 ## Templates and Components
 You can create **component** files that contain data that can be easily inserted into your campaign documents.
 Component files can be either `.json` or `.yaml` files. (Both `.yaml` and `.json` examples are pictured in the "Template/Component Example" section, [below](#template-component-example))
+
+#### Pandoc Components
 More information on how to format the data used in component files can be found in Pandoc's [Metadata Block](https://pandoc.org/MANUAL.html#extension-yaml_metadata_block) documentation.
 (Despite only having examples for `.yaml` metadata, Pandoc's [documentation](https://pandoc.org/MANUAL.html#option--metadata-file) does mention it supports `.json` data, as well)
 
 **Template** files are used to specify how to insert the component data into your campaign document.
 (Template files should be markdown, `.md`, files and should use [Pandoc](https://pandoc.org/MANUAL.html#using-variables-in-templates)'s variable syntax)
+
+#### NOTE:
+While there will continue to be support for templating using Pandoc, DMBinder is switching to [Mustache](https://mustache.github.io) as the primary means of templating. This can be changed in the extension settings by changing `dmbinder.defaultTemplatingEngine`. This switch is for ease of use (no outside installations necessary) and due to some shortcomings of Pandoc's templating system. Updated documentation will be provided when the default templating engine is eventually switched over.
 
 ##### Template Component Example
 
@@ -60,6 +65,7 @@ $description$
 ``` yaml
 ---
 templateItem: spell-block
+---
 name: Acid Splash
 source: PRPG Core Rulebook pg. 239
 school: conjuration (creation) [acid]
@@ -87,7 +93,6 @@ area: 25 ft. + 5 ft./2 levels
 effect: one missile of acid
 duration: instantaneous
 description: You fire a small orb of acid at the target. You must succeed on a ranged touch attack to hit your target. The orb deals 1d3 points of acid damage. This acid disappears after 1 round.
-...
 ```
 
 `.json` Example:
@@ -158,7 +163,6 @@ Component files are fairly simple. They simply contain named data attributes tha
 
 `.yaml` example:
 ``` yaml
----
 # This is a comment
 singleAttribute: Single Value
 parentAttribute:
@@ -178,7 +182,6 @@ complexList:
     itemBody: Body 2
     itemCoolAttribute: Cool Attribute 2
     coolnessFactor: 10
-...
 ```
 
 `.json` example:
@@ -214,10 +217,12 @@ complexList:
 ```
 
 ##### Note:
-If using `.yaml` components, the metadata needs to be preceeded with `---` and proceeded with `...` so that Pandoc will recognize the data
+If using `.yaml` components, you may specify the templating engine the metadata needs to be preceeded with `---` and proceeded with `---` so that Pandoc will recognize the data
 
 ### Template Basics
 
+<details>
+<summary>Pandoc Templating</summary>
 Despite looking somewhat messy, Pandoc's templating system was implemented over using VS Code or TextMate "snippets", due to their benefits, particularly regarding the handling of lists and conditional logic. Template files should look just like regular Markdown (`.md`) files, but with specially formatted placeholders that will be replaced with the data from a component. This allows, for example, all the descriptive blocks (spells, items, monsters, NPCs, magic shops, cities, etc) in your campaign documents to have a similar and consistent layout. Gone are the days where the order of monster stats changed from monster to monster!
 
 There are 3 main features of Pandoc's templating system:
@@ -235,12 +240,10 @@ Variables are accessed based on the names defined in the component files and nes
 ##### Component
 
 ``` yaml
----
 name: Cool Dude
 equipment:
   weapon: Greatsword
   armor: Plate Mail
-...
 ```
 
 ##### Template
@@ -267,12 +270,10 @@ Conditions can control if content listed between the opening statement and the c
 
 ##### Component
 ``` yaml
----
 name: Cool Dude
 equipment:
   meleeWeapon: Greatsword
   armor: Plate Mail
-...
 ```
 
 ##### Template
@@ -311,7 +312,6 @@ Loops are a great way to format a list of data!
 ##### Component
 
 ``` yaml
----
 name: Cool Dude
 equipment:
   weapon: Greatsword
@@ -326,7 +326,6 @@ saleItems:
     cost: 2,000 gp
   - name: Masterwork Crossbow
     cost: 100 gp
-...
 ```
 
 ##### Template
@@ -397,6 +396,7 @@ Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
 ```
 
 </details>
+</details> <!-- Pandoc Templating -->
 
 ### Inserting A Component
 
