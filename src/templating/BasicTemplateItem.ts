@@ -32,7 +32,8 @@ export class BasicTemplateItem implements ITemplateItem {
         const templateMatter = matter(templateData, { delimiters: ["---", "---"] });
         if (templateMatter.data) {
             this._metadata = {
-                templateEngine: templateMatter.data.templateEngine
+                templateEngine: templateMatter.data.templateEngine,
+                escapeHtml: templateMatter.data.escapeHtml
             };
         }
         this._content = templateMatter.content;

@@ -15,6 +15,8 @@ import { YamlComponentItem } from "../templating/YamlComponentItem";
 import { BasicTemplateItem } from "../templating/BasicTemplateItem";
 import { ITemplateItem } from "../templating/ITemplateItem";
 
+const _pandocSyntaxRegEx = /\$(?:if\(|for\()?[\w.]+\)?\$/g;
+
 export namespace ComponentHelper {
     export async function buildComponent(templatePath: string, componentPath: string): Promise<string> {
         let engine: ITemplateEngine;
@@ -35,6 +37,14 @@ export namespace ComponentHelper {
                 default:
                     throw new Error("Unexpected templating engine type!");
             }
+            if (engineType !== TemplateEngineType.Pandoc && _pandocSyntaxRegEx.test(await templateItem.getContents())) {
+                const alertMessage = "It looks like you may be trying to render a 'Pandoc' template, "
+                    + "but DMBinder was using the 'Mustache' rendering engine. "
+                    + "You may want to either change the default rendering engine in VSCode's settings or "
+                    + "explicitly specify the rendering engine in the template.";
+                // tslint:disable-next-line: no-floating-promises
+                window.showInformationMessage(alertMessage);
+            }
             return await engine.buildComponent(templateItem, componentItem);
         }
         throw new Error("Could not determine which templating engine to use.");
@@ -49,12 +59,6 @@ export namespace ComponentHelper {
             default:
                 throw new Error("Unexpected component item file type!");
         }
-    }
-
-    export async function alertPandocDetectedWhileMustacheRendering(): Promise<void> {
-        await window.showInformationMessage(
-            "It looks like you may be trying to render a 'Pandoc' template, but DMBinder was using the 'Mustache' rendering engine. "
-            + "You may want to either change the default rendering engine in VSCode's settings or explicitly specify the rendering engine in the template.");
     }
 
     export async function promptGenerateComponent(item?: ITreeItem, includeAutogen: boolean = false): Promise<string | undefined> {
