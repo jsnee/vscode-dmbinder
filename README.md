@@ -8,6 +8,7 @@ Visual Studio Code extension for managing campaign documents.
 - [Templates and Components](#templates-and-components)
 - [PDF Rendering](#pdf-rendering)
 - [The campaign.json File](#campaignjson)
+- [Planned Changes](#planned-changes)
 - [Icon Sources](#icon-sources)
 - [Related Projects](#related-projects)
 
@@ -615,6 +616,17 @@ Below is an example Campaign configuration file:
     "outDirectory": "./out/"
 }
 ```
+
+## Planned Changes
+- When generating a dungeon map, save settings to a Markdown comment before the map
+- Add unit testing
+- QOL improvements
+  - Explorer view changes
+    - Add toggle view layout button
+    - Add "Open campaign.json" button
+- Cleanup package.json
+  - Sort and remove unused commands
+  - Hide commands from command palette (where appropriate)
 
 See [generator-dmbinder](https://github.com/jsnee/generator-dmbinder) for a yeoman generator to help bootstrap a campaign binder.
 

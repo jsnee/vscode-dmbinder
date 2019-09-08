@@ -1,12 +1,5 @@
 # Change Log
 
-### Planned Changes
-- When generating a dungeon map, save settings to a Markdown comment before the map
-- Add unit testing
-- Cleanup package.json
-  - Sort and remove unused commands
-  - Hide commands from command palette (where appropriate)
-
 ## 0.4.6
 - Added templating with [Handlebars](https://handlebarsjs.com/) (really, just a beefed up version of Mustache)
   - *NOTE:* Mustache is still supported and is treated as a separate rendering engine
