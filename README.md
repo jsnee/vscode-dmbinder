@@ -1,10 +1,19 @@
 # vscode-dmbinder
 Visual Studio Code extension for managing campaign documents.
 
-## Features
+## Quick Links
+- [Features](#features)
+- [Reporting Bugs or Requesting Features](#issues-or-feature-requests)
+- [DMBinder Explorer View](#dmbinder-explorer)
+- [Templates and Components](#templates-and-components)
+- [PDF Rendering](#pdf-rendering)
+- [The campaign.json File](#campaignjson)
+- [Icon Sources](#icon-sources)
+- [Related Projects](#related-projects)
 
+## Features
 - DMBinder view that helps organize campaign documents
-- Generation of Hombrewery elements using snippets and templating (Pandoc or Mustache)
+- Generation of Hombrewery elements using snippets and templating (Mustache, Handlebars or Pandoc)
 - Rendering of markdown files to PDF using Puppeteer
 - Randomly generate dungeon maps
 - Generation of content (like names, titles, locations, etc.) using randomized lists or Markov chains
@@ -21,226 +30,115 @@ The extension looks for `.dmbinder/campaign.json` in your workspace folders, and
 
 ![DMBinder Explorer Screenshot](img/screenshots/explorer.png)
 
-</details>
+</details><!--DMBinder Explorer screenshot -->
+
+## Configuration Settings
+- `dmbinder.generateGettingStartedEnabled`
+- `dmbinder.homebrewPreviewEnabled`
+- `dmbinder.autogenerateOnRender`
+- `dmbinder.treeViewStyle`
+- `dmbinder.chromeExecutablePath`
+- `dmbinder.defaultTemplatingEngine` (Default: "handlebars")
 
 ## Templates and Components
 You can create **component** files that contain data that can be easily inserted into your campaign documents.
 Component files can be either `.json` or `.yaml` files. (Both `.yaml` and `.json` examples are pictured in the "Template/Component Example" section, [below](#template-component-example))
 
-<details>
-<summary>Pandoc Templating</summary>
+### Template Basics
+Templates are Markdown, `.md` files that specify how to take the content in "component" files and generate markdown elements to be put into your campaign documents. Rather than having to remember the layout or style you have for your monster stat blocks or magic item cards, templates allow you to design the layout once and then insert them into your documents consistently and reusably.
 
-### Pandoc Templating
-Using Pandoc as a templating engine is deprecated, but still supported. In order to use Pandoc as your templating engine, you'll first need to install [Pandoc](https://pandoc.org) version 2.3 or greater.
-While it is officially supported, features introduced in the future may cause templating with Pandoc to break occasionally. If this happens, please log a bug through [GitHub](https://github.com/jsnee/vscode-dmbinder/issues).
+Currently, there are 3 supported templating engines: Mustache (the default), Handlebars, and Pandoc (requires [installation](https://pandoc.org)). However, Handlebars is essentially a "beefed" up version of Mustache, so there are really only two templating styles: Mustache and Handlebars (which use double curly braces, `{{value}}`) and Pandoc (which uses "$", `$value$`)
 
-#### Pandoc Components
-More information on how to format the data used in component files can be found in Pandoc's [Metadata Block](https://pandoc.org/MANUAL.html#extension-yaml_metadata_block) documentation.
-(Despite only having examples for `.yaml` metadata, Pandoc's [documentation](https://pandoc.org/MANUAL.html#option--metadata-file) does mention it supports `.json` data, as well)
+#### Template Metadata Options
+Template files can specify options to use when rendering components:
+- templateEngine: the templating engine to use instead of the default setting ("handlebars", "mustache", or "pandoc")
+  - Default: Whatever value is specified for `dmbinder.defaultTemplatingEngine`
+- escapeHtml (Handlebars and Mustache only): if set, will allow the templating engine to escape HTML content
 
-#### NOTE:
-While there will continue to be support for templating using Pandoc, DMBinder is switching to [Mustache](https://mustache.github.io) as the primary means of templating. This can be changed in the extension settings by changing `dmbinder.defaultTemplatingEngine`. This switch is for ease of use (no outside installations necessary) and due to some shortcomings of Pandoc's templating system.
+### Component Basics
 
-#### Spell Block Template (Pandoc)
-Example:
-``` markdown
-#### $name$
-**Source** $source$
-**School** $school$; **Level** $for(classes)$$classes.name$ $classes.level$$sep$, $endfor$
-___
-- **Casting Time** $castTime$
-- **Components** $for(components)$$components$$sep$, $endfor$
-- **Range** $range$ $if(area)$($area$)$endif$
-- **Effect** $effect$
-- **Duration** $duration$
-$if(savingThrow)$- **Saving Throw** $savingThrow$$endif$
-$if(resistance)$- **Spell Resistance** $resistance$$endif$
+Component files are fairly simple. They simply contain named data attributes that can be used and reused to insert prebuilt snippets into your markdown formatted campaign documents.
 
-$description$
-
-```
-
-
-Despite looking somewhat messy, Pandoc's templating system was implemented over using VS Code or TextMate "snippets", due to their benefits, particularly regarding the handling of lists and conditional logic. Template files should look just like regular Markdown (`.md`) files, but with specially formatted placeholders that will be replaced with the data from a component. This allows, for example, all the descriptive blocks (spells, items, monsters, NPCs, magic shops, cities, etc) in your campaign documents to have a similar and consistent layout. Gone are the days where the order of monster stats changed from monster to monster!
-
-There are 3 main features of Pandoc's templating system:
-- Variables: `$variableName$`
-- Conditions: `$if(variableName)$Render if variable has value: $variableName$. Cool, right?$endif$`
-- Loops: `$for(listVariable)$Each value: $listVariable$$sep$, $endfor$`
-
-#### Variables
-
-Variables are accessed based on the names defined in the component files and nested variables are accessed using the `.` character to denote a nested attribute.
-
-<details>
-<summary>Example:</summary>
-
-##### Component
-
+`.yaml` example:
 ``` yaml
-name: Cool Dude
-equipment:
-  weapon: Greatsword
-  armor: Plate Mail
+# This is a comment
+singleAttribute: Single Value
+parentAttribute:
+  childAttribute: Nested Value
+  otherChild:
+    nestedAgain: Turtles all the way down
+listAttribute:
+  - Item 1
+  - Item 2
+  - Item 3
+complexList:
+  - itemTitle: Title 1
+    itemBody: Body 1
+    itemCoolAttribute: Cool Attribute 1
+    coolnessFactor: 1
+  - itemTitle: Title 2
+    itemBody: Body 2
+    itemCoolAttribute: Cool Attribute 2
+    coolnessFactor: 10
 ```
 
-##### Template
-
-``` markdown
-**Name:** $name$
-$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
+`.json` example:
+``` json
+{
+    "singleAttribute": "Single Value",
+    "parentAttribute": {
+        "childAttribute": "Nested Value",
+        "otherChild": {
+            "nestedAgain": "Turtles all the way down"
+        }
+    },
+    "listAttribute": [
+        "Item 1",
+        "Item 2",
+        "Item 3"
+    ],
+    "complexList": [
+        {
+            "itemTitle": "Title 1",
+            "itemBody": "Body 1",
+            "itemCoolAttribute": "Cool Attribute 1",
+            "coolnessFactor": 1
+        },
+        {
+            "itemTitle": "Title 2",
+            "itemBody": "Body 2",
+            "itemCoolAttribute": "Cool Attribute 2",
+            "coolnessFactor": 10
+        }
+    ]
+}
 ```
 
-##### Output
+##### Note:
+It is possible to specify the name of the template file (leave off the `.md` extension) to use by specifying it in the component file like below:
 
-``` markdown
-**Name:** Cool Dude
-Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
-```
-
-</details>
-
-#### Conditions
-Conditions can control if content listed between the opening statement and the closing statement are output, based on checking if a variable exists.
-
-<details>
-<summary>Example:</summary>
-
-##### Component
+`.yaml` example:
 ``` yaml
-name: Cool Dude
-equipment:
-  meleeWeapon: Greatsword
-  armor: Plate Mail
+---
+templateItem: name-of-template-file
+---
+name: dummyComponent
 ```
+It is important to note that in the `YAML` file, the `templateItem` attribute is preceeded and proceeded by `---`, this is to separate this attribute from the actual component attributes. Unfortunately this syntax (sometimes called "front matter") isn't possible to separate from the rest of the data when using the `JSON` format, at least in any meaningful way.
 
-##### Template
-``` markdown
-**Name:** $name$
-$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.
-$if(equipment.rangedWeapon)$$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
+`.json` example:
+``` json
+{
+    "templateItem": "name-of-template-file",
+    "name": "dummyComponent"
+}
 ```
-
-##### Output
-``` markdown
-**Name:** Cool Dude
-Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
- 
-```
-
-The part about the armor is output because `equipment.armor` has a value, but the next line is blank because there is no `equipment.rangedWeapon` defined in the component metadata.
-
-</details>
-
-***Important Note:***
-Notice that in the example provided, there is a blank line displayed at the end, because there is a new line *before* the `$if(equipment.rangedWeapon)$`. In order to not see that empty line, you would need to start the `$if()$` statement at the end of the previous line like so:
-``` markdown
-**Name:** $name$
-$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.$if(equipment.rangedWeapon)$
-$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
-```
-*This* is why template files can start to look incredibly messy using Pandoc, but the benefits can outweigh the clutter.
-
-#### Loops
-Loops are a great way to format a list of data!
-
-<details>
-<summary>Example:</summary>
-  
-##### Component
-
-``` yaml
-name: Cool Dude
-equipment:
-  weapon: Greatsword
-  armor: Plate Mail
-inventory:
-  - Bag of Holding
-  - Bedroll
-  - Rations (x7)
-  - 7 gp
-saleItems:
-  - name: +1 *Ring of Protection*
-    cost: 2,000 gp
-  - name: Masterwork Crossbow
-    cost: 100 gp
-```
-
-##### Template
-``` markdown
-**Name:** $name$
-$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
-**Inventory:**
-$for(inventory)$
-- $inventory$
-$endfor$
-**Items For Sale:**
-| Name | Cost |
-|:----:|:----:|
-$for(saleItems)$
-| $saleItems.name$ | $saleItems.cost$ |
-$endfor$
-```
-
-##### Output
-``` markdown
-**Name:** Cool Dude
-Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
-**Inventory:**
-- Bag of Holding
-- Bedroll
-- Rations (x7)
-- 7 gp
-**Items For Sale:**
-| Name | Cost |
-|:----:|:----:|
-| +1 <em>Ring of Protection</em> | 2,000 gp |
-| Masterwork Crossbow | 100 gp |
-
-```
-
-</details>
-
-### Loops Separator
-
-Another nifty feature of Pandoc is that you can define a separator for loops.
-The separator is optional and is specified at the very end of the loop.
-If present, anything put between `$sep$` and the `$endfor$` will be added between every item in the list.
-For instance, if you wanted a list to generate a comma separated list you could do something like this:
-
-<details>
-<summary>Example:</summary>
-
-Component:
-``` yaml
-name: Cool Dude
-inventory:
-  - a Bag of Holding
-  - a bedroll
-  - rations (x7)
-  - 7 gp
-```
-
-Template:
-``` markdown
-**Name:** $name$
-$name$ is holding $for(inventory)$$inventory$$sep$, $endfor$.
-```
-
-Output:
-``` markdown
-**Name:** Cool Dude
-Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
-```
-
-</details>
-</details>
 
 ### Template Component Example
 
 Below are pictured an example template and component for the Pathfinder spell *Acid Splash*.
 
-#### Spell Block Template (Mustache)
+#### Spell Block Template (Mustache or Handlebars)
 Example:
 ``` markdown
 #### {{name}}
@@ -249,7 +147,7 @@ Example:
 ___
 - **Casting Time** {{castTime}}
 - **Components** {{components}}
-- **Range** {{range}}{{area}} {{.}}{{/area}}
+- **Range** {{range}}{{#area}} {{.}}{{/area}}
 - **Effect** {{effect}}
 - **Duration** {{duration}}
 {{#savingThrow}}
@@ -262,6 +160,31 @@ ___
 {{! Description is handled this way in case description is a list or a single value}}
 {{#description}}
 {{.}}
+{{/description}}
+```
+#### Spell Block Template (Handlebars)
+With Handlebars, you don't need to set the "last" value like has to be done for mustache. Instead, you can use "@last" to determine when you're on the last of a list.
+Example:
+``` markdown
+#### {{name}}
+**Source** {{source}}
+**School** {{school}}; **Level** {{#each classes}}{{name}} {{level}}{{#unless @last}}, {{/unless}}{{/each}}
+___
+- **Casting Time** {{castTime}}
+- **Components** {{components}}
+- **Range** {{range}}{{#if area}} {{this}}{{/if}}
+- **Effect** {{effect}}
+- **Duration** {{duration}}
+{{#if savingThrow}}
+- **Saving Throw** {{this}}
+{{/if}}
+{{#if resistance}}
+- **Spell Resistance** {{this}}
+{{/if}}
+
+{{! Description is handled this way in case description is a list or a single value}}
+{{#description}}
+{{this}}
 {{/description}}
 ```
 
@@ -353,84 +276,6 @@ description: You fire a small orb of acid at the target. You must succeed on a r
 
 #### Example Output
 ![Build Component Example Screenshot](img/screenshots/example-output.png)
-### Component Basics
-
-Component files are fairly simple. They simply contain named data attributes that can be used and reused to insert prebuilt snippets into your markdown formatted campaign documents.
-
-`.yaml` example:
-``` yaml
-# This is a comment
-singleAttribute: Single Value
-parentAttribute:
-  childAttribute: Nested Value
-  otherChild:
-    nestedAgain: Turtles all the way down
-listAttribute:
-  - Item 1
-  - Item 2
-  - Item 3
-complexList:
-  - itemTitle: Title 1
-    itemBody: Body 1
-    itemCoolAttribute: Cool Attribute 1
-    coolnessFactor: 1
-  - itemTitle: Title 2
-    itemBody: Body 2
-    itemCoolAttribute: Cool Attribute 2
-    coolnessFactor: 10
-```
-
-`.json` example:
-``` json
-{
-    "singleAttribute": "Single Value",
-    "parentAttribute": {
-        "childAttribute": "Nested Value",
-        "otherChild": {
-            "nestedAgain": "Turtles all the way down"
-        }
-    },
-    "listAttribute": [
-        "Item 1",
-        "Item 2",
-        "Item 3"
-    ],
-    "complexList": [
-        {
-            "itemTitle": "Title 1",
-            "itemBody": "Body 1",
-            "itemCoolAttribute": "Cool Attribute 1",
-            "coolnessFactor": 1
-        },
-        {
-            "itemTitle": "Title 2",
-            "itemBody": "Body 2",
-            "itemCoolAttribute": "Cool Attribute 2",
-            "coolnessFactor": 10
-        }
-    ]
-}
-```
-
-##### Note:
-It is possible to specify the name of the template file (leave off the `.md` extension) to use by specifying it in the component file like below:
-
-`.yaml` example:
-``` yaml
----
-templateItem: name-of-template-file
----
-name: dummyComponent
-```
-It is important to note that in the `YAML` file, the `templateItem` attribute is preceeded and proceeded by `---`, this is to separate this attribute from the actual component attributes. Unfortunately this syntax (sometimes called "front matter") isn't possible to separate from the rest of the data when using the `JSON` format, at least in any meaningful way.
-
-`.json` example:
-``` json
-{
-    "templateItem": "name-of-template-file",
-    "name": "dummyComponent"
-}
-```
 
 ### Inserting A Component
 
@@ -461,6 +306,215 @@ Optionally, you may include a `templateItem` attribute in your component that wi
 ![Inserting Component Using 'templateItem' Screenshot](img/screenshots/insert-component-autopick-template.gif)
 
 </details>
+
+### Pandoc Templating
+Using Pandoc as a templating engine is deprecated, but still supported. In order to use Pandoc as your templating engine, you'll first need to install [Pandoc](https://pandoc.org) version 2.3 or greater.
+While it is officially supported, features introduced in the future may cause templating with Pandoc to break occasionally. If this happens, please log a bug through [GitHub](https://github.com/jsnee/vscode-dmbinder/issues).
+
+<details>
+<summary>Pandoc Templating</summary>
+
+#### Pandoc Components
+More information on how to format the data used in component files can be found in Pandoc's [Metadata Block](https://pandoc.org/MANUAL.html#extension-yaml_metadata_block) documentation.
+(Despite only having examples for `.yaml` metadata, Pandoc's [documentation](https://pandoc.org/MANUAL.html#option--metadata-file) does mention it supports `.json` data, as well)
+
+#### NOTE:
+While there will continue to be support for templating using Pandoc, DMBinder is switching to [Mustache](https://mustache.github.io) as the primary means of templating. This can be changed in the extension settings by changing `dmbinder.defaultTemplatingEngine`. This switch is for ease of use (no outside installations necessary) and due to some shortcomings of Pandoc's templating system.
+
+#### Spell Block Template (Pandoc)
+Example:
+``` markdown
+#### $name$
+**Source** $source$
+**School** $school$; **Level** $for(classes)$$classes.name$ $classes.level$$sep$, $endfor$
+___
+- **Casting Time** $castTime$
+- **Components** $for(components)$$components$$sep$, $endfor$
+- **Range** $range$ $if(area)$($area$)$endif$
+- **Effect** $effect$
+- **Duration** $duration$
+$if(savingThrow)$- **Saving Throw** $savingThrow$$endif$
+$if(resistance)$- **Spell Resistance** $resistance$$endif$
+
+$description$
+
+```
+
+
+Despite looking somewhat messy, Pandoc's templating system was implemented over using VS Code or TextMate "snippets", due to their benefits, particularly regarding the handling of lists and conditional logic. Template files should look just like regular Markdown (`.md`) files, but with specially formatted placeholders that will be replaced with the data from a component. This allows, for example, all the descriptive blocks (spells, items, monsters, NPCs, magic shops, cities, etc) in your campaign documents to have a similar and consistent layout. Gone are the days where the order of monster stats changed from monster to monster!
+
+There are 3 main features of Pandoc's templating system:
+- Variables: `$variableName$`
+- Conditions: `$if(variableName)$Render if variable has value: $variableName$. Cool, right?$endif$`
+- Loops: `$for(listVariable)$Each value: $listVariable$$sep$, $endfor$`
+
+#### Variables
+
+Variables are accessed based on the names defined in the component files and nested variables are accessed using the `.` character to denote a nested attribute.
+
+<details>
+<summary>Example:</summary>
+
+##### Component
+
+``` yaml
+name: Cool Dude
+equipment:
+  weapon: Greatsword
+  armor: Plate Mail
+```
+
+##### Template
+
+``` markdown
+**Name:** $name$
+$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
+```
+
+##### Output
+
+``` markdown
+**Name:** Cool Dude
+Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
+```
+
+</details><!-- Example: -->
+
+#### Conditions
+Conditions can control if content listed between the opening statement and the closing statement are output, based on checking if a variable exists.
+
+<details>
+<summary>Example:</summary>
+
+##### Component
+``` yaml
+name: Cool Dude
+equipment:
+  meleeWeapon: Greatsword
+  armor: Plate Mail
+```
+
+##### Template
+``` markdown
+**Name:** $name$
+$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.
+$if(equipment.rangedWeapon)$$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
+```
+
+##### Output
+``` markdown
+**Name:** Cool Dude
+Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
+ 
+```
+
+The part about the armor is output because `equipment.armor` has a value, but the next line is blank because there is no `equipment.rangedWeapon` defined in the component metadata.
+
+</details><!-- Example: -->
+
+***Important Note:***
+Notice that in the example provided, there is a blank line displayed at the end, because there is a new line *before* the `$if(equipment.rangedWeapon)$`. In order to not see that empty line, you would need to start the `$if()$` statement at the end of the previous line like so:
+``` markdown
+**Name:** $name$
+$name$ wields a *$equipment.weapon$*$if(equipment.armor)$ and is protected by their hardy *$equipment.armor$*$endif$.$if(equipment.rangedWeapon)$
+$name$ also is pretty handy with their $equipment.rangedWeapon$, too!$endif$
+```
+*This* is why template files can start to look incredibly messy using Pandoc, but the benefits can outweigh the clutter.
+
+#### Loops
+Loops are a great way to format a list of data!
+
+##### Loops Separator
+
+Another nifty feature of Pandoc is that you can define a separator for loops.
+The separator is optional and is specified at the very end of the loop.
+If present, anything put between `$sep$` and the `$endfor$` will be added between every item in the list.
+For instance, if you wanted a list to generate a comma separated list you could do something like this:
+
+<details>
+<summary>Example:</summary>
+
+Component:
+``` yaml
+name: Cool Dude
+inventory:
+  - a Bag of Holding
+  - a bedroll
+  - rations (x7)
+  - 7 gp
+```
+
+Template:
+``` markdown
+**Name:** $name$
+$name$ is holding $for(inventory)$$inventory$$sep$, $endfor$.
+```
+
+Output:
+``` markdown
+**Name:** Cool Dude
+Cool Dude is holding a Bag of Holding, a bedroll, rations (x7), 7 gp.
+```
+
+</details><!-- Example: -->
+
+<details>
+<summary>Example:</summary>
+  
+##### Component
+
+``` yaml
+name: Cool Dude
+equipment:
+  weapon: Greatsword
+  armor: Plate Mail
+inventory:
+  - Bag of Holding
+  - Bedroll
+  - Rations (x7)
+  - 7 gp
+saleItems:
+  - name: +1 *Ring of Protection*
+    cost: 2,000 gp
+  - name: Masterwork Crossbow
+    cost: 100 gp
+```
+
+##### Template
+``` markdown
+**Name:** $name$
+$name$ wields a *$equipment.weapon$* and is protected by their hardy *$equipment.armor$*.
+**Inventory:**
+$for(inventory)$
+- $inventory$
+$endfor$
+**Items For Sale:**
+| Name | Cost |
+|:----:|:----:|
+$for(saleItems)$
+| $saleItems.name$ | $saleItems.cost$ |
+$endfor$
+```
+
+##### Output
+``` markdown
+**Name:** Cool Dude
+Cool Dude wields a *Greatsword* and is protected by their hardy *Plate Mail*.
+**Inventory:**
+- Bag of Holding
+- Bedroll
+- Rations (x7)
+- 7 gp
+**Items For Sale:**
+| Name | Cost |
+|:----:|:----:|
+| +1 <em>Ring of Protection</em> | 2,000 gp |
+| Masterwork Crossbow | 100 gp |
+
+```
+
+</details><!-- Example: -->
+</details><!-- Pandoc Templating -->
 
 
 ### Rendering to PDF

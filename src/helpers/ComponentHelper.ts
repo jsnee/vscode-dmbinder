@@ -14,6 +14,7 @@ import { JsonComponentItem } from "../templating/JsonComponentItem";
 import { YamlComponentItem } from "../templating/YamlComponentItem";
 import { BasicTemplateItem } from "../templating/BasicTemplateItem";
 import { ITemplateItem } from "../templating/ITemplateItem";
+import { HandlebarsEngine } from "../templating/HandlebarsEngine";
 
 const _pandocSyntaxRegEx = /\$(?:if\(|for\()?[\w.]+\)?\$/g;
 
@@ -33,6 +34,9 @@ export namespace ComponentHelper {
                     break;
                 case TemplateEngineType.Mustache:
                     engine = new MustacheEngine();
+                    break;
+                case TemplateEngineType.Handlebars:
+                    engine = new HandlebarsEngine();
                     break;
                 default:
                     throw new Error("Unexpected templating engine type!");

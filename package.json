@@ -265,10 +265,11 @@
                     "type": "string",
                     "description": "The default templating engine to use",
                     "enum": [
+                        "handlebars",
                         "mustache",
                         "pandoc"
                     ],
-                    "default": "mustache"
+                    "default": "handlebars"
                 }
             }
         },
@@ -514,6 +515,7 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.4",
+        "@types/handlebars": "^4.1.0",
         "@types/he": "^1.1.0",
         "@types/js-yaml": "^3.12.1",
         "@types/markdown-it": "0.0.2",
@@ -532,6 +534,7 @@
     "dependencies": {
         "fs-extra": "^7.0.1",
         "gray-matter": "^4.0.2",
+        "handlebars": "^4.2.0",
         "he": "^1.2.0",
         "js-yaml": "^3.13.1",
         "markdown-it": "^9.1.0",

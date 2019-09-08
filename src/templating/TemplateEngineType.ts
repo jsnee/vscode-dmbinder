@@ -1,6 +1,7 @@
 export enum TemplateEngineType {
-    Pandoc = "pandoc",
-    Mustache = "mustache"
+    Handlebars = "handlebars",
+    Mustache = "mustache",
+    Pandoc = "pandoc"
 }
 
 export namespace TemplateEngineTypeExtensions {
