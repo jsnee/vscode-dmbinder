@@ -49,7 +49,12 @@ export namespace ComponentHelper {
                 // tslint:disable-next-line: no-floating-promises
                 window.showInformationMessage(alertMessage);
             }
-            return await engine.buildComponent(templateItem, componentItem);
+            try {
+                return await engine.buildComponent(templateItem, componentItem);
+            } catch (err) {
+                window.showErrorMessage(`Error encountered while trying to render "${componentItem.componentName}" using "${templateItem.templateName}":\n${err}`);
+                throw err;
+            }
         }
         throw new Error("Could not determine which templating engine to use.");
     }

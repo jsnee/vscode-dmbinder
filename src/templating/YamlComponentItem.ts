@@ -4,10 +4,12 @@ import { ComponentMetadata } from "./ComponentMetadata";
 import * as matter from "gray-matter";
 import * as yaml from "js-yaml";
 import { FileUtility } from "../utils/FileUtility";
+import * as path from "path";
 
 export class YamlComponentItem implements IComponentItem {
     private _hasLoaded: boolean = false;
     private _componentUri: Uri;
+    private _templateName: string;
     private _metadata?: ComponentMetadata;
     private _content?: any;
 
@@ -15,8 +17,9 @@ export class YamlComponentItem implements IComponentItem {
         if (componentPath instanceof Uri) {
             this._componentUri = componentPath;
         } else {
-            this._componentUri = Uri.parse(componentPath);
+            this._componentUri = Uri.file(componentPath);
         }
+        this._templateName = path.basename(this._componentUri.fsPath, ".yaml");
     }
 
     private async loadComponent(): Promise<void> {
@@ -36,6 +39,10 @@ export class YamlComponentItem implements IComponentItem {
 
     public get componentUri(): Uri {
         return this._componentUri;
+    }
+
+    public get componentName(): string {
+        return this._templateName;
     }
 
     public async getMetadata(): Promise<ComponentMetadata> {

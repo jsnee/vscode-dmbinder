@@ -17,7 +17,7 @@ export class BasicTemplateItem implements ITemplateItem {
         if (templatePath instanceof Uri) {
             this._templateUri = templatePath;
         } else {
-            this._templateUri = Uri.parse(templatePath);
+            this._templateUri = Uri.file(templatePath);
         }
         this._inferrredFromComponent = inferredFromComponent;
         if (templateName === undefined) {

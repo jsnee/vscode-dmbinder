@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.7
+- Fixed templates/components not working when not stored on the C: drive in Windows
+- Also added some error messages when building a component fails
+
 ## 0.4.6
 - Added templating with [Handlebars](https://handlebarsjs.com/) (really, just a beefed up version of Mustache)
   - *NOTE:* Mustache is still supported and is treated as a separate rendering engine
