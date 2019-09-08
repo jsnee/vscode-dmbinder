@@ -7,6 +7,12 @@
   - Sort and remove unused commands
   - Hide commands from command palette (where appropriate)
 
+## 0.4.6
+- Added templating with [Handlebars](https://handlebarsjs.com/) (really, just a beefed up version of Mustache)
+  - *NOTE:* Mustache is still supported and is treated as a separate rendering engine
+- Set the default rendering engine to Handlebars
+- Cleaned up the README a bit (still have a lot more to do)
+
 ## 0.4.5
 - Added Templating with [Mustache](https://mustache.github.io)
 
