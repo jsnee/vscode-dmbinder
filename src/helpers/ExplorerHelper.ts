@@ -33,22 +33,22 @@ export namespace ExplorerHelper {
                             let paths: string[] = [];
                             switch (treeType) {
                                 case CampaignItemType.Source:
-                                    paths = campaign.sourcePaths;
+                                    paths = campaign.sourcePaths || [];
                                     paths.push(relativePath);
                                     campaign.sourcePaths = paths;
                                     break;
                                 case CampaignItemType.Template:
-                                    paths = campaign.templatePaths;
+                                    paths = campaign.templatePaths || [];
                                     paths.push(relativePath);
                                     campaign.templatePaths = paths;
                                     break;
                                 case CampaignItemType.Component:
-                                    paths = campaign.componentPaths;
+                                    paths = campaign.componentPaths || [];
                                     paths.push(relativePath);
                                     campaign.componentPaths = paths;
                                     break;
                                 case CampaignItemType.Generator:
-                                    paths = campaign.generatorPaths;
+                                    paths = campaign.generatorPaths || [];
                                     paths.push(relativePath);
                                     campaign.generatorPaths = paths;
                                     break;
