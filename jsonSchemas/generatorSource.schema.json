@@ -11,6 +11,7 @@
                 "import",
                 "markov",
                 "multiline",
+                "rollTable",
                 "switch"
             ],
             "default": "basic"
@@ -34,22 +35,11 @@
                 },
                 "values": {
                     "description": "A list of templates or values to use when generating strings",
-                    "anyOf": [
-                        {
-                            "type": "array",
-                            "minItems": 1,
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        {
-                            "type": "object",
-                            "patternProperties": {
-                                "^\\d+(-\\d+)?$": { "type": "string" }
-                            },
-                            "additionalProperties": false
-                        }
-                    ],
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    },
                     "default": []
                 }
             },
@@ -87,6 +77,29 @@
                 }
             },
             "required": ["values"]
+        },
+        {
+            "properties": {
+                "generatorType": {
+                    "enum": [
+                        "rollTable"
+                    ]
+                },
+                "rollValues": {
+                    "description": "A list of dice rolls and their corresponding outcome",
+                    "type": "object",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    },
+                    "patternProperties": {
+                        "^[0-9]+(-[0-9]+)?$": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "required": ["rollValues"]
         },
         {
             "properties": {

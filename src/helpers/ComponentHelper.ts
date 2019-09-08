@@ -46,14 +46,13 @@ export namespace ComponentHelper {
                     + "but DMBinder was using the 'Mustache' rendering engine. "
                     + "You may want to either change the default rendering engine in VSCode's settings or "
                     + "explicitly specify the rendering engine in the template.";
-                // tslint:disable-next-line: no-floating-promises
                 window.showInformationMessage(alertMessage);
             }
             try {
                 return await engine.buildComponent(templateItem, componentItem);
             } catch (err) {
                 window.showErrorMessage(`Error encountered while trying to render "${componentItem.componentName}" using "${templateItem.templateName}":\n${err}`);
-                throw err;
+                throw new Error("Error encountered while trying to build component.");
             }
         }
         throw new Error("Could not determine which templating engine to use.");

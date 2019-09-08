@@ -7,6 +7,8 @@ import { window } from 'vscode';
 import { GeneratorSourceConfig, GeneratorSourceCollection, GeneratorSourceType } from './GeneratorSourceConfig';
 import { MultilineContentGenerator } from './MultilineContentGenerator';
 import { SwitchContentGenerator } from './SwitchContentGenerator';
+import { RollTableContentGenerator } from './RollTableContentGenerator';
+import { WindowHelper } from '../../helpers/WindowHelper';
 
 enum TemplateMatch {
     Whole = 0,
@@ -15,63 +17,10 @@ enum TemplateMatch {
     GetVariableName = 3
 }
 
-interface LoadedGeneratorSourceConfig {
-    generatorType?: string;
-    sourceFile?: string;
-    values?: string[] | { [roll: string]: string };
-    condition?: string;
-    switchValues?: { [name: string]: string | string[] };
-    sources?: { [generatorName: string]: LoadedGeneratorSourceConfig };
-}
-
-function getGeneratorSourceConfig(loadedConfig: LoadedGeneratorSourceConfig): GeneratorSourceConfig {
-    let result: GeneratorSourceConfig = {
-        generatorType: loadedConfig.generatorType,
-        sourceFile: loadedConfig.sourceFile,
-        condition: loadedConfig.condition,
-        switchValues: loadedConfig.switchValues
-    };
-
-    if (loadedConfig.values && !(loadedConfig.values instanceof Array)) {
-        result.values = [];
-        for (let roll in loadedConfig.values) {
-            let range = roll.split("-");
-            if (range.length === 1) {
-                range.push(range[0]);
-            }
-            if (range.length === 2) {
-                let rangeFrom: number;
-                let rangeTo: number;
-                if (rangeFrom = parseInt(range[0])) {
-                    if (rangeTo = parseInt(range[1])) {
-                        if (rangeFrom > rangeTo) {
-                            let tempRange = [rangeFrom, rangeTo];
-                            rangeFrom = Math.min(...tempRange);
-                            rangeTo = Math.max(...tempRange);
-                        }
-                        for (let ndx = rangeFrom; ndx <= rangeTo; ndx++) {
-                            if (result.values[ndx]) {
-                                throw Error("Content generator has an overlapping roll table!");
-                            }
-                            result.values[ndx] = loadedConfig.values[roll];
-                        }
-                        continue;
-                    }
-                }
-            }
-            throw Error("Invalid range encountered in content generator source!");
-        }
-        // Remove the first one (since dice start at 1, the 0th element is probably empty)
-        if (result.values && result.values.length && result.values[0] === undefined) {
-            result.values.shift();
-        }
-    } else {
-        result.values = loadedConfig.values;
-    }
-    if (loadedConfig.sources) {
-        result.sources = {};
-        for (let configName in loadedConfig.sources) {
-            result.sources[configName] = getGeneratorSourceConfig(loadedConfig.sources[configName]);
+function getGeneratorSourceConfig(result: GeneratorSourceConfig): GeneratorSourceConfig {
+    if (result.sources) {
+        for (let configName in result.sources) {
+            result.sources[configName] = getGeneratorSourceConfig(result.sources[configName]);
         }
     }
     return result;
@@ -112,7 +61,7 @@ export class GeneratorSource {
     }
 
     private static async loadGeneratorSourceConfig(generatorPath: string): Promise<GeneratorSourceConfig> {
-        const loadedConfig: LoadedGeneratorSourceConfig = await fse.readJson(generatorPath);
+        const loadedConfig: GeneratorSourceConfig = await fse.readJson(generatorPath);
         let config = getGeneratorSourceConfig(loadedConfig);
         if (config.sources) {
             for (let sourceName in config.sources) {
@@ -133,7 +82,11 @@ export class GeneratorSource {
     public async generateContent(vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
         let generator = getContentGenerator(this._sourceConfig);
         if (generator) {
-            return await this.generateFromTemplate(generator.generate(vars), vars, paramCallback);
+            try {
+                return await this.generateFromTemplate(generator.generate(vars), vars, paramCallback);
+            } catch (err) {
+                WindowHelper.showErrorMessage(err);
+            }
         }
         return "";
     }
@@ -149,9 +102,7 @@ export class GeneratorSource {
         if (tokenName === undefined) {
             let getVarName = matches[TemplateMatch.GetVariableName];
             if (getVarName === undefined) {
-                const errMsg = `Error encountered while generating content on match: ${matches[TemplateMatch.Whole]}`;
-                window.showErrorMessage(errMsg);
-                throw new Error(errMsg);
+                throw new Error(`Error encountered while generating content on match: ${matches[TemplateMatch.Whole]}`);
             }
             if (vars[getVarName]) {
                 value = vars[getVarName];
@@ -206,6 +157,8 @@ export function getContentGenerator(generatorConfig: GeneratorSourceConfig): Bas
         case GeneratorSourceType.Import:
             window.showErrorMessage("Encountered unexpected issue when attempting to process imported content generator");
             return;
+        case GeneratorSourceType.RollTable:
+            return new RollTableContentGenerator(generatorConfig);
         case GeneratorSourceType.Switch:
             return new SwitchContentGenerator(generatorConfig);
         default:
