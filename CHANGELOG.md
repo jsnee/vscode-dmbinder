@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.8
+- Added a RollTable content generator, replacing the basic generator method (was not very efficient)
+- Fixed some broken error handling (trying to print Error object to error message)
+
 ## 0.4.7
 - Fixed templates/components not working when not stored on the C: drive in Windows
 - Also added some error messages when building a component fails
