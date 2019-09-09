@@ -4,6 +4,9 @@ Visual Studio Code extension for managing campaign documents.
 ## Documentation
 Documentation of how to use vscode-dmbinder has now moved to our [wiki](https://github.com/jsnee/vscode-dmbinder/wiki)!
 
+## Installation
+Requires [Visual Studio Code](https://code.visualstudio.com/download). Once VSCode is installed, search for the extension or install it from [here](https://marketplace.visualstudio.com/items?itemName=jpsnee.vscode-dmbinder).
+
 ## Features
 - DMBinder view that helps organize campaign documents
 - Generation of Hombrewery elements using snippets and templating (Mustache, Handlebars or Pandoc)
