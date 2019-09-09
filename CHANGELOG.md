@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.4.9
+- Clicking on the campaign name in the status bar opens the campaign's config file
+- Added a button to toggle the campaign explorer layout to the campaign explorer
+- Migrated documentation to the GitHub wiki
+
 ## 0.4.8
 - Added a RollTable content generator, replacing the basic generator method (was not very efficient)
 - Fixed some broken error handling (trying to print Error object to error message)
