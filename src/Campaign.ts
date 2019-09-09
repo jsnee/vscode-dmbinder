@@ -19,7 +19,7 @@ export class Campaign {
 
     constructor(campaignPath: string) {
         this._path = campaignPath;
-        this._config = fse.readJsonSync(this._configPath);
+        this._config = fse.readJsonSync(this.configPath);
         this._isConfigMutated = false;
     }
 
@@ -72,7 +72,7 @@ export class Campaign {
         return false;
     }
 
-    private get _configPath(): string {
+    public get configPath(): string {
         return getConfigPath(this._path);
     }
 
@@ -80,7 +80,7 @@ export class Campaign {
         if (!ignoreMutated && this._isConfigMutated) {
             await this.saveConfig();
         }
-        this._config = await fse.readJSON(this._configPath);
+        this._config = await fse.readJSON(this.configPath);
         this._isConfigMutated = false;
     }
 
@@ -89,7 +89,7 @@ export class Campaign {
             let opts: fse.WriteOptions = {
                 spaces: 4
             };
-            await fse.writeJSON(this._configPath, this._config, opts);
+            await fse.writeJSON(this.configPath, this._config, opts);
             this._isConfigMutated = false;
         }
     }

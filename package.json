@@ -51,6 +51,11 @@
                 "category": "DM Binder"
             },
             {
+                "command": "dmbinder.campaign.openConfig",
+                "title": "Open the campaign.json file for the current campaign",
+                "category": "DM Binder"
+            },
+            {
                 "command": "dmbinder.campaign.refresh",
                 "title": "Refresh the current campaign",
                 "category": "DM Binder",
@@ -338,6 +343,9 @@
             ],
             "view/title": [
                 {
+                    "command": "dmbinder.config.toggleViewStyle"
+                },
+                {
                     "command": "dmbinder.campaign.refresh",
                     "group": "navigation",
                     "when": "view == dmbinder"
@@ -468,7 +476,7 @@
             "dmbinder": [
                 {
                     "id": "dmbinder",
-                    "name": "DM Binder",
+                    "name": "Campaign View",
                     "when": "config.dmbinder.treeViewStyle == composite"
                 },
                 {

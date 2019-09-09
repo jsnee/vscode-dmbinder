@@ -25,6 +25,7 @@ class CampaignStatusBarItem {
         } else if (campaigns.length === 1) {
             this._statusBarItem.text = this.getStatusText(campaigns[0].campaignName);
             this._statusBarItem.tooltip = campaigns[0].campaignPath;
+            this._statusBarItem.command = "dmbinder.campaign.openConfig";
             this._statusBarItem.show();
         }
     }

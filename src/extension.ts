@@ -12,11 +12,11 @@ import { ExplorerHelper } from './helpers/ExplorerHelper';
 
 interface ContextProperties {
     localStoragePath: string;
-    compositeTreeView: TreeView<ITreeItem> | undefined;
-    sourcesTreeView: TreeView<ITreeItem> | undefined;
-    templatesTreeView: TreeView<ITreeItem> | undefined;
-    componentsTreeView: TreeView<ITreeItem> | undefined;
-    generatorsTreeView: TreeView<ITreeItem> | undefined;
+    compositeTreeView?: TreeView<ITreeItem>;
+    sourcesTreeView?: TreeView<ITreeItem>;
+    templatesTreeView?: TreeView<ITreeItem>;
+    componentsTreeView?: TreeView<ITreeItem>;
+    generatorsTreeView?: TreeView<ITreeItem>;
 }
 
 export const contextProps: ContextProperties = {
@@ -68,6 +68,9 @@ export async function activate(context: ExtensionContext) {
 
     let brewCampaignDisposable = commands.registerCommand('dmbinder.campaign.brew', ExtensionCommands.renderCampaignSources);
     context.subscriptions.push(brewCampaignDisposable);
+
+    let openCampaignConfigDisposable = commands.registerCommand('dmbinder.campaign.openConfig', ExtensionCommands.openCampaignConfig);
+    context.subscriptions.push(openCampaignConfigDisposable);
 
     let editTreeItemDisposable = commands.registerCommand('dmbinder.item.edit', ExtensionCommands.editTreeItem);
     context.subscriptions.push(editTreeItemDisposable);

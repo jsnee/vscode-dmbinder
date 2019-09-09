@@ -1,7 +1,7 @@
 
 import { campaignExplorerProvider } from '../ui/campaignExplorerProvider';
 import { Campaign } from '../Campaign';
-import { Uri, window, QuickPickItem, QuickPickOptions, InputBoxOptions } from 'vscode';
+import { Uri, window, QuickPickItem, QuickPickOptions, InputBoxOptions, workspace } from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CampaignItemType } from '../ui/CampaignItemType';
@@ -50,7 +50,7 @@ export namespace CampaignHelper {
     }
 
     export async function promptSelectCampaign(promptText: string = "Select a campaign", noPromptIfOne: boolean = false): Promise<Campaign | undefined> {
-        const campaignPaths = await campaignExplorerProvider.listCampaignPaths();
+        const campaignPaths = await listCampaignPaths();
         if (campaignPaths) {
             if (campaignPaths.length === 1 && noPromptIfOne) {
                 return new Campaign(campaignPaths[0]);
@@ -129,5 +129,18 @@ export namespace CampaignHelper {
             return CampaignItemType[key];
         }
         return;
+    }
+
+    export async function listCampaignPaths(): Promise<string[] | undefined> {
+        if (!workspace.workspaceFolders) {
+            return;
+        }
+        let result: string[] = [];
+        for (let folder of workspace.workspaceFolders) {
+            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
+                result.push(folder.uri.fsPath);
+            }
+        }
+        return result;
     }
 }

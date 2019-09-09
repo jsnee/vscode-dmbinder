@@ -7,6 +7,8 @@ Visual Studio Code extension for managing campaign documents.
 - [DMBinder Explorer View](#dmbinder-explorer)
 - [Templates and Components](#templates-and-components)
 - [PDF Rendering](#pdf-rendering)
+- Content Authoring Tools
+  - [Content Generation](#content-generation)
 - [The campaign.json File](#campaignjson)
 - [Planned Changes](#planned-changes)
 - [Icon Sources](#icon-sources)
@@ -582,9 +584,33 @@ In order to render files to PDF, you'll need to do one of the following:
 For best results when using `dmbinder.config.downloadChromiumRevision` to download Chromium instance for PDF rendering,
 it is recommended to use the suggested revision or later.
 
+## Content Authoring Tools
+DMBinder has a few integrated tools to help generate original or random content and author source documents.
 
 ### Content Generation
-Documentation coming soon.
+The DMBinder extension has an extensive (and continually expanding) set of content generation tools.
+
+There are currently 5 main types of content generators (there is *technically* another generator type, "import", but that simply imports the generator configuration from another file):
+- Basic
+- Markov
+- Multiline
+- RollTable
+- Switch
+
+Configuration of your content generators are stored in JSON format in files that use the extension `.dmbgen.json`. These files (or a folder that contains these files) is added to your `campaign.json` [file](#campaignjson).
+
+There are three main parts of a `.dmbgen.json` file: the generator type, the generator values, and an optional list of additional generators referenced by the main generator. Subsequent generators are invoked by wrapping the name of the generator you want to call in curly braces, **{}**. An
+
+#### Content Generation: Basic
+The basic content generator is just that, basic. All it does is simply pick, at random, from a list of provided values.
+
+##### Basic Content Generation Example
+
+#### Content Generation: Markov
+The Markov content generator uses Markov chains to generate original names or words based on an existing sampleset. More information on how Markov chains work can be found on [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain), but this Markov chain implementation is based on the one listed on (possibly one of my favorite websites to use for D&D, and one of my biggest inspiriations for this extension) [donjon.bin.sh](https://donjon.bin.sh/code/name/).
+
+#### Content Generation: Multiline
+The multiline content generator is primarily intented to be used in conjunction with other content generators (but I suppose *could* be used alone). It's sole purpose is to combine **all** of the values listed, instead of picking just one.
 
 ### Dungeon Generator
 Based on the logic behind [donjon.bin.sh dungeon generator](https://donjon.bin.sh/code/dungeon/)
@@ -619,14 +645,6 @@ Below is an example Campaign configuration file:
 
 ## Planned Changes
 - When generating a dungeon map, save settings to a Markdown comment before the map
-- Add unit testing
-- QOL improvements
-  - Explorer view changes
-    - Add toggle view layout button
-    - Add "Open campaign.json" button
-- Cleanup package.json
-  - Sort and remove unused commands
-  - Hide commands from command palette (where appropriate)
 
 See [generator-dmbinder](https://github.com/jsnee/generator-dmbinder) for a yeoman generator to help bootstrap a campaign binder.
 

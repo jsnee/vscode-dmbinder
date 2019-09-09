@@ -266,4 +266,18 @@ export namespace ExtensionCommands {
             window.showWarningMessage("No opened document found.");
         }
     }
+
+    export async function openCampaignConfig(): Promise<void> {
+        const campaignPaths = await CampaignHelper.listCampaignPaths();
+        if (campaignPaths && campaignPaths.length > 0) {
+            if (campaignPaths.length === 1) {
+                const campaign = new Campaign(campaignPaths[0]);
+                commands.executeCommand("vscode.open", Uri.file(campaign.configPath));
+            } else {
+                await window.showWarningMessage("Multiple campaigns found in the current workspace!");
+            }
+        } else {
+            await window.showWarningMessage("No campaigns found in the current workspace!");
+        }
+    }
 }

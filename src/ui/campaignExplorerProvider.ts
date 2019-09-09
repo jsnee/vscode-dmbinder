@@ -31,7 +31,7 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
     public async getChildren(element?: ITreeItem, itemType?: CampaignItemType): Promise<ITreeItem[] | null | undefined> {
         if (element === undefined) {
             if (!workspace.workspaceFolders) {
-                return undefined;
+                return;
             }
             if (workspace.workspaceFolders.length === 1) {
                 if (await Campaign.hasCampaignConfig(workspace.workspaceFolders[0].uri.fsPath)) {
@@ -120,19 +120,6 @@ class CampaignExplorerProvider implements TreeDataProvider<ITreeItem> {
             };
             return result;
         });
-    }
-
-    public async listCampaignPaths(): Promise<string[] | undefined> {
-        if (!workspace.workspaceFolders) {
-            return;
-        }
-        let result: string[] = [];
-        for (let folder of workspace.workspaceFolders) {
-            if (await Campaign.hasCampaignConfig(folder.uri.fsPath)) {
-                result.push(folder.uri.fsPath);
-            }
-        }
-        return result;
     }
 
     public refresh(item?: ITreeItem): void {
