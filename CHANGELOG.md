@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.5.0
+- Added dice rolling to generator expression syntax
+
 ## 0.4.9
 - Clicking on the campaign name in the status bar opens the campaign's config file
 - Added a button to toggle the campaign explorer layout to the campaign explorer

@@ -9,13 +9,8 @@ import { MultilineContentGenerator } from './MultilineContentGenerator';
 import { SwitchContentGenerator } from './SwitchContentGenerator';
 import { RollTableContentGenerator } from './RollTableContentGenerator';
 import { WindowHelper } from '../../helpers/WindowHelper';
-
-enum TemplateMatch {
-    Whole = 0,
-    SourceName = 1,
-    SetVariableName = 2,
-    GetVariableName = 3
-}
+import { GeneratorExpression } from './GeneratorExpression';
+import { DiceHelper } from '../../helpers/DiceHelper';
 
 function getGeneratorSourceConfig(result: GeneratorSourceConfig): GeneratorSourceConfig {
     if (result.sources) {
@@ -92,46 +87,38 @@ export class GeneratorSource {
     }
 
     private async generateFromTemplate(template: string, vars: GeneratorVars = {}, paramCallback?: (source: string) => Promise<string | undefined>): Promise<string> {
-        let regEx = /\{(?:(?:(\w+)(?::(\w+))?)|:(\w+))\}/;
-        let matches = template.match(regEx);
-        if (!matches) {
+        const expression = GeneratorExpression.matchNextExpression(template);
+        if (!expression) {
             return template;
         }
         let value: string;
-        let tokenName = matches[TemplateMatch.SourceName];
-        if (tokenName === undefined) {
-            let getVarName = matches[TemplateMatch.GetVariableName];
-            if (getVarName === undefined) {
-                throw new Error(`Error encountered while generating content on match: ${matches[TemplateMatch.Whole]}`);
-            }
-            if (vars[getVarName]) {
-                value = vars[getVarName];
-            } else {
-                window.showWarningMessage(`Tried to access undefined generator variable: ${getVarName}`);
-                value = "";
-            }
-        } else {
-            let setVarName = matches[TemplateMatch.SetVariableName];
+        if (expression.variableName !== undefined && vars[expression.variableName]) {
+            value = vars[expression.variableName];
+        } else if (expression.diceRoll !== undefined) {
+            value = String(DiceHelper.calculateDiceRollExpression(expression.diceRoll));
+        } else if (expression.generatorName !== undefined) {
             let valueOverride: string | undefined = undefined;
             if (paramCallback) {
-                let valueTemplate = await paramCallback(tokenName);
+                let valueTemplate = await paramCallback(expression.generatorName);
                 if (valueTemplate) {
                     valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
                 }
             }
-            if (setVarName !== undefined && vars[setVarName]) {
-                valueOverride = vars[setVarName];
-            }
             if (valueOverride === undefined) {
-                value = await this.generateBySourceName(tokenName, vars);
+                value = await this.generateBySourceName(expression.generatorName, vars);
             } else {
                 value = valueOverride;
             }
-            if (setVarName !== undefined) {
-                vars[setVarName] = value;
-            }
+        } else if (expression.variableName !== undefined) {
+            window.showWarningMessage(`Tried to access undefined generator variable: ${expression.variableName}`);
+            value = "";
+        } else {
+            throw new Error(`Error encountered while generating content on match: ${expression.wholeMatch}`);
         }
-        return await this.generateFromTemplate(template.replace(regEx, value), vars, paramCallback);
+        if (expression.variableName !== undefined) {
+            vars[expression.variableName] = value;
+        }
+        return await this.generateFromTemplate(expression.replace(template, value), vars, paramCallback);
     }
 
     private async generateBySourceName(sourceName: string, vars: GeneratorVars = {}): Promise<string> {

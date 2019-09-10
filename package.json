@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.4.9",
+    "version": "0.5.0",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
