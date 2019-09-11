@@ -1,27 +1,29 @@
-const _expressionRegEx = /\{(?::(\w+)|(?:(\w+)(?::(\w+))?)|#(\(*\d+d\d+(?: [+\-*/] \(*(?:\d+d\d+|\d+)\)*)*)(?::(\w+))?)\}/;
+import { FormatSpec } from "../../utils/FormatSpec";
+import { IGeneratorExpression } from "./IGeneratorExpression";
+
+const _expressionRegEx = /\{(?!\})(?:(\w+)|#(\(*\d+d\d+(?: [+\-*/] \(*(?:\d+d\d+|\d+)\)*)*))?(?:\[((?:.[<>=^])?[+\- ]?#?0?\d*[_,]?(?:\.\d+)?[bcdeEfFgGnosxX%]?)\])?(?::(\w+))?\}/;
 
 enum TemplateMatch {
     Whole = 0,
-    GetVariableName = 1,
-    GeneratorName = 2,
-    SetVariableName = 3,
-    DiceRoll = 4,
-    DiceRollVariableName = 5
+    GeneratorName = 1,
+    DiceRoll = 2,
+    FormatSpec = 3,
+    VariableName = 5
 }
 
-export class GeneratorExpression {
+export class GeneratorExpression implements IGeneratorExpression {
     private _wholeMatch: string;
     private _generatorName?: string;
     private _variableName?: string;
     private _diceRoll?: string;
+    private _formatSpec?: FormatSpec;
 
     private constructor(matches: RegExpMatchArray) {
         this._wholeMatch = matches[TemplateMatch.Whole];
         this._generatorName = matches[TemplateMatch.GeneratorName];
-        this._variableName = matches[TemplateMatch.SetVariableName]
-            || matches[TemplateMatch.GetVariableName]
-            || matches[TemplateMatch.DiceRollVariableName];
+        this._variableName = matches[TemplateMatch.VariableName];
         this._diceRoll = matches[TemplateMatch.DiceRoll];
+        this._formatSpec = FormatSpec.getFormatSpec(matches[TemplateMatch.FormatSpec]);
     }
 
     public static matchNextExpression(text: string): GeneratorExpression | undefined {
@@ -46,6 +48,10 @@ export class GeneratorExpression {
 
     public get diceRoll(): string | undefined {
         return this._diceRoll;
+    }
+
+    public get formatSpec(): FormatSpec | undefined {
+        return this._formatSpec;
     }
 
     public replace(text: string, value: string): string {
