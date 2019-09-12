@@ -11,18 +11,22 @@ function testRollExpr(input: string, expected?: string, expectValidFormat: boole
 suite("Dice Roll Generator FormatSpec Tests", function () {
     test("Dice Roll Generator Fill and Alignment Formatting", function () {
         testRollExpr("{#-(1d1 * 3) + -(-(12 * (1d1 + 9 - 1d1)) * 3)}", "321", false); // No Formatting
-        testRollExpr("{#1d1 * 3[<4]}", "3   "); // Default "fill" is space
-        testRollExpr("{#1d1 * 3[4]}", "   3"); // Default "align" is right
-        testRollExpr("{#1d1 * 3[*^4]}", "*3**");
-        testRollExpr("{#1d1 * 3[*<5]}", "3****");
-        testRollExpr("{#1d1 * 3[*>5]}", "****3");
-        testRollExpr("{#1d1 * -3[*=5]}", "-***3");
+        testRollExpr("{#1d1 * 3[<4]}", "3   ");     // Default "fill" is space
+        testRollExpr("{#1d1 * 3[4]}", "   3");      // Default "align" is right
+        testRollExpr("{#1d1 * 3[*^4]}", "*3**");    // Center alignment with an even width
+        testRollExpr("{#1d1 * 3[*^5]}", "**3**");   // Center alignment with an odd width
+        testRollExpr("{#1d1 * 3[*<5]}", "3****");   // Left alignment
+        testRollExpr("{#1d1 * 3[*>5]}", "****3");   // Right alignment
+        testRollExpr("{#1d1 * -3[*=5]}", "-***3");  // Pad after sign
         testRollExpr("{#1d1 * -333[*=2]}", "-333"); // Number Longer than Width
-        testRollExpr("{#1d1 * -3[*=]}", "-3"); // No Width Specified
-        testRollExpr("{#1d1 * -3[05]}", "-0003"); // Sign-Aware Zero-Padding
+        testRollExpr("{#1d1 * -3[*=]}", "-3");      // No Width Specified
+        testRollExpr("{#1d1 * -3[05]}", "-0003");   // Sign-Aware Zero-Padding
+        testRollExpr("{#1d1[]}", "1", false);       // Invalid format
 
         // Invalid Situations
         assert.equal(DiceRollTestHelper.testRoll("{#1d1[*]}", false), undefined);
+        assert.equal(DiceRollTestHelper.testRoll("{#1d1[{]}", false), undefined);
+        assert.equal(DiceRollTestHelper.testRoll("{#1d1[}]}", false), undefined);
     });
 
     test("Dice Roll Generator Sign Formatting", function () {

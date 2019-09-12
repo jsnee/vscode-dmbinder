@@ -1,4 +1,4 @@
-const _formatSpecRegEx = /^(?:(.)?([<>=^]))?([+\- ])?(#)?(0)?(\d+)?([_,])?(?:\.(\d+))?([bcdeEfFgGnosxX%])?$/;
+const _formatSpecRegEx = /^(?:([^\n{}])?([<>=^]))?([+\- ])?(#)?(0)?(\d+)?([_,])?(?:\.(\d+))?([bcdeEfFgGnosxX%])?$/;
 
 enum FormatSpecMatch {
     Whole = 0,

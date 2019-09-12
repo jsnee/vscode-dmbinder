@@ -1,7 +1,7 @@
 import { FormatSpec } from "../../utils/FormatSpec";
 import { IGeneratorExpression } from "./IGeneratorExpression";
 
-const _expressionRegEx = /{(?!})(?:(\w+)|#((?:\-?\()*\d+d\d+(?: [+\-*/] (?:\-?\()*(?:\d+d\d+|\-?\d+)\)*)*))?(?:(?<!{)\[((?:.?[<>=^])?[+\- ]?#?0?\d*[_,]?(?:\.\d+)?[bcdeEfFgGnosxX%]?)\])?(?::(\w+))?}/;
+const _expressionRegEx = /{(?!})(?:(\w+)|#((?:\-?\()*\d+d\d+(?: [+\-*/] (?:\-?\()*(?:\d+d\d+|\-?\d+)\)*)*))?(?:(?<!{)\[((?:[^\n{}]?[<>=^])?[+\- ]?#?0?\d*[_,]?(?:\.\d+)?[bcdeEfFgGnosxX%]?)\])?(?::(\w+))?}/;
 
 enum TemplateMatch {
     Whole = 0,
