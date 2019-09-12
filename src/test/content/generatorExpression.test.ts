@@ -1,17 +1,7 @@
-//
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
-//
-
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-import { GeneratorExpression } from '../generators/content/GeneratorExpression';
-import { IGeneratorExpression } from '../generators/content/IGeneratorExpression';
+import { GeneratorExpression } from '../../generators/content/GeneratorExpression';
+import { IGeneratorExpression } from '../../generators/content/IGeneratorExpression';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-// import * as vscode from 'vscode';
-// import * as myExtension from '../extension';
 function testGenExpr(input: string, assertion?: IGeneratorExpression) {
     const output = GeneratorExpression.matchNextExpression(input);
     if (assertion === undefined) {
@@ -25,7 +15,6 @@ function testGenExpr(input: string, assertion?: IGeneratorExpression) {
     }
 }
 
-// Defines a Mocha test suite to group tests of similar kind together
 suite("Content Generator Tests", function () {
     // Testing Regex for Generator Expressions
     test("Basic GeneratorExpression Lexing", function () {
@@ -62,6 +51,7 @@ suite("Content Generator Tests", function () {
         testGenExpr("{}");
         testGenExpr("{ }");
     });
+
     test("Dice Roll GeneratorExpression Lexing", function () {
         // Valid Situations
         testGenExpr("awefweaf{#2d4}fwefwefw", {
@@ -82,6 +72,13 @@ suite("Content Generator Tests", function () {
             wholeMatch: "{#(2d4 * 3) + (12 * (3d8 + 9 - 1d4))}",
             generatorName: undefined,
             diceRoll: "(2d4 * 3) + (12 * (3d8 + 9 - 1d4))",
+            variableName: undefined,
+            formatSpec: undefined
+        });
+        testGenExpr("{#-(2d4 * 3) + -(-(12 * (3d8 + 9 - 1d4)) * 3)}", {
+            wholeMatch: "{#-(2d4 * 3) + -(-(12 * (3d8 + 9 - 1d4)) * 3)}",
+            generatorName: undefined,
+            diceRoll: "-(2d4 * 3) + -(-(12 * (3d8 + 9 - 1d4)) * 3)",
             variableName: undefined,
             formatSpec: undefined
         });
