@@ -1,14 +1,14 @@
 import { FormatSpec } from "../../utils/FormatSpec";
 import { IGeneratorExpression } from "./IGeneratorExpression";
 
-const _expressionRegEx = /\{(?!\})(?:(\w+)|#(\(*\d+d\d+(?: [+\-*/] \(*(?:\d+d\d+|\d+)\)*)*))?(?:\[((?:.[<>=^])?[+\- ]?#?0?\d*[_,]?(?:\.\d+)?[bcdeEfFgGnosxX%]?)\])?(?::(\w+))?\}/;
+const _expressionRegEx = /{(?!})(?:(\w+)|#((?:\-?\()*\d+d\d+(?: [+\-*/] (?:\-?\()*(?:\d+d\d+|\-?\d+)\)*)*))?(?:(?<!{)\[((?:.?[<>=^])?[+\- ]?#?0?\d*[_,]?(?:\.\d+)?[bcdeEfFgGnosxX%]?)\])?(?::(\w+))?}/;
 
 enum TemplateMatch {
     Whole = 0,
     GeneratorName = 1,
     DiceRoll = 2,
     FormatSpec = 3,
-    VariableName = 5
+    VariableName = 4
 }
 
 export class GeneratorExpression implements IGeneratorExpression {

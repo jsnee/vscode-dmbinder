@@ -95,7 +95,12 @@ export class GeneratorSource {
         if (expression.variableName !== undefined && vars[expression.variableName]) {
             value = vars[expression.variableName];
         } else if (expression.diceRoll !== undefined) {
-            value = String(DiceHelper.calculateDiceRollExpression(expression.diceRoll));
+            let roll = DiceHelper.calculateDiceRollExpression(expression.diceRoll);
+            if (expression.formatSpec) {
+                value = expression.formatSpec.format(roll);
+            } else {
+                value = String(roll);
+            }
         } else if (expression.generatorName !== undefined) {
             let valueOverride: string | undefined = undefined;
             if (paramCallback) {

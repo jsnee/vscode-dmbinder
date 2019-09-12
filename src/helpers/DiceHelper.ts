@@ -26,7 +26,7 @@ export namespace DiceHelper {
         while (result.match(_diceRollRegEx)) {
             result = result.replace(_diceRollRegEx, rollDiceToString);
         }
-        if (/^\(*\d+(?: [+\-*/] \(*\d+\)*)*$/.test(result)) {
+        if (/^(?:\-?\()*\d+(?: [+\-*/] (?:\-?\()*\-?\d+\)*)*$/.test(result)) {
             return eval(result) as number;
         }
         throw new Error(`Encountered invalid dice roll expression: ${diceRoll}`);

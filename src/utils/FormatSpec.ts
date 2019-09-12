@@ -1,6 +1,4 @@
-import { DMBSettings } from "../Settings";
-
-const _formatSpecRegEx = /^(?:(.)([<>=^]))?([+\- ])?(#)?(0)?(\d+)?([_,])?(?:\.(\d+))?([bcdeEfFgGnosxX%])?$/;
+const _formatSpecRegEx = /^(?:(.)?([<>=^]))?([+\- ])?(#)?(0)?(\d+)?([_,])?(?:\.(\d+))?([bcdeEfFgGnosxX%])?$/;
 
 enum FormatSpecMatch {
     Whole = 0,
@@ -22,7 +20,7 @@ function parseAlignment(val?: string): FormatSpecAlignment | undefined {
         case ">":
             return FormatSpecAlignment.Right;
         case "=":
-            return FormatSpecAlignment.LeftAfterSign;
+            return FormatSpecAlignment.PadAfterSign;
         case "^":
             return FormatSpecAlignment.Centered;
         default:
@@ -94,7 +92,7 @@ function parsePresentationType(val?: string): FormatSpecPresentationType | undef
 export enum FormatSpecAlignment {
     Left,
     Right,
-    LeftAfterSign,
+    PadAfterSign,
     Centered
 }
 
@@ -127,6 +125,10 @@ export enum FormatSpecPresentationType {
     Percentage
 }
 
+function parseIntOrUndefined(val?: string) {
+    return val === undefined ? val : parseInt(val);
+}
+
 export class FormatSpec {
     private _whole: string;
     private _fill?: string;
@@ -146,18 +148,18 @@ export class FormatSpec {
         this._alternateForm = spec[FormatSpecMatch.AlternateForm] === "#";
         this._width = parseInt(spec[FormatSpecMatch.Width]);
         this._grouping = parseGrouping(spec[FormatSpecMatch.Grouping]);
-        this._precision = parseInt(spec[FormatSpecMatch.Precision]);
+        this._precision = parseIntOrUndefined(spec[FormatSpecMatch.Precision]);
         this._presentationType = parsePresentationType(spec[FormatSpecMatch.PresentationType]);
         if (this._alignment === undefined
             && this._fill === undefined
             && spec[FormatSpecMatch.SignAwareZeroPadding] === "0") {
-            this._alignment = FormatSpecAlignment.LeftAfterSign;
+            this._alignment = FormatSpecAlignment.PadAfterSign;
             this._fill = "0";
         }
     }
 
-    public static getFormatSpec(spec: string): FormatSpec | undefined {
-        if (spec !== "") {
+    public static getFormatSpec(spec?: string): FormatSpec | undefined {
+        if (spec !== undefined && spec !== "") {
             const matches = spec.match(_formatSpecRegEx);
             if (matches) {
                 return new FormatSpec(matches);
@@ -166,11 +168,19 @@ export class FormatSpec {
         return;
     }
 
+    public get wholeMatch(): string {
+        return this._whole;
+    }
+
     public format(input: number | string): string {
         if (typeof (input) === "number") {
-            const sign = getSign(input, this._sign);
+            let alignment = this._alignment === undefined ? FormatSpecAlignment.Right : this._alignment;
+            let sign = getSign(input, this._sign);
             let result: string;
             let precision = this._precision;
+            if (precision === undefined) {
+                precision = 6;
+            }
             switch (this._presentationType) {
                 case FormatSpecPresentationType.Binary:
                     result = input.toString(2);
@@ -196,29 +206,19 @@ export class FormatSpec {
                     break;
                 case FormatSpecPresentationType.ScientificNotation:
                 case FormatSpecPresentationType.UpperScientificNotation:
-                    if (precision === undefined) {
-                        precision = 6;
-                    }
                     result = input.toExponential(precision);
                     break;
                 case FormatSpecPresentationType.FixedPoint:
                 case FormatSpecPresentationType.UpperFixedPoint:
-                    if (precision === undefined) {
-                        precision = 6;
-                    }
                     result = input.toFixed(precision);
                     break;
                 case FormatSpecPresentationType.GeneralNumber:
                 case FormatSpecPresentationType.UpperGeneralNumber:
-                    if (precision === undefined) {
-                        precision = 6;
-                    }
-                    if (isNaN(input)) {
-                        result = "NaN";
-                    } else if (input === Number.NEGATIVE_INFINITY || input === Number.POSITIVE_INFINITY) {
-                        result = "inf";
-                    } else if (input === 0) {
-                        result = "0";
+                    if (input === 0
+                        || isNaN(input)
+                        || input === Number.NEGATIVE_INFINITY
+                        || input === Number.POSITIVE_INFINITY) {
+                        result = String(input);
                     } else {
                         if (precision < 1) {
                             precision = 1;
@@ -227,7 +227,7 @@ export class FormatSpec {
                         if (exp < precision && exp >= -4) {
                             result = String(Number(input.toFixed(precision - 1 - exp)));
                         } else {
-                            result = input.toExponential(precision - 1);
+                            result = Number(input.toPrecision(precision - 1)).toExponential();
                         }
                     }
                     break;
@@ -235,9 +235,6 @@ export class FormatSpec {
                     result = (input * 100).toFixed(precision) + "%";
                     break;
                 case FormatSpecPresentationType.LocaleNumber:
-                    if (precision === undefined) {
-                        precision = 6;
-                    }
                     result = input.toLocaleString(undefined, { maximumSignificantDigits: precision });
                     break;
                 case FormatSpecPresentationType.Decimal:
@@ -267,10 +264,27 @@ export class FormatSpec {
                 }
                 result = addSeparators(result, grouping);
             }
-            result = pad(result, width, this._fill, this._alignment);
+            // Uppercase
+            switch (this._presentationType) {
+                case FormatSpecPresentationType.UpperFixedPoint:
+                case FormatSpecPresentationType.UpperGeneralNumber:
+                case FormatSpecPresentationType.UpperHex:
+                case FormatSpecPresentationType.UpperScientificNotation:
+                    result = result.toUpperCase();
+                    break;
+                default:
+                    break;
+            }
+            if (width !== undefined && alignment !== FormatSpecAlignment.PadAfterSign) {
+                result = sign + result;
+                width += sign.length;
+                sign = "";
+            }
+            result = pad(result, alignment, width, this._fill);
             return sign + result;
         } else {
-            return pad(input, this._width, this._fill, this._alignment);
+            let alignment = this._alignment === undefined ? FormatSpecAlignment.Left : this._alignment;
+            return pad(input, alignment, this._width, this._fill);
         }
     }
 }
@@ -304,18 +318,18 @@ function getSign(val: number, signConfig?: FormatSpecSign): string {
     return "";
 }
 
-function pad(input: string, width?: number, fill?: string, alignment?: FormatSpecAlignment): string {
-    if (width) {
-        let addRight = alignment && alignment === FormatSpecAlignment.Right;
+function pad(input: string, alignment: FormatSpecAlignment, width?: number, fill?: string): string {
+    if (width !== undefined) {
+        let addLeft = alignment === FormatSpecAlignment.PadAfterSign || alignment === FormatSpecAlignment.Right;
         fill = fill || " ";
         while (input.length < width) {
-            if (addRight) {
-                input = input + fill;
-            } else {
+            if (addLeft) {
                 input = fill + input;
+            } else {
+                input = input + fill;
             }
             if (alignment && alignment === FormatSpecAlignment.Centered) {
-                addRight = !addRight;
+                addLeft = !addLeft;
             }
         }
     }
