@@ -1,8 +1,11 @@
 # Change Log
 
+## 0.5.2
+- Added repeat generator syntax in generator expression
+
 ## 0.5.1
 - Added some unit tests
-- Added Python's format specification to generator sources
+- Added Python's format specification to dice roll generator expressions
 
 ## 0.5.0
 - Added dice rolling to generator expression syntax

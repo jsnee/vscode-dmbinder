@@ -102,18 +102,23 @@ export class GeneratorSource {
                 value = String(roll);
             }
         } else if (expression.generatorName !== undefined) {
-            let valueOverride: string | undefined = undefined;
-            if (paramCallback) {
-                let valueTemplate = await paramCallback(expression.generatorName);
-                if (valueTemplate) {
-                    valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
+            let values: string[] = [];
+            let stopAt = expression.generatorRepeat || 1;
+            while (values.length !== stopAt) {
+                let valueOverride: string | undefined = undefined;
+                if (paramCallback) {
+                    let valueTemplate = await paramCallback(expression.generatorName);
+                    if (valueTemplate) {
+                        valueOverride = await this.generateFromTemplate(valueTemplate, vars, paramCallback);
+                    }
+                }
+                if (valueOverride === undefined) {
+                    values.push(await this.generateBySourceName(expression.generatorName, vars));
+                } else {
+                    values.push(valueOverride);
                 }
             }
-            if (valueOverride === undefined) {
-                value = await this.generateBySourceName(expression.generatorName, vars);
-            } else {
-                value = valueOverride;
-            }
+            value = values.join(expression.repeatSeparator);
         } else if (expression.variableName !== undefined) {
             window.showWarningMessage(`Tried to access undefined generator variable: ${expression.variableName}`);
             value = "";
