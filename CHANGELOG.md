@@ -2,7 +2,7 @@
 
 ## 0.5.1
 - Added some unit tests
-- Added Python's format specification
+- Added Python's format specification to generator sources
 
 ## 0.5.0
 - Added dice rolling to generator expression syntax
