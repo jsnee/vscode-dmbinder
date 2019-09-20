@@ -343,7 +343,24 @@
             ],
             "view/title": [
                 {
-                    "command": "dmbinder.config.toggleViewStyle"
+                    "command": "dmbinder.config.toggleViewStyle",
+                    "when": "view == dmbinder"
+                },
+                {
+                    "command": "dmbinder.config.toggleViewStyle",
+                    "when": "view == dmbinder.sources"
+                },
+                {
+                    "command": "dmbinder.config.toggleViewStyle",
+                    "when": "view == dmbinder.templates"
+                },
+                {
+                    "command": "dmbinder.config.toggleViewStyle",
+                    "when": "view == dmbinder.components"
+                },
+                {
+                    "command": "dmbinder.config.toggleViewStyle",
+                    "when": "view == dmbinder.generators"
                 },
                 {
                     "command": "dmbinder.campaign.refresh",
