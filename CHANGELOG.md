@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.5.3
+- Removed some view options accidentally showing up on other extension views
+- Removed logging to debug console on startup
+
 ## 0.5.2
 - Added repeat generator syntax in generator expression
 
