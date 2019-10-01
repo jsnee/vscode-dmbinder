@@ -106,7 +106,13 @@ export namespace ComponentHelper {
     }
 
     export async function autogenerateFileComponents(data: string, fileName: string): Promise<string> {
-        const root = htmlParse(`<dmb-autogenerator-pseudoelement>${data}</dmb-autogenerator-pseudoelement>`, { includeComments: true });
+        const parseOpts: HtmlParserOptions = {
+            includeComments: true,
+            script: true,
+            style: true,
+            pre: true
+        };
+        const root = htmlParse(`<dmb-autogenerator-pseudoelement>${data}</dmb-autogenerator-pseudoelement>`, parseOpts);
         if (root instanceof HTMLElement) {
             const targets = root.querySelectorAll("dmb-autogen");
             if (targets.length < 1) {
