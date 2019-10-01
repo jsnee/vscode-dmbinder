@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.5.5
+- Fix some more component autogeneration issues
+
 ## 0.5.4
 - Fix some component autogeneration issues
 
