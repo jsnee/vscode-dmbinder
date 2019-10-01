@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.5.4
+- Fix some component autogeneration issues
+
 ## 0.5.3
 - Removed some view options accidentally showing up on other extension views
 - Removed logging to debug console on startup
