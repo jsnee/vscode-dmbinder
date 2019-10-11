@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { GeneratorExpression } from '../../generators/content/GeneratorExpression';
-import { IGeneratorExpression } from '../../generators/content/IGeneratorExpression';
+import { GeneratorExpression } from '../../../generators/content/GeneratorExpression';
+import { IGeneratorExpression } from '../../../generators/content/IGeneratorExpression';
 
 function testGenExpr(input: string, assertion?: IGeneratorExpression) {
     const output = GeneratorExpression.matchNextExpression(input);

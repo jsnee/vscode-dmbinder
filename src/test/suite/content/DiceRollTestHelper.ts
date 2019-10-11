@@ -1,5 +1,5 @@
-import { GeneratorExpression } from "../../generators/content/GeneratorExpression";
-import { DiceHelper } from "../../helpers/DiceHelper";
+import { GeneratorExpression } from "../../../generators/content/GeneratorExpression";
+import { DiceHelper } from "../../../helpers/DiceHelper";
 
 export interface DiceRollTestResult {
     output: string;
