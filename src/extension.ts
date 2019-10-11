@@ -91,6 +91,8 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(commands.registerCommand('dmbinder.config.toggleHomebreweryEnabled', ExtensionCommands.toggleHomebreweryEnabled));
 
+    context.subscriptions.push(commands.registerCommand('dmbinder.terminal.open', ExtensionCommands.createTerminal));
+
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
         if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {
             commands.executeCommand('markdown.preview.refresh', undefined);

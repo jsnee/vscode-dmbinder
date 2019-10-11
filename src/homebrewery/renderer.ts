@@ -8,15 +8,15 @@ import * as path from "path";
 import * as Puppeteer from 'puppeteer-core';
 import { ComponentHelper } from "../helpers/ComponentHelper";
 import { HombreweryEngine } from "./HomebreweryEngine";
-import { FileUtility } from "../utils/FileUtility";
 import { PuppeteerHelper } from "../helpers/PuppeteerHelper";
+import { ExtensionHelper } from "../helpers/ExtensionHelper";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
 }
 
 function getAssetPath(): string {
-    return path.join(FileUtility.getExtensionPath(), 'assets');
+    return path.join(ExtensionHelper.getExtensionPath(), 'assets');
 }
 
 async function cleanupBrewDirectory(): Promise<void> {

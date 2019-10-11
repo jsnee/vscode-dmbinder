@@ -14,6 +14,7 @@ import { ComponentHelper } from './helpers/ComponentHelper';
 import { DungeonGeneratorHelper } from './helpers/DungeonGeneratorHelper';
 import { GeneratorVars } from './generators/content/BaseContentGenerator';
 import { PuppeteerHelper } from './helpers/PuppeteerHelper';
+import { DMBTerminal } from './ui/DMBTerminal';
 
 export namespace ExtensionCommands {
     export async function promptChooseChromeExecutable(): Promise<void> {
@@ -279,5 +280,10 @@ export namespace ExtensionCommands {
         } else {
             await window.showWarningMessage("No campaigns found in the current workspace!");
         }
+    }
+
+    export function createTerminal(): void {
+        // tslint:disable-next-line: no-unused-expression
+        new DMBTerminal();
     }
 }
