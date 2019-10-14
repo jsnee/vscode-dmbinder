@@ -579,6 +579,7 @@
         "minimist": "^1.2.0",
         "mustache": "^3.0.3",
         "puppeteer-core": "^1.19.0",
-        "seedrandom": "^3.0.1"
+        "seedrandom": "^3.0.1",
+        "simple-argparse": "^1.0.0"
     }
 }
