@@ -3,6 +3,8 @@ import { ExtensionHelper } from "../helpers/ExtensionHelper";
 import { DiceHelper } from "../helpers/DiceHelper";
 import { EditorHelper } from "../helpers/EditorHelper";
 import { ComponentHelper } from "../helpers/ComponentHelper";
+import { GeneratorHelper } from "../helpers/GeneratorHelper";
+import { campaignExplorerProvider } from "./campaignExplorerProvider";
 
 var Parser = require("simple-argparse").Parser;
 
@@ -100,39 +102,38 @@ export class DMBTerminal {
         parser.version(extensionVersion);
         parser.defaultOption(function (command: string) {
             _this.printHelp(command);
+            _this.writePrompt();
         });
-        parser.option("autogen", "autogenerate elements in current document.", async function (): Promise<void> {
+        parser.option("autogen", "autogen", async function (): Promise<void> {
             await ComponentHelper.autogenerateComponentsForCurrentDocument();
+            _this.writePrompt();
         });
-        parser.option("component", "autogenerate elements in current document.", async function (this: { insert: boolean, i: boolean, autogen: boolean, a: boolean }, component: string, template?: string): Promise<void> {
-            if (!component) {
-                _this.writeToTerminal([
-                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
-                    "No component was provided!\r\n"
-                ]);
-                _this.printHelp("component");
-                return;
-            }
-            const data = await ComponentHelper.generateComponentByName(component, template, this.autogen || this.a);
-            if (data) {
-                if (this.insert || this.i) {
-                    await EditorHelper.insertIntoCurrent(data);
-                } else {
-                    _this.writeToTerminal(newlineCleanup(data));
-                }
-            }
+        parser.option("component", "component", async function (this: { insert: boolean, i: boolean, autogen: boolean, a: boolean }, component: string, template?: string): Promise<void> {
+            let opts = {
+                insert: this.insert || this.i,
+                autogen: this.autogen || this.a
+            };
+            await _this.componentCmd(component, template, opts);
         });
-        parser.option("roll", "roll some dice.", async function (this: { insert: boolean, i: boolean }): Promise<void> {
+        parser.option("list", "list", async function (listType: string): Promise<void> {
+            await _this.listCmd(listType);
+        });
+        parser.option("generate", "generate", async function (this: {insert: boolean, i: boolean}, generator: string): Promise<void> {
+            await _this.generateCmd(generator, { insert: this.insert || this.i });
+        });
+        parser.option("roll", "roll", async function (this: { insert: boolean, i: boolean }): Promise<void> {
             let args: string[] = Array.prototype.slice.call(arguments);
             let result = _this.rollDice(args.join(" "));
             if (result !== undefined && (this.insert || this.i)) {
                 await EditorHelper.insertIntoCurrent(result.toString());
             }
+            _this.writePrompt();
         });
-        parser.option("help", "get help for a command.", function (command: string) {
+        parser.option("help", "help", function (command?: string) {
             _this.printHelp(command);
+            _this.writePrompt();
         });
-        parser.option("exit", "exit the terminal.", function () {});
+        parser.option("exit", "exit", function () {});
         parser.option("i", "insert", "insert the output into the currently open document.");
         this._parser = parser;
 
@@ -192,6 +193,7 @@ export class DMBTerminal {
         switch (command) {
             case "autogen":
                 this.writeToTerminal([
+                    "\r\nAutogenerates all components in the currently open document.",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
                     "\r\n\r\n  USAGE",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
@@ -200,6 +202,7 @@ export class DMBTerminal {
                 return;
             case "component":
                 this.writeToTerminal([
+                    "\r\nGenerates a component.",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
                     "\r\n\r\n  USAGE",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
@@ -227,8 +230,44 @@ export class DMBTerminal {
                     "\r\n    autogen beholder -a -i",
                 ]);
                 break;
+            case "generate":
+                this.writeToTerminal([
+                    "\r\nGenerate content using a configured generator.",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    generate",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <generator-name>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  EXAMPLES",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\r\n    generate names",
+                    "\r\n    generate tavern -i",
+                ]);
+                break;
+            case "list":
+                this.writeToTerminal([
+                    "\r\nLists DMBinder content for the current campaign.",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    list",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <components|templates|generators>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  EXAMPLES",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\r\n    list components",
+                    "\r\n    list templates",
+                    "\r\n    list generators",
+                ]);
+                return;
             case "roll":
                 this.writeToTerminal([
+                    "\r\nRoll some dice.",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
                     "\r\n\r\n  USAGE",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
@@ -269,6 +308,22 @@ export class DMBTerminal {
                     " [options]",
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
                     "\r\n\t\t\t\t\tGenerate a component.",
+                    // Generate command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    generate",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <generator-name>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\tGenerate content using a configured generator.",
+                    // List command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    list",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <type>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\t\tList DMBinder content for the current campaign.",
                     // Roll command
                     TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
                     "\r\n    roll",
@@ -305,6 +360,117 @@ export class DMBTerminal {
         ]);
     }
 
+    private async componentCmd(component: string, template: string | undefined, opts: { insert: boolean, autogen: boolean }): Promise<void> {
+        if (!component) {
+            this.writeToTerminal([
+                TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
+                "No component was provided!\r\n"
+            ]);
+            this.printHelp("component");
+            this.writePrompt();
+            return;
+        }
+        const data = await ComponentHelper.generateComponentByName(component, template, opts.autogen);
+        if (data) {
+            if (opts.insert) {
+                await EditorHelper.insertIntoCurrent(data);
+            } else {
+                this.processOutput(newlineCleanup(data));
+            }
+        }
+        this.writePrompt();
+    }
+
+    private async listCmd(listType: string): Promise<void> {
+        if (!listType) {
+            this.writeToTerminal([
+                TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
+                "No 'type' was provided!\r\n"
+            ]);
+            this.printHelp("list");
+            this.writePrompt();
+            return;
+        }
+        switch (listType) {
+            case "components":
+                let components = await campaignExplorerProvider.getComponentItems();
+                if (components) {
+                    this.writeToTerminal([
+                        TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                        "Components:",
+                        TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextCyan)
+                    ]);
+                    for (let each of components) {
+                        this.writeToTerminal(`\r\n  ${each.label}`);
+                    }
+                    this.writeToTerminal(TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll));
+                } else {
+                    this.processOutput("No components found.");
+                }
+                break;
+            case "templates":
+                    let templates = await campaignExplorerProvider.getTemplateItems();
+                    if (templates) {
+                        this.writeToTerminal([
+                            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                            "Templates:",
+                            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextCyan)
+                        ]);
+                        for (let each of templates) {
+                            this.writeToTerminal(`\r\n  ${each.label}`);
+                        }
+                        this.writeToTerminal(TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll));
+                    } else {
+                        this.processOutput("No templates found.");
+                    }
+                break;
+            case "generators":
+                    let generators = await campaignExplorerProvider.getGeneratorItems();
+                    if (generators) {
+                        this.writeToTerminal([
+                            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                            "Generators:",
+                            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextCyan)
+                        ]);
+                        for (let each of generators) {
+                            this.writeToTerminal(`\r\n  ${each.label}`);
+                        }
+                        this.writeToTerminal(TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll));
+                    } else {
+                        this.processOutput("No generators found.");
+                    }
+                break;
+            default:
+                this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
+                    `Unexpected type provided: ${listType}\r\n`
+                ]);
+                this.printHelp("list");
+        }
+        this.writePrompt();
+    }
+
+    private async generateCmd(generator: string, opts: { insert: boolean }): Promise<void> {
+        if (!generator) {
+            this.writeToTerminal([
+                TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
+                "No generator was provided!\r\n"
+            ]);
+            this.printHelp("generate");
+            this.writePrompt();
+            return;
+        }
+        const data = await GeneratorHelper.generateElementByName(generator);
+        if (data) {
+            if (opts.insert) {
+                await EditorHelper.insertIntoCurrent(data);
+            } else {
+                this.processOutput(newlineCleanup(data));
+            }
+        }
+        this.writePrompt();
+    }
+
     private rollDice(input: string): number | undefined {
         try {
             let result = DiceHelper.calculateDiceRollExpression(`${input}`);
@@ -324,6 +490,9 @@ export class DMBTerminal {
             output,
             TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll)
         ]);
+        if (/^INVALID OPTION: /.test(output)) {
+            this.writePrompt();
+        }
     }
 
     private writePrompt(): void {
@@ -366,7 +535,6 @@ export class DMBTerminal {
                     this._history = this._history.slice(0, MaxHistoryCount - 1);
                 }
                 await this.run(input);
-                this.writePrompt();
                 return;
             case "\x7f": // Backspace key
                 if (this._line.length > 0 && this._lineLocation > 0) {

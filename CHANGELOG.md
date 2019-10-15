@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.5.6 - 2019-10-15
+### Added
+- New DMBinder terminal
+  - `autogen` command autogenerates all "autogen" components in current document.
+  - `component` command builds a component
+  - `list` command lists components/templates/generators
+  - `generate` command generates content based on a given configuration
+  - `roll` command generates a randomly rolled outcome
+  - `help` command displays usage information (in general or for a specified command)
+  - `exit` command closes the terminal
+
 ## 0.5.5
 - Fix some more component autogeneration issues
 
