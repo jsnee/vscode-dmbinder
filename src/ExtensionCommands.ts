@@ -15,6 +15,7 @@ import { DungeonGeneratorHelper } from './helpers/DungeonGeneratorHelper';
 import { GeneratorVars } from './generators/content/BaseContentGenerator';
 import { PuppeteerHelper } from './helpers/PuppeteerHelper';
 import { DMBTerminal } from './ui/DMBTerminal';
+import { EditorHelper } from './helpers/EditorHelper';
 
 export namespace ExtensionCommands {
     export async function promptChooseChromeExecutable(): Promise<void> {
@@ -93,14 +94,7 @@ export namespace ExtensionCommands {
     export async function promptInsertComponent(item?: ITreeItem): Promise<void> {
         let result = await ComponentHelper.promptGenerateComponent(item, true);
         if (result) {
-            let editor = window.activeTextEditor;
-            let res = result;
-            if (editor) {
-                let selection = editor.selection;
-                await editor.edit((editBuilder) => {
-                    editBuilder.replace(selection, res);
-                });
-            }
+            await EditorHelper.insertIntoCurrent(result);
         }
     }
 

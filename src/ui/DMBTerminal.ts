@@ -1,8 +1,14 @@
 import { EventEmitter, Pseudoterminal, window, Terminal } from "vscode";
 import { ExtensionHelper } from "../helpers/ExtensionHelper";
 import { DiceHelper } from "../helpers/DiceHelper";
+import { EditorHelper } from "../helpers/EditorHelper";
+import { ComponentHelper } from "../helpers/ComponentHelper";
 
 var Parser = require("simple-argparse").Parser;
+
+function newlineCleanup(str: string): string {
+    return str.replace(/(?<!\r)\n/g, "\r\n");
+}
 
 export namespace TerminalCtrlSeq {
     const esc = "\x1b";
@@ -64,7 +70,9 @@ export enum TerminalCtrlChar {
     TextLightBlue = "94",
     TextLightMagenta = "95",
     TextLightCyan = "96",
-    TextWhite = "97"
+    TextWhite = "97",
+    // Fancy Colors
+    TextOrange = "38;2;252;127;0"
 }
 
 const MaxHistoryCount = 20;
@@ -77,22 +85,55 @@ export class DMBTerminal {
     private _history: string[];
     private _historyLocation?: number;
     private _lineLocation: number = 0;
+    private readonly _version: string;
 
     public constructor(show: boolean = true) {
         const extensionVersion = ExtensionHelper.getExtensionVersion();
+        this._version = extensionVersion;
         this._history = [];
         const _this = this;
         let parser = new Parser(function (output: string) {
-            output = output.replace(/[^\r]\n/g, "\r\n");
+            output = newlineCleanup(output);
             _this.processOutput(output);
         });
         parser.description("DMBinder", "DMBinder Visual Studio Code extension.");
         parser.version(extensionVersion);
-        parser.option("roll", "Roll some dice.", function () {
-            let args: string[] = Array.prototype.slice.call(arguments);
-            _this.rollDice(args.join(" "));
+        parser.defaultOption(function (command: string) {
+            _this.printHelp(command);
         });
-        parser.option("exit", "Exit the terminal.", function () {});
+        parser.option("autogen", "autogenerate elements in current document.", async function (): Promise<void> {
+            await ComponentHelper.autogenerateComponentsForCurrentDocument();
+        });
+        parser.option("component", "autogenerate elements in current document.", async function (this: { insert: boolean, i: boolean, autogen: boolean, a: boolean }, component: string, template?: string): Promise<void> {
+            if (!component) {
+                _this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextRed),
+                    "No component was provided!\r\n"
+                ]);
+                _this.printHelp("component");
+                return;
+            }
+            const data = await ComponentHelper.generateComponentByName(component, template, this.autogen || this.a);
+            if (data) {
+                if (this.insert || this.i) {
+                    await EditorHelper.insertIntoCurrent(data);
+                } else {
+                    _this.writeToTerminal(newlineCleanup(data));
+                }
+            }
+        });
+        parser.option("roll", "roll some dice.", async function (this: { insert: boolean, i: boolean }): Promise<void> {
+            let args: string[] = Array.prototype.slice.call(arguments);
+            let result = _this.rollDice(args.join(" "));
+            if (result !== undefined && (this.insert || this.i)) {
+                await EditorHelper.insertIntoCurrent(result.toString());
+            }
+        });
+        parser.option("help", "get help for a command.", function (command: string) {
+            _this.printHelp(command);
+        });
+        parser.option("exit", "exit the terminal.", function () {});
+        parser.option("i", "insert", "insert the output into the currently open document.");
         this._parser = parser;
 
         this._writeEmitter = new EventEmitter<string>();
@@ -107,8 +148,8 @@ export class DMBTerminal {
                 this.writePrompt();
             },
             close: () => { },
-            handleInput: (data: string) => {
-                _this.handleInput(data);
+            handleInput: async (data: string) => {
+                await _this.handleInput(data);
             }
         };
         this._terminal = window.createTerminal({ name: 'DMBinder', pty });
@@ -117,8 +158,8 @@ export class DMBTerminal {
         }
     }
 
-    public run(input: string, echoInput: boolean = false): void {
-        this._parser.parse(input);
+    public async run(input: string, echoInput: boolean = false): Promise<void> {
+        await this._parser.parse(input);
     }
 
     public show(preserveFocus?: boolean): void {
@@ -137,16 +178,144 @@ export class DMBTerminal {
         }
     }
 
-    private rollDice(input: string): void {
-        console.log(`Dice roll: ${input}`);
+    private printHelp(command?: string): void {
+        
+        this.writeToTerminal([
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold, TerminalCtrlChar.TextCyan),
+            "vscode-dmbinder ",
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Dim, TerminalCtrlChar.TextDefault),
+            "(command-line interface) ",
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextOrange),
+            this._version,
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll)
+        ]);
+        switch (command) {
+            case "autogen":
+                this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    autogen"
+                ]);
+                return;
+            case "component":
+                this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    component",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <component-name> [template-name]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  OPTIONS",
+                    // -a, --autogen
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextYellow),
+                    "\r\n    -a",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    ",",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextYellow),
+                    " --autogen",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\tWrap the output in an autogen tag for future regeneration.",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  EXAMPLES",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\r\n    autogen skeleton",
+                    "\r\n    autogen mage-hand spell-template",
+                    "\r\n    autogen beholder -a -i",
+                ]);
+                break;
+            case "roll":
+                this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    roll",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <dice-roll>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  EXAMPLES",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\r\n    roll 1d4",
+                    "\r\n    roll 1d8 + 3",
+                    "\r\n    roll (1d4 + 3) * 2d6 - (1d4 * 1d4)",
+                ]);
+                break;
+            default:
+                this.writeToTerminal([
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.Bold),
+                    "\r\n\r\n  USAGE",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    <command>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextDefault, TerminalCtrlChar.Bold),
+                    "\r\n\r\n  COMMANDS",
+                    // Autogen command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextRed),
+                    "\r\n    autogen",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\t\t\tAutogenerate all components in the currently open document.",
+                    // Component command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    component",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <component-name> [template-name]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\r\n\t\t\t\t\tGenerate a component.",
+                    // Roll command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    roll",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextBlue),
+                    " <dice-roll>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextGreen),
+                    " [options]",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\tRoll some dice.",
+                    // Help command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    help <command>",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\t\tDisplay help for a specific command.",
+                    // Exit command
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed),
+                    "\r\n    exit",
+                    TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+                    "\t\t\t\tExit the DMBinder terminal.",
+                ]);
+        }
+        this.writeToTerminal([
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.Bold),
+            "\r\n\r\n  GLOBAL OPTIONS",
+            // -i, --insert
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll, TerminalCtrlChar.TextYellow),
+            "\r\n    -i",
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+            ",",
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextYellow),
+            " --insert",
+            TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.ResetAll),
+            "\t\tInsert the output of the command into the current document."
+        ]);
+    }
+
+    private rollDice(input: string): number | undefined {
         try {
             let result = DiceHelper.calculateDiceRollExpression(`${input}`);
             this.writeToTerminal(`${result}`);
+            return result;
         } catch (ex)
         {
             this.writeToTerminal(TerminalCtrlSeq.getControlSequence(TerminalCtrlChar.TextRed));
             this.processOutput(ex);
         }
+        return;
     }
 
     private processOutput(output: string): void {
@@ -166,7 +335,6 @@ export class DMBTerminal {
     }
 
     private setLine(value: string): void {
-        console.log(`Setting Line: "${value}"`);
         while (this._lineLocation > 0) {
             this.writeToTerminal("\x1b[D");
             this._lineLocation--;
@@ -179,7 +347,7 @@ export class DMBTerminal {
         this._lineLocation = this._line.length;
     }
 
-    public handleInput(data: string): void {
+    public async handleInput(data: string): Promise<void> {
         if (data.charAt(0) === "\\") {
             console.log(`Special Char: ${data}`);
         }
@@ -197,7 +365,7 @@ export class DMBTerminal {
                     this._history.unshift(input);
                     this._history = this._history.slice(0, MaxHistoryCount - 1);
                 }
-                this.run(input);
+                await this.run(input);
                 this.writePrompt();
                 return;
             case "\x7f": // Backspace key
@@ -246,10 +414,18 @@ export class DMBTerminal {
                     }
                 }
                 return;
+                case "\x1b[H": // Home key
+                return;
+                case "\x1b[F": // End key
+                return;
+                case "\x1b[6~": // Page Down key
+                return;
+                case "\x1b[5~": // Page Up key
+                    return;
             default:
                 this.insertIntoLine(data);
                 this._lineLocation++;
-                console.log(JSON.stringify({ data: data, line: this._line, cursorPos: this._lineLocation }));
+                //console.log(JSON.stringify({ data: data, line: this._line, cursorPos: this._lineLocation }));
                 break;
         }
         this.writeToTerminal(data);
