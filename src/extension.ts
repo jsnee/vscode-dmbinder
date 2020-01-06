@@ -9,6 +9,7 @@ import { CampaignItemType } from './ui/CampaignItemType';
 import { MarkdownIt } from 'markdown-it';
 import { PuppeteerHelper } from './helpers/PuppeteerHelper';
 import { ExplorerHelper } from './helpers/ExplorerHelper';
+import { ComponentContentProvider } from './ui/ComponentContentProvider';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -41,6 +42,8 @@ export async function activate(context: ExtensionContext) {
     if (context.storagePath) {
         contextProps.localStoragePath = context.storagePath;
     }
+
+    context.subscriptions.push(workspace.registerTextDocumentContentProvider("dmbcomponent", new ComponentContentProvider()));
 
     const tv = campaignExplorerProvider;
     contextProps.compositeTreeView = window.createTreeView('dmbinder', { treeDataProvider: tv });

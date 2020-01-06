@@ -6,6 +6,7 @@ import { DMBSettings } from './Settings';
 import { renderCampaign } from './homebrewery/renderer';
 import * as matter from 'gray-matter';
 import * as fse from 'fs-extra';
+import * as path from 'path';
 import { GeneratorSource } from './generators/content/GeneratorSource';
 import { DungeonGeneratorConfig, parseDungeonGeneratorConfig } from './generators/dungeon/DungeonGeneratorConfig';
 import { DungeonGenerator } from './generators/dungeon/DungeonGenerator';
@@ -82,6 +83,17 @@ export namespace ExtensionCommands {
     }
 
     export async function promptBuildComponent(item?: ITreeItem): Promise<void> {
+        if (item && item.getTreeItem) {
+            const { resourceUri } = await item.getTreeItem();
+            if (resourceUri) {
+                if (await ComponentHelper.getImpliedTemplateItem(resourceUri)) {
+                    const uri = Uri.parse(`dmbcomponent:${path.basename(resourceUri.fsPath)}`);
+                    const doc = await workspace.openTextDocument(uri);
+                    await window.showTextDocument(doc, { preview: false });
+                    return;
+                }
+            }
+        }
         let result = await ComponentHelper.promptGenerateComponent(item);
         if (result) {
             const doc = await workspace.openTextDocument({

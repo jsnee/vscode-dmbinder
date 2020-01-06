@@ -20,11 +20,21 @@ import { EditorHelper } from "./EditorHelper";
 const _pandocSyntaxRegEx = /\$(?:if\(|for\()?[\w.]+\)?\$/g;
 
 export namespace ComponentHelper {
-    export async function buildComponent(templatePath: string, componentPath: string): Promise<string> {
+
+    export async function buildComponent(componentPath: string, templatePath?: string): Promise<string> {
         let engine: ITemplateEngine;
         let componentItem = getComponentItem(componentPath);
-        
-        let templateItem = new BasicTemplateItem(templatePath);
+        let templateItem: ITemplateItem;
+        if (templatePath === undefined) {
+            const impliedTemplate = await getImpliedTemplateItem(Uri.file(componentPath));
+            if (impliedTemplate === undefined) {
+                throw Error("Tried to build a template, but no template path provided and no template was implied!");
+            }
+            templateItem = impliedTemplate;
+        } else {
+            templateItem = new BasicTemplateItem(templatePath);
+        }
+
         const templateMetadata = await templateItem.getMetadata();
         let engineType = templateMetadata.templateEngine || DMBSettings.defaultTemplatingEngine;
 
@@ -90,9 +100,9 @@ export namespace ComponentHelper {
             componentUri = treeItem.resourceUri;
         }
         if (componentUri) {
-            let selectedTemplate = await _getOrPromptTemplateUri(componentUri);
+            let selectedTemplate = await _getOrPromptTemplateItem(componentUri);
             if (selectedTemplate) {
-                let body = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
+                let body = await buildComponent(componentUri.fsPath, selectedTemplate.templateUri.fsPath);
                 if (!includeAutogen) {
                     return body;
                 }
@@ -101,6 +111,20 @@ export namespace ComponentHelper {
             }
         }
         return;
+    }
+
+    export async function getComponentByName(componentName: string): Promise<Uri | undefined> {
+        const componentList = await campaignExplorerProvider.getComponentItems();
+        if (!componentList) {
+            window.showWarningMessage("Failed to find any components in the current campaign.");
+            return;
+        }
+        const matchedComponent = componentList.find(each => each.label === componentName);
+        if (!matchedComponent || !matchedComponent.detail) {
+            window.showWarningMessage(`Failed to find a component named "${componentName}".`);
+            return;
+        }
+        return Uri.file(matchedComponent.detail);
     }
 
     export async function generateComponentByName(componentName: string, templateName?: string, includeAutogen: boolean = false): Promise<string | undefined> {
@@ -115,12 +139,12 @@ export namespace ComponentHelper {
             return;
         }
         const componentUri = Uri.file(matchedComponent.detail);
-        const selectedTemplate = await _getOrPromptTemplateUri(componentUri, templateName);
+        const selectedTemplate = await _getOrPromptTemplateItem(componentUri, templateName);
         if (!selectedTemplate) {
             window.showWarningMessage(`Failed to find a template for component "${componentName}".`);
             return;
         }
-        const buildResult = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
+        const buildResult = await buildComponent(componentUri.fsPath, selectedTemplate.templateUri.fsPath);
         if (includeAutogen) {
             return wrapInAutogen(componentName, templateName, buildResult);
         }
@@ -157,12 +181,12 @@ export namespace ComponentHelper {
                     continue;
                 }
                 const componentUri = Uri.file(matchedComponent.detail);
-                const selectedTemplate = await _getOrPromptTemplateUri(componentUri, templateName);
+                const selectedTemplate = await _getOrPromptTemplateItem(componentUri, templateName);
                 if (!selectedTemplate) {
                     window.showWarningMessage(`Failed to find a template for component "${componentName}".`);
                     continue;
                 }
-                const buildResult = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
+                const buildResult = await buildComponent(componentUri.fsPath, selectedTemplate.templateUri.fsPath);
                 const child = new TextNode("\n\n" + buildResult);
                 node.childNodes = [child];
             }
@@ -236,12 +260,12 @@ export namespace ComponentHelper {
                         continue;
                     }
                     const componentUri = Uri.file(matchedComponent.detail);
-                    const selectedTemplate = await _getOrPromptTemplateUri(componentUri, templateName);
+                    const selectedTemplate = await _getOrPromptTemplateItem(componentUri, templateName);
                     if (!selectedTemplate) {
                         window.showWarningMessage(`Failed to find a template for component "${componentName}".`);
                         continue;
                     }
-                    const buildResult = await buildComponent(selectedTemplate.templateUri.fsPath, componentUri.fsPath);
+                    const buildResult = await buildComponent(componentUri.fsPath, selectedTemplate.templateUri.fsPath);
                     const child = new TextNode("\n\n" + buildResult);
                     node.childNodes = [child];
                 }
@@ -263,7 +287,25 @@ export namespace ComponentHelper {
         }
     }
 
-    async function _getOrPromptTemplateUri(componentUri: Uri, overrideTemplateName?: string): Promise<ITemplateItem | undefined> {
+    export async function getImpliedTemplateItem(componentUri: Uri): Promise<ITemplateItem | undefined> {
+        const qpItemList = await campaignExplorerProvider.getTemplateItems();
+        if (qpItemList) {
+            let isImplied = false;
+            let templateItem: QuickPickItem | undefined;
+            const component = getComponentItem(componentUri.fsPath);
+            const componentMetadata = await component.getMetadata();
+            if (componentMetadata.templateItem) {
+                templateItem = qpItemList.find((each) => each.label === `${componentMetadata.templateItem}`);
+                isImplied = templateItem !== undefined;
+            }
+            if (templateItem && templateItem.detail) {
+                return new BasicTemplateItem(Uri.file(templateItem.detail), templateItem.label, isImplied);
+            }
+        }
+        return;
+    }
+
+    async function _getOrPromptTemplateItem(componentUri: Uri, overrideTemplateName?: string): Promise<ITemplateItem | undefined> {
         const qpItemList = await campaignExplorerProvider.getTemplateItems();
         if (qpItemList) {
             let isImplied = false;
