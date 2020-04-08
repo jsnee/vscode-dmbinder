@@ -6,10 +6,12 @@ import { DMBSettings } from "../Settings";
 import * as fse from 'fs-extra';
 import * as path from "path";
 import * as Puppeteer from 'puppeteer-core';
+import * as Matter from 'gray-matter';
 import { ComponentHelper } from "../helpers/ComponentHelper";
 import { HombreweryEngine } from "./HomebreweryEngine";
 import { PuppeteerHelper } from "../helpers/PuppeteerHelper";
 import { ExtensionHelper } from "../helpers/ExtensionHelper";
+import { PdfPageOptions, parsePdfPageOptions } from "./PdfPageOptions";
 
 function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
@@ -36,6 +38,13 @@ async function renderFileContents(uri: Uri): Promise<string> {
     const engine = new HombreweryEngine();
     if (DMBSettings.autogenerateOnRender === true) {
         data = await ComponentHelper.autogenerateFileComponents(data, path.basename(uri.path, ".md"));
+    }
+    if (Matter.test(data, { delimiters: ['---', '---'] })) {
+        try {
+            data = Matter(data, { delimiters: ['---', '---'] }).content;
+        } catch (ex) {
+            throw Error("Failed to parse markdown file front-matter!");
+        }
     }
     const body = await engine.render(data);
     return `<!DOCTYPE html>
@@ -144,11 +153,28 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
         await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
     
         let outPath = path.join(outDir, path.basename(sourcePath, '.md') + '.pdf');
-        await page.pdf({ path: outPath, format: 'Letter' });
+        const matter = await getPdfPageOptions(sourcePath);
+        await page.pdf({
+            path: outPath,
+            format: matter && matter.pageSize ? matter.pageSize : 'Letter'
+        });
     } catch (ex) {
         console.error(ex);
         if (ex instanceof Error) {
             throw Error(`Puppeteer Error: ${(ex as Error).message}`);
+        }
+    }
+}
+
+async function getPdfPageOptions(sourcePath: string): Promise<PdfPageOptions | void> {
+    const uri = Uri.file(sourcePath);
+    const data = await fse.readFile(uri.fsPath, 'utf-8');
+    if (Matter.test(data, { delimiters: ['---', '---'] })) {
+        try {
+            const matter = Matter(data, { delimiters: ['---', '---'] }).data;
+            return parsePdfPageOptions(matter);
+        } catch (ex) {
+            throw Error("Failed to parse markdown file front-matter!");
         }
     }
 }

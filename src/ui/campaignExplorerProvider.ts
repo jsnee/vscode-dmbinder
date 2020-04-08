@@ -202,7 +202,7 @@ async function expandDirectoryContents(itemPath: string): Promise<string[] | und
     return undefined;
 }
 
-async function mapCampaignTreeItems(workspaceFolders: WorkspaceFolder[], itemType?: CampaignItemType): Promise<CampaignTreeItem[]> {
+async function mapCampaignTreeItems(workspaceFolders: readonly WorkspaceFolder[], itemType?: CampaignItemType): Promise<CampaignTreeItem[]> {
     let result: CampaignTreeItem[] = [];
     for (let workspaceFolder of workspaceFolders) {
         if (await Campaign.hasCampaignConfig(workspaceFolder.uri.fsPath)) {
