@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.5.7
+### Added
+- Ability to render a specific page layout (paper size)
+  - Supported sizes include: "Letter", "Legal", "Tabloid", "Ledger", "A0", "A1", "A2", "A3", "A4", "A5", and "A6"
+
+### Fixed
+- Fixed various node dependency vulnerabilities
+
 ## 0.5.6 - 2019-10-15
 ### Added
 - New DMBinder terminal
