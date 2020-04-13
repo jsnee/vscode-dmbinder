@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.5.8
+### Fixed
+- Fixed HTML page ids being in reverse
+
 ## 0.5.7
 ### Added
 - Ability to render a specific page layout (paper size)

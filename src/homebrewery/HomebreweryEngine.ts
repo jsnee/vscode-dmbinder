@@ -54,14 +54,14 @@ export class HombreweryEngine {
         
             let currentPage = 2;
         
-            for (let i = state.tokens.length - 1; i >= 0; i--) {
+            for (let i = 0; i < state.tokens.length; i++) {
                 if (state.tokens[i].type !== 'inline') {
                     continue;
                 }
                 if (state.tokens[i].content === '\\page') {
                     let token;
                     const inlineTokens = state.tokens[i].children;
-                    for (let j = inlineTokens.length - 1; j >= 0; j--) {
+                    for (let j = 0; j < inlineTokens.length; j++) {
                         token = inlineTokens[j];
                         if (token.type === 'text') {
                             if (token.content === '\\page') {
