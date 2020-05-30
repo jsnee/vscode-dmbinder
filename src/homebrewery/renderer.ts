@@ -86,7 +86,7 @@ async function renderHomebrewStandalone(uri: Uri): Promise<void> {
     try {
         const browser = await Puppeteer.launch(opts);
         const page = await browser.newPage();
-        await page.goto(Uri.file(brewPath).toString(), { waitUntil: "networkidle2" });
+        await page.goto(Uri.file(brewPath).toString(), { waitUntil: 'load' });
 
         let outDir = path.dirname(uri.fsPath);
         let outPath = path.join(outDir, basename + '.pdf');
@@ -150,7 +150,7 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
     try {
         const browser = await Puppeteer.launch(opts);
         const page = await browser.newPage();
-        await page.goto(Uri.file(htmlPath).toString(), { waitUntil: "networkidle2" });
+        await page.goto(Uri.file(htmlPath).toString(), { waitUntil: 'load'});
     
         let outPath = path.join(outDir, path.basename(sourcePath, '.md') + '.pdf');
         const matter = await getPdfPageOptions(sourcePath);
