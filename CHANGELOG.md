@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.5.9
+### Added
+- Ability to set document orientation
+  - Landscape or Portrait (Defaults to Portrait)
+
+### Fixed
+- Fixed HTML rendering to PDF before page has finished loading
+
 ## 0.5.8
 ### Fixed
 - Fixed HTML page ids being in reverse
