@@ -1,5 +1,6 @@
 export interface PdfPageOptions {
     pageSize?: PDFFormat;
+    pageOrientation?: PDFOrientation;
 }
 
 export function parsePdfPageOptions(matter: { [key: string]: any }): PdfPageOptions {
@@ -8,6 +9,9 @@ export function parsePdfPageOptions(matter: { [key: string]: any }): PdfPageOpti
         switch (key) {
             case 'pageSize':
                 result.pageSize = matter[key];
+                break;
+            case 'pageOrientation':
+                result.pageOrientation = matter[key];
                 break;
             default:
                 break;
@@ -28,3 +32,7 @@ type PDFFormat =
   | "A4"
   | "A5"
   | "A6";
+
+type PDFOrientation =
+  | "Portrait"
+  | "Landscape";

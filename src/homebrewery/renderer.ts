@@ -156,7 +156,8 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
         const matter = await getPdfPageOptions(sourcePath);
         await page.pdf({
             path: outPath,
-            format: matter && matter.pageSize ? matter.pageSize : 'Letter'
+            format: matter && matter.pageSize ? matter.pageSize : 'Letter',
+            landscape: (matter || false) && matter.pageOrientation === 'Landscape'
         });
     } catch (ex) {
         console.error(ex);
