@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.5.11
+### Fixed
+- Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
+  - This time the styles are put in the `.vscode` directory since markdown styles need to be relative to the workspace
+
 ## 0.5.10
 ### Fixed
 - Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
