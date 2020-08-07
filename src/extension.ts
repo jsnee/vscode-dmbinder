@@ -1,7 +1,7 @@
 import { commands, ExtensionContext, window, workspace, TreeView } from 'vscode';
 import { renderHomebrew } from './homebrewery/renderer';
 import { campaignExplorerProvider } from './ui/campaignExplorerProvider';
-import { registerHomebrewRenderer } from './homebrewery/markdownHomebrewery';
+import { registerHomebrewRenderer } from './homebrewery/markdownPreviewHomebrewery';
 import { ExtensionCommands } from './ExtensionCommands';
 import { campaignStatus } from './ui/CampaignStatus';
 import { ITreeItem } from './ui/ITreeItem';
@@ -9,6 +9,7 @@ import { CampaignItemType } from './ui/CampaignItemType';
 import { MarkdownIt } from 'markdown-it';
 import { PuppeteerHelper } from './helpers/PuppeteerHelper';
 import { ExplorerHelper } from './helpers/ExplorerHelper';
+import { ExtensionHelper } from './helpers/ExtensionHelper';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -93,8 +94,9 @@ export async function activate(context: ExtensionContext) {
 
     context.subscriptions.push(commands.registerCommand('dmbinder.terminal.open', ExtensionCommands.createTerminal));
 
-    let onEnabledChangeListener = workspace.onDidChangeConfiguration(cfg => {
+    let onEnabledChangeListener = workspace.onDidChangeConfiguration(async cfg => {
         if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {
+            await ExtensionHelper.assertMarkdownPreviewStyles();
             commands.executeCommand('markdown.preview.refresh', undefined);
         }
     });
@@ -114,6 +116,8 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('dmbinder.template.addFile', ExplorerHelper.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template)));
     context.subscriptions.push(commands.registerCommand('dmbinder.component.addFile', ExplorerHelper.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component)));
     context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', ExplorerHelper.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
+
+    await ExtensionHelper.assertMarkdownPreviewStyles();
 
     return {
         extendMarkdownIt(md: MarkdownIt) {

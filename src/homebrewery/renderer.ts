@@ -17,10 +17,6 @@ function getBrewPath(): string {
     return path.join(contextProps.localStoragePath, 'dmbinder-brewing');
 }
 
-function getAssetPath(): string {
-    return path.join(ExtensionHelper.getExtensionPath(), 'assets');
-}
-
 async function cleanupBrewDirectory(): Promise<void> {
     let cleanupAction = fse.remove(getBrewPath());
     window.setStatusBarMessage("Cleaning up...", cleanupAction);
@@ -28,7 +24,7 @@ async function cleanupBrewDirectory(): Promise<void> {
 }
 
 async function copyAssetsToBrewDirectory(): Promise<void> {
-    let copyAssets = fse.copy(getAssetPath(), getBrewPath(), { recursive: true });
+    let copyAssets = fse.copy(ExtensionHelper.getAssetPath(), getBrewPath(), { recursive: true });
     window.setStatusBarMessage("Copying assets...", copyAssets);
     await copyAssets;
 }

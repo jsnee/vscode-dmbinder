@@ -1,5 +1,7 @@
 import { DMBSettings } from "../Settings";
 import { MarkdownIt } from 'markdown-it';
+import * as path from "path";
+import { ExtensionHelper } from "../helpers/ExtensionHelper";
 
 export function registerHomebrewRenderer(ogMd: MarkdownIt): MarkdownIt {
     ogMd.core.ruler.before('replacements', 'homebrewery_wrapper', homebrewAddWrapper);
@@ -16,6 +18,8 @@ function homebrewAddWrapper(state: any) {
         open.attrPush(['class', 'phb']);
         open.attrPush(['id', 'p1']);
         state.tokens.splice(0, 0, open);
+        const stylesheet = new state.Token('html_block', '', 0);
+        stylesheet.content = `<link rel="stylesheet" href="${path.join(ExtensionHelper.getAssetPath(), 'phb.standalone.css')}">`;
     }
     if (state.tokens[state.tokens.length - 1].type !== 'pageBr_close') {
         const close = new state.Token('pageBr_close', 'div', -1);

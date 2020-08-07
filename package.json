@@ -296,9 +296,9 @@
         ],
         "markdown.markdownItPlugins": true,
         "markdown.previewStyles": [
-            "./assets/phb-previewSpecific.css",
-            "./assets/phb.standalone.css",
-            "./assets/jsnee-homebrew.css"
+            "./assets-enabled/phb-previewSpecific.css",
+            "./assets-enabled/phb.standalone.css",
+            "./assets-enabled/jsnee-homebrew.css"
         ],
         "menus": {
             "commandPalette": [
