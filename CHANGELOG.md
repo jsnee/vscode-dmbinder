@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.5.10
+### Fixed
+- Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
+
 ## 0.5.9
 ### Added
 - Ability to set document orientation
