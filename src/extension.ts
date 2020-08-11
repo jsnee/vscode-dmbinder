@@ -9,8 +9,6 @@ import { CampaignItemType } from './ui/CampaignItemType';
 import { MarkdownIt } from 'markdown-it';
 import { PuppeteerHelper } from './helpers/PuppeteerHelper';
 import { ExplorerHelper } from './helpers/ExplorerHelper';
-import { ExtensionHelper } from './helpers/ExtensionHelper';
-import { DMBSettings } from './Settings';
 
 interface ContextProperties {
     localStoragePath: string;
@@ -97,7 +95,6 @@ export async function activate(context: ExtensionContext) {
 
     let onEnabledChangeListener = workspace.onDidChangeConfiguration(async cfg => {
         if (cfg.affectsConfiguration('dmbinder.homebrewPreviewEnabled')) {
-            await ExtensionHelper.toggleHomebreweryStyles(DMBSettings.homebreweryEnabled || false);
             commands.executeCommand('markdown.preview.refresh', undefined);
         }
     });
@@ -117,8 +114,6 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('dmbinder.template.addFile', ExplorerHelper.addNewTreeItem(contextProps.templatesTreeView, CampaignItemType.Template)));
     context.subscriptions.push(commands.registerCommand('dmbinder.component.addFile', ExplorerHelper.addNewTreeItem(contextProps.componentsTreeView, CampaignItemType.Component)));
     context.subscriptions.push(commands.registerCommand('dmbinder.generator.addFile', ExplorerHelper.addNewTreeItem(contextProps.generatorsTreeView, CampaignItemType.Generator)));
-
-    await ExtensionHelper.assertMarkdownStyleDirExists();
 
     return {
         extendMarkdownIt(md: MarkdownIt) {

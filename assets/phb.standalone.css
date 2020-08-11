@@ -1,84 +1,82 @@
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-acronym,
-address,
-big,
-cite,
-code,
-del,
-dfn,
-em,
-img,
-ins,
-kbd,
-q,
-s,
-samp,
-small,
-strike,
-strong,
-sub,
-sup,
-tt,
-var,
-b,
-u,
-i,
-center,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-form,
-label,
-legend,
-table,
-caption,
-tbody,
-tfoot,
-thead,
-tr,
-th,
-td,
-article,
-aside,
-canvas,
-details,
-embed,
-figure,
-figcaption,
-footer,
-header,
-hgroup,
-menu,
-nav,
-output,
-ruby,
-section,
-summary,
-time,
-mark,
-audio,
-video {
+.phb div,
+.phb span,
+.phb applet,
+.phb object,
+.phb iframe,
+.phb h1,
+.phb h2,
+.phb h3,
+.phb h4,
+.phb h5,
+.phb h6,
+.phb p,
+.phb blockquote,
+.phb pre,
+.phb a,
+.phb abbr,
+.phb acronym,
+.phb address,
+.phb big,
+.phb cite,
+.phb code,
+.phb del,
+.phb dfn,
+.phb em,
+.phb img,
+.phb ins,
+.phb kbd,
+.phb q,
+.phb s,
+.phb samp,
+.phb small,
+.phb strike,
+.phb strong,
+.phb sub,
+.phb sup,
+.phb tt,
+.phb var,
+.phb b,
+.phb u,
+.phb i,
+.phb center,
+.phb dl,
+.phb dt,
+.phb dd,
+.phb ol,
+.phb ul,
+.phb li,
+.phb fieldset,
+.phb form,
+.phb label,
+.phb legend,
+.phb table,
+.phb caption,
+.phb tbody,
+.phb tfoot,
+.phb thead,
+.phb tr,
+.phb th,
+.phb td,
+.phb article,
+.phb aside,
+.phb canvas,
+.phb details,
+.phb embed,
+.phb figure,
+.phb figcaption,
+.phb footer,
+.phb header,
+.phb hgroup,
+.phb menu,
+.phb nav,
+.phb output,
+.phb ruby,
+.phb section,
+.phb summary,
+.phb time,
+.phb mark,
+.phb audio,
+.phb video {
     border: 0;
     font-size: 100%;
     font: inherit;
@@ -87,42 +85,38 @@ video {
     padding: 0
 }
 
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-menu,
-nav,
-section {
+.phb article,
+.phb aside,
+.phb details,
+.phb figcaption,
+.phb figure,
+.phb footer,
+.phb header,
+.phb hgroup,
+.phb menu,
+.phb nav,
+.phb section {
     display: block
 }
 
-body {
-    line-height: 1
-}
-
-ol,
-ul {
+.phb ol,
+.phb ul {
     list-style: none
 }
 
-blockquote,
-q {
+.phb blockquote,
+.phb q {
     quotes: none
 }
 
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
+.phb blockquote:before,
+.phb blockquote:after,
+.phb q:before,
+.phb q:after {
     content: none
 }
 
-table {
+.phb table {
     border-collapse: collapse;
     border-spacing: 0
 }
@@ -223,16 +217,8 @@ table {
     -moz-column-span: all
 }
 
-@page {
-    margin: 0
-}
-
 body {
     counter-reset: phb-page-numbers
-}
-
-* {
-    -webkit-print-color-adjust: exact
 }
 
 .phb {

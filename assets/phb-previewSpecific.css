@@ -1,12 +1,9 @@
-body {
-    margin: 0;
-    line-height: 1;
-    color: black;
-}
-
 .phb {
     border: 0;
     vertical-align: baseline;
+    margin: 0;
+    line-height: 1;
+    color: black;
 }
 
 .phb h1 {
@@ -29,10 +26,10 @@ body {
     line-height: 1;
 }
 
-div.classTable tr {
-    padding: 0;
-}
-
 .phb:not(:last-child) {
     margin-bottom: 30px;
+}
+
+.phb div.classTable tr {
+    padding: 0;
 }

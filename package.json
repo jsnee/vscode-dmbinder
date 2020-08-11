@@ -3,7 +3,7 @@
     "displayName": "DMBinder",
     "description": "Visual Studio Code extension for managing campaign documents.",
     "publisher": "jpsnee",
-    "version": "0.5.11",
+    "version": "0.5.12",
     "icon": "img/dmbinder_icon.png",
     "license": "MIT",
     "repository": {
@@ -295,6 +295,14 @@
             }
         ],
         "markdown.markdownItPlugins": true,
+        "markdown.previewStyles": [
+            "./assets/jsnee-homebrew.css",
+            "./assets/phb-previewSpecific.css",
+            "./assets/phb.standalone.css"
+        ],
+        "markdown.previewScripts": [
+            "./assets/phbStyleLoader.js"
+        ],
         "menus": {
             "commandPalette": [
                 {

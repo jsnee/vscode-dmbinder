@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.5.12
+### Fixed
+- Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
+  - Removing the previous solution to this problem
+  - Now the preview should work for unsaved markdown files, too
+
 ## 0.5.11
 ### Fixed
 - Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
