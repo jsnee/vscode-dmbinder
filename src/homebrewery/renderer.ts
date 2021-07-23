@@ -153,7 +153,8 @@ async function renderPdfFile(sourcePath: string, outDir: string, brewDir?: strin
         await page.pdf({
             path: outPath,
             format: matter && matter.pageSize ? matter.pageSize : 'Letter',
-            landscape: (matter || false) && matter.pageOrientation === 'Landscape'
+            landscape: (matter || false) && matter.pageOrientation === 'Landscape',
+            printBackground: true
         });
     } catch (ex) {
         console.error(ex);
