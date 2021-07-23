@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.5.13
+### Fixed
+- Added `printBackground` Puppeteer PDF option to properly render background images
+
 ## 0.5.12
 ### Fixed
 - Homebrewery preview styles are only applied if `dmbinder.homebrewPreviewEnabled` setting is enabled
