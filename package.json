@@ -577,7 +577,7 @@
         "handlebars": "^4.4.3",
         "he": "^1.2.0",
         "js-yaml": "^3.13.1",
-        "markdown-it": "^9.1.0",
+        "markdown-it": "^12.3.2",
         "mustache": "^3.2.1",
         "puppeteer-core": "^1.20.0",
         "seedrandom": "^3.0.5",
