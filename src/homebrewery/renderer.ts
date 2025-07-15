@@ -51,7 +51,7 @@ async function renderFileContents(uri: Uri): Promise<string> {
         <link rel="stylesheet" href="${path.join(getBrewPath(), 'phb-previewSpecific.css')}">
         <link rel="stylesheet" href="${path.join(getBrewPath(), 'phb.standalone.css')}">
     </head>
-    <body class="vscode-body">
+    <body class="vscode-body" style="margin:0">
         ${body}
     </body>
     </html>`;
