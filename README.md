@@ -59,6 +59,8 @@ Below is an example Campaign configuration file:
 
 ## Planned Changes
 - When generating a dungeon map, save settings to a Markdown comment before the map
+- Update packages
+- Add support for HomebreweryV3
 
 See [generator-dmbinder](https://github.com/jsnee/generator-dmbinder) for a yeoman generator to help bootstrap a campaign binder.
 
