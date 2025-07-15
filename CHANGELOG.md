@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.5.14
+### Fixed
+- Fixed body margin that appeared when rendering to PDF
+
 ## 0.5.13
 ### Fixed
 - Added `printBackground` Puppeteer PDF option to properly render background images
